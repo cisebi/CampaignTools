@@ -1,5 +1,31 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Campaign+Tools</fullName>
+    <types>
+        <members>Member__c.Contact__c</members>
+        <members>Member__c.Lead__c</members>
+        <members>Member__c.Root_Node__c</members>
+        <members>Member__c.Sources__c</members>
+        <members>Node__c.Operation__c</members>
+        <members>Node__c.Parent_Node__c</members>
+        <members>Node__c.Root_Node__c</members>
+        <members>Source__c.Exclude__c</members>
+        <members>Source__c.Node__c</members>
+        <members>Source__c.Type__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>List__c</members>
+        <members>Member__c</members>
+        <members>Node__c</members>
+        <members>Source__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>List__c-List Layout</members>
+        <members>Member__c-Member Layout</members>
+        <members>Node__c-Group Layout</members>
+        <members>Source__c-Source Layout</members>
+        <name>Layout</name>
+    </types>
     <version>34.0</version>
 </Package>
