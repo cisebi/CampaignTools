@@ -3,17 +3,23 @@
     <types>
         <members>Group__c.Exclude__c</members>
         <members>Group__c.List__c</members>
-        <members>Member__c.Group__c</members>
-        <members>Member__c.List__c</members>
-        <members>Member__c.Primary_Source__c</members>
+        <members>Member__c.Contact__c</members>
+        <members>Member__c.Lead__c</members>
+        <members>Member__c.Root_Node__c</members>
         <members>Member__c.Sources__c</members>
-        <members>Source__c.Group__c</members>
+        <members>Node__c.Operation__c</members>
+        <members>Node__c.Parent_Node__c</members>
+        <members>Node__c.Root_Node__c</members>
+        <members>Source__c.Exclude__c</members>
+        <members>Source__c.Node__c</members>
+        <members>Source__c.Type__c</members>
         <name>CustomField</name>
     </types>
     <types>
         <members>Group__c</members>
         <members>List__c</members>
         <members>Member__c</members>
+        <members>Node__c</members>
         <members>Source__c</members>
         <name>CustomObject</name>
     </types>
@@ -21,6 +27,7 @@
         <members>Group__c-Group Layout</members>
         <members>List__c-List Layout</members>
         <members>Member__c-Member Layout</members>
+        <members>Node__c-Group Layout</members>
         <members>Source__c-Source Layout</members>
         <name>Layout</name>
     </types>

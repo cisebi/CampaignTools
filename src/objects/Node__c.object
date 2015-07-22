@@ -54,36 +54,16 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <fields>
-        <fullName>Exclude__c</fullName>
-        <defaultValue>false</defaultValue>
+        <fullName>Operation__c</fullName>
         <externalId>false</externalId>
-        <label>Exclude</label>
-        <trackTrending>false</trackTrending>
-        <type>Checkbox</type>
-    </fields>
-    <fields>
-        <fullName>Node__c</fullName>
-        <deleteConstraint>SetNull</deleteConstraint>
-        <externalId>false</externalId>
-        <label>Node</label>
-        <referenceTo>Node__c</referenceTo>
-        <relationshipLabel>Sources</relationshipLabel>
-        <relationshipName>Sources</relationshipName>
-        <required>false</required>
-        <trackTrending>false</trackTrending>
-        <type>Lookup</type>
-    </fields>
-    <fields>
-        <fullName>Type__c</fullName>
-        <externalId>false</externalId>
-        <label>Type</label>
+        <label>Operation</label>
         <picklist>
             <picklistValues>
-                <fullName>Report</fullName>
+                <fullName>AND</fullName>
                 <default>false</default>
             </picklistValues>
             <picklistValues>
-                <fullName>Campaign</fullName>
+                <fullName>OR</fullName>
                 <default>false</default>
             </picklistValues>
             <sorted>false</sorted>
@@ -91,12 +71,37 @@
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
-    <label>Source</label>
+    <fields>
+        <fullName>Parent_Node__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <externalId>false</externalId>
+        <label>Parent Node</label>
+        <referenceTo>Node__c</referenceTo>
+        <relationshipLabel>Nodes</relationshipLabel>
+        <relationshipName>Nodes</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Root_Node__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <externalId>false</externalId>
+        <label>Root Node</label>
+        <referenceTo>Node__c</referenceTo>
+        <relationshipLabel>Nodes (Root Node)</relationshipLabel>
+        <relationshipName>RootNodes</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <label>Node</label>
     <nameField>
-        <label>Source Id</label>
-        <type>Text</type>
+        <displayFormat>G-{000000}</displayFormat>
+        <label>Node Id</label>
+        <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Sources</pluralLabel>
+    <pluralLabel>Nodes</pluralLabel>
     <searchLayouts/>
     <sharingModel>ReadWrite</sharingModel>
 </CustomObject>

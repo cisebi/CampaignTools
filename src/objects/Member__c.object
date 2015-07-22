@@ -54,11 +54,11 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <fields>
-        <fullName>Group__c</fullName>
+        <fullName>Contact__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <externalId>false</externalId>
-        <label>Group</label>
-        <referenceTo>Group__c</referenceTo>
+        <label>Contact</label>
+        <referenceTo>Contact</referenceTo>
         <relationshipLabel>Members</relationshipLabel>
         <relationshipName>Members</relationshipName>
         <required>false</required>
@@ -66,11 +66,11 @@
         <type>Lookup</type>
     </fields>
     <fields>
-        <fullName>List__c</fullName>
+        <fullName>Lead__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <externalId>false</externalId>
-        <label>List</label>
-        <referenceTo>List__c</referenceTo>
+        <label>Lead</label>
+        <referenceTo>Lead</referenceTo>
         <relationshipLabel>Members</relationshipLabel>
         <relationshipName>Members</relationshipName>
         <required>false</required>
@@ -78,17 +78,16 @@
         <type>Lookup</type>
     </fields>
     <fields>
-        <fullName>Primary_Source__c</fullName>
+        <fullName>Root_Node__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
         <externalId>false</externalId>
-        <label>Primary Source</label>
-        <referenceTo>Source__c</referenceTo>
+        <label>Root Node</label>
+        <referenceTo>Node__c</referenceTo>
         <relationshipLabel>Members</relationshipLabel>
         <relationshipName>Members</relationshipName>
-        <relationshipOrder>0</relationshipOrder>
-        <reparentableMasterDetail>false</reparentableMasterDetail>
+        <required>false</required>
         <trackTrending>false</trackTrending>
-        <type>MasterDetail</type>
-        <writeRequiresMasterRead>false</writeRequiresMasterRead>
+        <type>Lookup</type>
     </fields>
     <fields>
         <fullName>Sources__c</fullName>
@@ -107,5 +106,5 @@
     </nameField>
     <pluralLabel>Members</pluralLabel>
     <searchLayouts/>
-    <sharingModel>ControlledByParent</sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
 </CustomObject>
