@@ -12,8 +12,7 @@ public with sharing class SegmentMapper {
 
         //fill out CSegment map
         for (Segment__c seg : segMap.values()) {
-            CSegment CSeg = new CSegment();
-            CSeg.Segment = segMap.get(seg.id);
+            CSegment CSeg = new CSegment(seg);
             mapCSegment.put(seg.Id, CSeg);
         }
         

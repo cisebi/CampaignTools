@@ -4,8 +4,8 @@ public with sharing class CSegment {
     public CSegment parentCSegment { get; set; }
     public CSegment rootCSegment { get; set; }
 
-    public CSegment() {
-    	Segment = new Segment__c();
+    public CSegment(Segment__c seg) {
+    	Segment = seg;
     	listChildCSegments = new list<CSegment>();
     }
 }

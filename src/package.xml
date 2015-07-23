@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Campaign+Tools</fullName>
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Campaign Tools</fullName>
     <types>
-        <members>CNode</members>
         <members>CSegment</members>
-        <members>CSource</members>
         <members>SegmentMapper</members>
         <members>SegmentMapper_TEST</members>
         <name>ApexClass</name>
@@ -27,7 +26,8 @@
         <name>CustomLabel</name>
     </types>
     <types>
-        <name>CustomLabel</name>
+        <members>CustomLabels</members>
+        <name>CustomLabels</name>
     </types>
     <types>
         <members>Member__c</members>
@@ -39,5 +39,5 @@
         <members>Segment__c-Group Layout</members>
         <name>Layout</name>
     </types>
-    <version>34.0</version>
+    <version>33.0</version>
 </Package>
