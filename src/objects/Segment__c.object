@@ -72,36 +72,36 @@
         <type>Picklist</type>
     </fields>
     <fields>
-        <fullName>Parent_Node__c</fullName>
+        <fullName>Parent_Segment__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <externalId>false</externalId>
-        <label>Parent Node</label>
-        <referenceTo>Node__c</referenceTo>
-        <relationshipLabel>Nodes</relationshipLabel>
-        <relationshipName>Nodes</relationshipName>
+        <label>Parent Segment</label>
+        <referenceTo>Segment__c</referenceTo>
+        <relationshipLabel>Segments</relationshipLabel>
+        <relationshipName>Segments</relationshipName>
         <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Lookup</type>
     </fields>
     <fields>
-        <fullName>Root_Node__c</fullName>
+        <fullName>Root_Segment__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <externalId>false</externalId>
-        <label>Root Node</label>
-        <referenceTo>Node__c</referenceTo>
-        <relationshipLabel>Nodes (Root Node)</relationshipLabel>
-        <relationshipName>RootNodes</relationshipName>
+        <label>Root Segment</label>
+        <referenceTo>Segment__c</referenceTo>
+        <relationshipLabel>Root Segments</relationshipLabel>
+        <relationshipName>RootSegments</relationshipName>
         <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Lookup</type>
     </fields>
-    <label>Node</label>
+    <label>Segment</label>
     <nameField>
-        <displayFormat>G-{000000}</displayFormat>
-        <label>Node Id</label>
+        <displayFormat>SEG-{000000}</displayFormat>
+        <label>Segment Id</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Nodes</pluralLabel>
+    <pluralLabel>Segments</pluralLabel>
     <searchLayouts/>
     <sharingModel>ReadWrite</sharingModel>
 </CustomObject>

@@ -62,11 +62,11 @@
         <type>Checkbox</type>
     </fields>
     <fields>
-        <fullName>Node__c</fullName>
+        <fullName>Segment__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <externalId>false</externalId>
-        <label>Node</label>
-        <referenceTo>Node__c</referenceTo>
+        <label>Segment</label>
+        <referenceTo>Segment__c</referenceTo>
         <relationshipLabel>Sources</relationshipLabel>
         <relationshipName>Sources</relationshipName>
         <required>false</required>
