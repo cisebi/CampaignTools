@@ -2,6 +2,7 @@
     <fullName>Campaign+Tools</fullName>
     <types>
         <members>CNode</members>
+        <members>CSegment</members>
         <members>CSource</members>
         <name>ApexClass</name>
     </types>
