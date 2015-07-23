@@ -34,7 +34,7 @@
 * @group Segments
 *
 * @description contains the logic to take an in-memory segment tree, and
-* compute which saved member records should copied to the campaign list.
+* compute which saved member records should be copied to the campaign list.
 *
 */
 
@@ -42,13 +42,13 @@ public with sharing class SegmentTreeProcessor {
     
     /*******************************************************************************************************
     * @description process the segment tree and mark which saved member records should be in the result set.
-    * @param seg a segment within the segment tree
-    * @param member the member record to process
+    * @param csegRoot the root of the segment tree
+    * @param listMember the member records to process
     * @return void
     ********************************************************************************************************/
-    public static void processSegmentTree(Segment__c segRoot, list<Member__c> listMember) {
+    public static void processSegmentTree(CSegment csegRoot, list<Member__c> listMember) {
         for (Member__c member : listMember) {
-            member.Include_in_List__c = includeMemberInSegmentTree(member, segRoot);
+            member.Include_in_List__c = includeMemberInSegmentTree(member, csegRoot);
         }
     }
 
@@ -56,29 +56,25 @@ public with sharing class SegmentTreeProcessor {
     * @description should this member be included given this segment subtree?
     * this method uses recursion to process the subtree it is provided.
     * @param member the member record to analyze
-    * @param segment a segment within the segment tree
+    * @param cseg a segment within the segment tree
     * @return true if the member should be included, false if not.
     ********************************************************************************************************/
-    public static boolean includeMemberInSegmentTree(Member__c member, Segment__c segment) {
+    public static boolean includeMemberInSegmentTree(Member__c member, CSegment cseg) {
     
         // handle a leaf segment, which should have a single source
-        list<Source__c> listSrc = segment.getSObjects('Sources__r');
-        
-        if (listSrc.size() > 0) {
-            Source__c src = listSrc[0];
+        if (cseg.Segment.Source_ID__c != null) {
             // if this member refers to this source
-            if (member.Sources__c != null && member.Sources__c.contains(src.Id))
+            if (member.Sources__c != null && member.Sources__c.contains(cseg.Segment.Id))
                 // then it is to be included.
-                return !src.Exclude__c;
+                return !cseg.Segment.Exclude_Source__c;
         }
 
         // not a leaf node, so recursively call on all child segments
-        list<Segment__c> listSegChildren = segment.getSObjects('Segments__r');
-        boolean isAnd = segment.Operation__c == 'AND';
+        boolean isAnd = cseg.Segment.Operation__c == 'AND'; 
         boolean includeMember = isAnd;  // and requires starting with true, or requires starting with false.
         
-        for (Segment__c seg : listSegChildren) {
-            boolean include = includeMemberInSegmentTree(member, seg);
+        for (CSegment csegment : cseg.listChildCSegments) {
+            boolean include = includeMemberInSegmentTree(member, csegment);
             if (isAnd) {
                 if (!include)
                     return false; // we can short circuit in this case!
