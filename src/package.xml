@@ -16,21 +16,16 @@
         <members>Segment__c.Root_Segment__c</members>
         <members>Segment__c.Source_ID__c</members>
         <members>Segment__c.Source_Type__c</members>
-        <members>Source__c.Exclude__c</members>
-        <members>Source__c.Segment__c</members>
-        <members>Source__c.Type__c</members>
         <name>CustomField</name>
     </types>
     <types>
         <members>Member__c</members>
         <members>Segment__c</members>
-        <members>Source__c</members>
         <name>CustomObject</name>
     </types>
     <types>
         <members>Member__c-Member Layout</members>
         <members>Segment__c-Group Layout</members>
-        <members>Source__c-Source Layout</members>
         <name>Layout</name>
     </types>
     <version>34.0</version>
