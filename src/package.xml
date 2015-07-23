@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Campaign+Tools</fullName>
     <types>
         <members>CNode</members>
@@ -19,14 +20,12 @@
         <name>CustomField</name>
     </types>
     <types>
-        <members>List__c</members>
         <members>Member__c</members>
         <members>Segment__c</members>
         <members>Source__c</members>
         <name>CustomObject</name>
     </types>
     <types>
-        <members>List__c-List Layout</members>
         <members>Member__c-Member Layout</members>
         <members>Segment__c-Group Layout</members>
         <members>Source__c-Source Layout</members>
