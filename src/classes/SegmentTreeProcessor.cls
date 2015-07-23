@@ -70,8 +70,7 @@ public with sharing class SegmentTreeProcessor {
         }
 
         // not a leaf node, so recursively call on all child segments
-        boolean isAnd = cseg.Segment.Operation__c == 'AND'; 
-        boolean includeMember = isAnd;  // and requires starting with true, or requires starting with false.
+        boolean isAnd = cseg.Segment.Operation__c == label.LogicAND; 
         
         for (CSegment csegment : cseg.listChildCSegments) {
             boolean include = includeMemberInSegmentTree(member, csegment);
