@@ -4,6 +4,8 @@
         <members>CNode</members>
         <members>CSegment</members>
         <members>CSource</members>
+        <members>SegmentTreeProcessor</members>
+        <members>SegmentTreeProcessor_TEST</members>
         <name>ApexClass</name>
     </types>
     <types>
