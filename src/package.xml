@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Campaign+Tools</fullName>
     <types>
-        <members>CNode</members>
-        <members>CSource</members>
+        <members>CSegment</members>
+        <members>SegmentMapper</members>
+        <members>SegmentMapper_TEST</members>
         <name>ApexClass</name>
     </types>
     <types>
@@ -17,6 +19,11 @@
         <members>Segment__c.Source_ID__c</members>
         <members>Segment__c.Source_Type__c</members>
         <name>CustomField</name>
+    </types>
+    <types>
+        <members>logicAND</members>
+        <members>logicOR</members>
+        <name>CustomLabel</name>
     </types>
     <types>
         <members>Member__c</members>
