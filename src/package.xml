@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Campaign Tools</fullName>
+    <fullName>Campaign+Tools</fullName>
     <types>
         <members>CSegment</members>
         <members>SegmentMapper</members>
@@ -26,10 +26,6 @@
         <name>CustomLabel</name>
     </types>
     <types>
-        <members>CustomLabels</members>
-        <name>CustomLabels</name>
-    </types>
-    <types>
         <members>Member__c</members>
         <members>Segment__c</members>
         <name>CustomObject</name>
@@ -39,5 +35,5 @@
         <members>Segment__c-Group Layout</members>
         <name>Layout</name>
     </types>
-    <version>33.0</version>
+    <version>34.0</version>
 </Package>
