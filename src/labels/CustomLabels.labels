@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>logicAND</fullName>
+        <categories>logic</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>logicAND</shortDescription>
+        <value>AND</value>
+    </labels>
+    <labels>
+        <fullName>logicOR</fullName>
+        <categories>logic</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>logicOR</shortDescription>
+        <value>OR</value>
+    </labels>
+</CustomLabels>
