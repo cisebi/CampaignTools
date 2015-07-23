@@ -7,7 +7,5 @@ public with sharing class CSegment {
     public CSegment() {
     	Segment = new Segment__c();
     	listChildCSegments = new list<CSegment>();
-    	parentCSegment = new CSegment();
-    	rootCSegment = new CSegment();
     }
 }

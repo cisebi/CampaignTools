@@ -4,6 +4,8 @@
         <members>CNode</members>
         <members>CSegment</members>
         <members>CSource</members>
+        <members>SegmentMapper</members>
+        <members>SegmentMapper_TEST</members>
         <name>ApexClass</name>
     </types>
     <types>
@@ -18,6 +20,14 @@
         <members>Segment__c.Source_ID__c</members>
         <members>Segment__c.Source_Type__c</members>
         <name>CustomField</name>
+    </types>
+    <types>
+        <members>logicAND</members>
+        <members>logicOR</members>
+        <name>CustomLabel</name>
+    </types>
+    <types>
+        <name>CustomLabel</name>
     </types>
     <types>
         <members>Member__c</members>
