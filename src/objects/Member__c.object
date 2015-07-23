@@ -78,11 +78,11 @@
         <type>Lookup</type>
     </fields>
     <fields>
-        <fullName>Root_Node__c</fullName>
+        <fullName>Root_Segment__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <externalId>false</externalId>
-        <label>Root Node</label>
-        <referenceTo>Node__c</referenceTo>
+        <label>Root Segment</label>
+        <referenceTo>Segment__c</referenceTo>
         <relationshipLabel>Members</relationshipLabel>
         <relationshipName>Members</relationshipName>
         <required>false</required>
