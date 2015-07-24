@@ -46,8 +46,13 @@ public with sharing class MembersBuilder_TEST {
         new MembersBuilder(root.ID);
         Test.stopTest();
         
-        List<Member__c> membersInserted = [select Contact__c, Sources__c from Member__c];
+        List<Member__c> membersInserted = [select Contact__c, Sources__c from Member__c order by Contact__c];
         System.assertEquals(5, membersInserted.size());
+        System.assertEquals(camp1.ID, membersInserted[0].Sources__c);
+        System.assertEquals(camp1.ID + ';' + camp3.ID, membersInserted[1].Sources__c);
+        System.assertEquals(camp2.ID, membersInserted[2].Sources__c);
+        System.assertEquals(camp2.ID, membersInserted[3].Sources__c);
+        System.assertEquals(camp2.ID, membersInserted[4].Sources__c);
     }
     
     @isTest
