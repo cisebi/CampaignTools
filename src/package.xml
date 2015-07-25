@@ -8,6 +8,13 @@
         <name>ApexClass</name>
     </types>
     <types>
+        <members>CampaignListBuilder</members>
+        <members>Source</members>
+        <members>SourceGroup</members>
+        <members>SourceMultiList</members>
+        <name>AuraBundleDefinition</name>
+    </types>
+    <types>
         <members>Member__c.Contact__c</members>
         <members>Member__c.Lead__c</members>
         <members>Member__c.Root_Segment__c</members>
@@ -34,6 +41,10 @@
         <members>Member__c-Member Layout</members>
         <members>Segment__c-Group Layout</members>
         <name>Layout</name>
+    </types>
+    <types>
+        <members>bssf1</members>
+        <name>StaticResource</name>
     </types>
     <version>34.0</version>
 </Package>
