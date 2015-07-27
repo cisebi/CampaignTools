@@ -16,8 +16,6 @@ public with sharing class MembersBuilder {
             }
         }
         
-        List<CampaignMember> memberContacts = [select Contact.ID, Campaign.ID from CampaignMember 
-                                                                where Campaign.ID in :sourceCampaigns];
         //Set<ID> memberLeads = new Map<ID, CampaignMember>([select Lead.ID from CampaignMember 
         //                                            where Campaign.ID in :sourceCampaigns]).keySet();
         
@@ -30,12 +28,14 @@ public with sharing class MembersBuilder {
         Map<ID, Member__c> contactMembersToInsert = new Map<ID, Member__c>();
         
         //Insert each Member and its sources
-        for(CampaignMember contactMember : memberContacts) {
+        for(CampaignMember contactMember : [select Contact.ID, Campaign.ID, Campaign.Name from CampaignMember where Campaign.ID in :sourceCampaigns]) {
             if(contactMembersToInsert.get(contactMember.Contact.ID) == null) {
-                contactMembersToInsert.put(contactMember.Contact.ID, new Member__c(Sources__c = contactMember.Campaign.ID));
+                contactMembersToInsert.put(contactMember.Contact.ID, new Member__c(Sources__c = contactMember.Campaign.ID, 
+                                                            Source_Names__c = 'Campaign:' + contactMember.Campaign.Name));
             } else {
                 Member__c existingMember = contactMembersToInsert.get(contactMember.Contact.ID);
-                existingMember.Sources__c = existingMember.Sources__c + ';' + contactMember.Campaign.ID; 
+                existingMember.Sources__c = existingMember.Sources__c + ';' + contactMember.Campaign.ID;
+                existingMember.Source_Names__c = existingMember.Source_Names__c + ';Campaign:' + contactMember.Campaign.Name;
             }
         }
         membersToInsert.addAll(contactMembersToInsert.values());

@@ -99,7 +99,7 @@
         <visibleLines>3</visibleLines>
     </fields>
     <fields>
-        <fullName>Sources_Names__c</fullName>
+        <fullName>Source_Names__c</fullName>
         <externalId>false</externalId>
         <label>Source Names</label>
         <length>32768</length>

@@ -7,9 +7,9 @@ public with sharing class MembersBuilder_TEST {
         //other one camp2 source. The first child also has a child, with camp3 source.
         //The Contact in camp3 is also in camp2.
         
-        Campaign camp1 = new Campaign(Name = 'Test1');
-        Campaign camp2 = new Campaign(Name = 'Test2');
-        Campaign camp3 = new Campaign(Name = 'Test3');
+        Campaign camp1 = new Campaign(Name = 'Test 1');
+        Campaign camp2 = new Campaign(Name = 'Test 2');
+        Campaign camp3 = new Campaign(Name = 'Test 3');
         insert new Campaign[] {camp1, camp2, camp3};
         
         Contact c1_1 = new Contact(LastName = 'Testerson1');
@@ -46,13 +46,23 @@ public with sharing class MembersBuilder_TEST {
         new MembersBuilder(root.ID);
         Test.stopTest();
         
-        List<Member__c> membersInserted = [select Contact__c, Sources__c from Member__c order by Contact__c];
+        List<Member__c> membersInserted = [select Contact__c, Sources__c, Source_Names__c from Member__c order by Contact__c];
         System.assertEquals(5, membersInserted.size());
+        
         System.assertEquals(camp1.ID, membersInserted[0].Sources__c);
+        System.assertEquals('Campaign:' + camp1.Name, membersInserted[0].Source_Names__c);
+        
         System.assertEquals(camp1.ID + ';' + camp3.ID, membersInserted[1].Sources__c);
+        System.assertEquals('Campaign:' + camp1.Name + ';Campaign:' + camp3.Name, membersInserted[1].Source_Names__c);
+        
         System.assertEquals(camp2.ID, membersInserted[2].Sources__c);
+        System.assertEquals('Campaign:' + camp2.Name, membersInserted[2].Source_Names__c);
+        
         System.assertEquals(camp2.ID, membersInserted[3].Sources__c);
+        System.assertEquals('Campaign:' + camp2.Name, membersInserted[3].Source_Names__c);
+        
         System.assertEquals(camp2.ID, membersInserted[4].Sources__c);
+        System.assertEquals('Campaign:' + camp2.Name, membersInserted[4].Source_Names__c);
     }
     
     @isTest
