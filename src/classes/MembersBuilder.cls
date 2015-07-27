@@ -5,39 +5,59 @@ public with sharing class MembersBuilder {
         Set<ID> sourceCampaigns = new Set<ID>();
         Set<ID> sourceReports = new Set<ID>();
         //Retrieve all sources from all children segments of root segment
-        for(Segment__c segment : [select Source_ID__c, Source_Type__c from Segment__c where Root_Segment__c = :rootSegmentID and Source_ID__c != null]) {
+        for(Segment__c segment : [select Source_ID__c, Source_Type__c from Segment__c where Root_Segment__c = :rootSegmentID 
+        and Source_ID__c != null]) {
             if(segment.Source_Type__c == 'Campaign') {
                 sourceCampaigns.add(segment.Source_ID__c);
             } else if(segment.Source_Type__c == 'Report') {
                 sourceReports.add(segment.Source_ID__c);
             }
         }
-        
-        //Set<ID> memberLeads = new Map<ID, CampaignMember>([select Lead.ID from CampaignMember 
-        //                                            where Campaign.ID in :sourceCampaigns]).keySet();
-        
-        //For those Leads where a Contact exists, use the Contact instead of the Lead
-        //leadsToContacts(memberContacts, memberLeads);
-        
+ 
         //Each member can be a Lead or a Contact
         List<Member__c> membersToInsert = new List<Member__c>();
-         
-        Map<ID, Member__c> contactMembersToInsert = new Map<ID, Member__c>();
+        List<CampaignMember> members = [select Contact.ID, Lead.ID, Campaign.ID, Campaign.Name from CampaignMember 
+                                                where Campaign.ID in :sourceCampaigns];
+                                                
+        /*List<CampaignMember> contactMembers = [select Contact.ID, Lead.ID, Campaign.ID, Campaign.Name from CampaignMember 
+                                                where Campaign.ID in :sourceCampaigns];
+        List<CampaignMember> leadMembers = [select Lead.ID, Campaign.ID, Campaign.Name from CampaignMember 
+                                                where Campaign.ID in :sourceCampaigns];
+        
+        //For those Leads where a Contact exists, use the Contact instead of the Lead
+        Set<ID> contactMemberIDs = new Map<ID, CampaignMember>(contactMembers).keySet();
+        Set<ID> leadMemberIDs = new Map<ID, CampaignMember>(leadMembers).keySet();
+        leadsToContacts(contactMemberIDs, leadMemberIDs);*/
         
         //Insert each Member and its sources
-        for(CampaignMember contactMember : [select Contact.ID, Campaign.ID, Campaign.Name from CampaignMember where Campaign.ID in :sourceCampaigns]) {
-            if(contactMembersToInsert.get(contactMember.Contact.ID) == null) {
-                contactMembersToInsert.put(contactMember.Contact.ID, new Member__c(Sources__c = contactMember.Campaign.ID, 
-                                                            Source_Names__c = 'Campaign:' + contactMember.Campaign.Name));
-            } else {
-                Member__c existingMember = contactMembersToInsert.get(contactMember.Contact.ID);
-                existingMember.Sources__c = existingMember.Sources__c + ';' + contactMember.Campaign.ID;
-                existingMember.Source_Names__c = existingMember.Source_Names__c + ';Campaign:' + contactMember.Campaign.Name;
+        membersToInsert.addAll(getMemberRecords(members));
+        insert membersToInsert;
+    }
+    
+    private List<Member__c> getMemberRecords(List<CampaignMember> campaignMembers) {
+        Map<ID, Member__c> membersToInsert = new Map<ID, Member__c>();
+        for(CampaignMember member : campaignMembers) {
+            //The member is a Contact and it's not in our map
+            if(member.Contact.ID != null && membersToInsert.get(member.Contact.ID) == null) {
+                membersToInsert.put(member.Contact.ID, new Member__c(Sources__c = member.Campaign.ID, 
+                                                            Source_Names__c = 'Campaign:' + member.Campaign.Name));
+             //The member is a Lead and it's not in our map
+            } else if(member.Lead.ID != null && membersToInsert.get(member.Lead.ID) == null) {
+                membersToInsert.put(member.Lead.ID, new Member__c(Sources__c = member.Campaign.ID, 
+                                                            Source_Names__c = 'Campaign:' + member.Campaign.Name));
+            //The member is a Contact and it's already in our map
+            } else if(member.Contact.ID != null && membersToInsert.get(member.Contact.ID) != null) {
+                Member__c existingMember = membersToInsert.get(member.Contact.ID);
+                existingMember.Sources__c = existingMember.Sources__c + ';' + member.Campaign.ID;
+                existingMember.Source_Names__c = existingMember.Source_Names__c + ';Campaign:' + member.Campaign.Name;
+            //The member is a Lead and it's already in our map
+            } else if(member.Lead.ID != null && membersToInsert.get(member.Lead.ID) != null) {
+                Member__c existingMember = membersToInsert.get(member.Lead.ID);
+                existingMember.Sources__c = existingMember.Sources__c + ';' + member.Campaign.ID;
+                existingMember.Source_Names__c = existingMember.Source_Names__c + ';Campaign:' + member.Campaign.Name;
             }
         }
-        membersToInsert.addAll(contactMembersToInsert.values());
-        
-        insert membersToInsert;
+        return membersToInsert.values();
     }
     
     private void leadsToContacts(Set<ID> memberContacts, Set<ID> memberLeads) {
