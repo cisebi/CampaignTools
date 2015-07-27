@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Campaign+Tools</fullName>
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Campaign Tools</fullName>
     <types>
         <members>CSegment</members>
+        <members>ProcessSegmentBTN_CTRL</members>
         <members>SegmentMapper</members>
         <members>SegmentMapper_TEST</members>
         <members>SegmentTreeProcessor</members>
@@ -9,15 +11,11 @@
         <name>ApexClass</name>
     </types>
     <types>
-        <name>ApexComponent</name>
-    </types>
-    <types>
+        <members>ProcessSegmentBTN</members>
         <name>ApexPage</name>
     </types>
     <types>
-        <name>ApexTrigger</name>
-    </types>
-    <types>
+        <members>Campaign.Campaign_List__c</members>
         <members>Member__c.Contact__c</members>
         <members>Member__c.Include_in_List__c</members>
         <members>Member__c.Lead__c</members>
@@ -37,7 +35,8 @@
         <name>CustomLabel</name>
     </types>
     <types>
-        <name>CustomLabel</name>
+        <members>CustomLabels</members>
+        <name>CustomLabels</name>
     </types>
     <types>
         <members>Member__c</members>
@@ -48,9 +47,6 @@
         <members>Member__c-Member Layout</members>
         <members>Segment__c-Group Layout</members>
         <name>Layout</name>
-    </types>
-    <types>
-        <name>StaticResource</name>
     </types>
     <version>34.0</version>
 </Package>
