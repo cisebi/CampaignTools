@@ -64,7 +64,7 @@ public with sharing class SegmentTreeProcessor {
         // handle a leaf segment, which should have a single source
         if (cseg.Segment.Source_ID__c != null) {
             // if this member refers to this source
-            if (member.Sources__c != null && member.Sources__c.contains(cseg.Segment.Id))
+            if (member.Sources__c != null && member.Sources__c.contains(cseg.Segment.Source_ID__c))
                 // then it is to be included.
                 return !cseg.Segment.Exclude_Source__c;
         }

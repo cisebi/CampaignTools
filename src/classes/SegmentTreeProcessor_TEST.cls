@@ -60,7 +60,7 @@ private with sharing class SegmentTreeProcessor_TEST {
         list<Member__c> listMember = new list<Member__c>();
         Member__c member = new Member__c();
         member.Root_Segment__c = seg.Id;
-        member.Sources__c = seg.Id;
+        member.Sources__c = seg.Source_ID__c;
         listMember.add(member);
         insert listMember;
         
@@ -152,9 +152,9 @@ private with sharing class SegmentTreeProcessor_TEST {
         list<Segment__c> listSrc = [select Id, Source_ID__c from Segment__c where Source_ID__c != null 
             order by Source_ID__c];
         system.assertEquals(3, listSrc.size());
-        ID idB = listSrc[0].Id;            
-        ID idD = listSrc[1].Id;
-        ID idE = listSrc[2].Id;
+        string idB = listSrc[0].Source_ID__c;            
+        string idD = listSrc[1].Source_ID__c;
+        string idE = listSrc[2].Source_ID__c;
         list<Member__c> listMember = new list<Member__c>();
         listMember.add(new Member__c(Root_Segment__c = csegRoot.Segment.Id, Sources__c=idB+';'));
         listMember.add(new Member__c(Root_Segment__c = csegRoot.Segment.Id, Sources__c=idB+';'+idD+';'));
