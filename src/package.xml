@@ -13,6 +13,7 @@
     <members>Member__c.Lead__c</members>
     <members>Member__c.Root_Segment__c</members>
     <members>Member__c.Sources__c</members>
+    <members>Member__c.Sources_Names__c</members>
     <members>Segment__c.Exclude_Source__c</members>
     <members>Segment__c.Operation__c</members>
     <members>Segment__c.Parent_Segment__c</members>
