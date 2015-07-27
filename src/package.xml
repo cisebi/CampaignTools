@@ -12,7 +12,7 @@
         <members>Source</members>
         <members>SourceGroup</members>
         <members>SourceMultiList</members>
-        <name>AuraBundleDefinition</name>
+        <name>AuraDefinitionBundle</name>
     </types>
     <types>
         <members>Member__c.Contact__c</members>
@@ -30,6 +30,9 @@
     <types>
         <members>logicAND</members>
         <members>logicOR</members>
+        <name>CustomLabel</name>
+    </types>
+    <types>
         <name>CustomLabel</name>
     </types>
     <types>
