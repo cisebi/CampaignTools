@@ -100,6 +100,15 @@
         <type>Lookup</type>
     </fields>
     <fields>
+        <fullName>Source_Names__c</fullName>
+        <externalId>false</externalId>
+        <label>Source Names</label>
+        <length>32768</length>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>3</visibleLines>
+    </fields>
+    <fields>
         <fullName>Sources__c</fullName>
         <externalId>false</externalId>
         <label>Sources</label>
