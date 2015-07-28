@@ -27,8 +27,11 @@ public with sharing class MembersBuilder {
         //Insert each Member and its sources
         for(CampaignMember contactMember : [select Contact.ID, Campaign.ID, Campaign.Name from CampaignMember where Campaign.ID in :sourceCampaigns]) {
             if(contactMembersToInsert.get(contactMember.Contact.ID) == null) {
-                contactMembersToInsert.put(contactMember.Contact.ID, new Member__c(Sources__c = contactMember.Campaign.ID, 
-                                                            Source_Names__c = 'Campaign:' + contactMember.Campaign.Name));
+                contactMembersToInsert.put(contactMember.Contact.ID, new Member__c(
+                    Contact__c = contactMember.Contact.ID,
+                    Root_Segment__c = rootSegmentID, 
+                    Sources__c = contactMember.Campaign.ID, 
+                    Source_Names__c = 'Campaign:' + contactMember.Campaign.Name));
             } else {
                 Member__c existingMember = contactMembersToInsert.get(contactMember.Contact.ID);
                 existingMember.Sources__c = existingMember.Sources__c + ';' + contactMember.Campaign.ID;
