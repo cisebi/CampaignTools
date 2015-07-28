@@ -18,29 +18,7 @@ public with sharing class MembersBuilder {
         List<Member__c> membersToInsert = new List<Member__c>();
         Map<ID, CampaignMember> members = new Map<ID, CampaignMember>([select Contact.ID, Lead.ID, Campaign.ID, Campaign.Name 
                                                                 from CampaignMember where Campaign.ID in :sourceCampaigns]);
-         
-        Set<ID> leadMemberIDs = new Set<ID>();
-        Set<ID> contactMemberIDs = new Set<ID>();
-        for(CampaignMember member : members.values()) {
-            if(member.Contact.ID == null && member.Lead.ID != null) { //It's a Lead
-                leadMemberIDs.add(member.Lead.ID);
-            } else if(member.Contact.ID != null) { //It's a Contact
-                contactMemberIDs.add(member.Contact.ID);
-            }
-        }
-        
-        leadsToContacts(contactMemberIDs, leadMemberIDs);
-                                        
-        /*List<CampaignMember> contactMembers = [select Contact.ID, Lead.ID, Campaign.ID, Campaign.Name from CampaignMember 
-                                                where Campaign.ID in :sourceCampaigns];
-        List<CampaignMember> leadMembers = [select Lead.ID, Campaign.ID, Campaign.Name from CampaignMember 
-                                                where Campaign.ID in :sourceCampaigns];
-        
-        //For those Leads where a Contact exists, use the Contact instead of the Lead
-        Set<ID> contactMemberIDs = new Map<ID, CampaignMember>(contactMembers).keySet();
-        Set<ID> leadMemberIDs = new Map<ID, CampaignMember>(leadMembers).keySet();
-        */
-        
+
         //Insert each Member and its sources
         membersToInsert.addAll(getMemberRecords(members));
         insert membersToInsert;
@@ -71,17 +49,5 @@ public with sharing class MembersBuilder {
             }
         }
         return membersToInsert.values();
-    }
-    
-    private void leadsToContacts(Set<ID> contactMembers, Set<ID> leadMembers) {
-        List<Lead> leadsWithContact = [select ConvertedContactId from Lead where ID in :leadMembers];
-        for(Lead lead : leadsWithContact) {
-            //If a Contact exists for the Lead, add the Contact to the list of Member Contacts.
-            //Then pull the Lead from the list of Member Leads.
-            if(lead.ConvertedContactId != null) {
-                contactMembers.add(lead.ConvertedContactId);
-                leadMembers.remove(lead.ID);
-            }
-        }
     }
 }
