@@ -19,6 +19,7 @@
     </types>
     <types>
         <members>Campaign.Campaign_List__c</members>
+        <members>CampaignMember.Source_Names__c</members>
         <members>Member__c.Contact__c</members>
         <members>Member__c.Include_in_List__c</members>
         <members>Member__c.Lead__c</members>
@@ -40,6 +41,7 @@
     </types>
     <types>
         <members>Campaign</members>
+        <members>CampaignMember</members>
         <members>Member__c</members>
         <members>Segment__c</members>
         <name>CustomObject</name>
@@ -48,6 +50,11 @@
         <members>Member__c-Member Layout</members>
         <members>Segment__c-Group Layout</members>
         <name>Layout</name>
+    </types>
+    <types>
+        <members>Campaign.Refresh_Campaign_List</members>
+        <members>Campaign.ViewCampaignInfluenceReport</members>
+        <name>WebLink</name>
     </types>
     <version>34.0</version>
 </Package>
