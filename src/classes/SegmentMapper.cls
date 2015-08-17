@@ -1,6 +1,10 @@
 public with sharing class SegmentMapper {
 
     public static CSegment mapRootSegment(Segment__c rootSegment) {
+        return mapRootSegment(rootSegment, true);
+    }
+    
+    public static CSegment mapRootSegment(Segment__c rootSegment, boolean fillBackLinks) {
 
         map<id, Segment__c> segMap = new map<id, Segment__c>(
             [SELECT Id, Operation__c, Parent_Segment__c, Root_Segment__c, Source_Type__c, Source_Id__c, Exclude_Source__c,
@@ -19,10 +23,10 @@ public with sharing class SegmentMapper {
         //fill out parent, root, and child lists with CSegments
         for (CSegment CSeg : mapCSegment.values()) {
 
-            if (CSeg.Segment.Parent_Segment__c!=null)
+            if (CSeg.Segment.Parent_Segment__c!=null && fillBackLinks)
                 CSeg.parentCSegment = mapCSegment.get(CSeg.Segment.Parent_Segment__c);
 
-            if (CSeg.Segment.Root_Segment__c!=null)
+            if (CSeg.Segment.Root_Segment__c!=null && fillBackLinks)
                 CSeg.rootCSegment = mapCSegment.get(CSeg.Segment.Root_Segment__c);
 
             if (CSeg.Segment.getSObjects('Segments__r')!=null) {

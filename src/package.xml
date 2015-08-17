@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Campaign Tools</fullName>
+<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Campaign+Tools</fullName>
     <types>
         <members>CSegment</members>
+        <members>CampaignListBuilder_CTRL</members>
         <members>CampaignPopulate</members>
         <members>MembersBuilder</members>
         <members>MembersBuilder_TEST</members>
@@ -12,6 +12,8 @@
         <members>SegmentMapper_TEST</members>
         <members>SegmentTreeProcessor</members>
         <members>SegmentTreeProcessor_TEST</members>
+        <members>SegmentTreeSave</members>
+        <members>SegmentTreeSave_TEST</members>
         <name>ApexClass</name>
     </types>
     <types>
@@ -23,6 +25,15 @@
     </types>
     <types>
         <name>ApexTrigger</name>
+    </types>
+    <types>
+        <members>CampaignListBuilder</members>
+        <members>Source</members>
+        <members>SourceGroup</members>
+        <members>SourceMultiList</members>
+        <members>addCSegmentEvent</members>
+        <members>deleteCSegmentEvent</members>
+        <name>AuraDefinitionBundle</name>
     </types>
     <types>
         <members>Campaign.Campaign_List__c</members>
