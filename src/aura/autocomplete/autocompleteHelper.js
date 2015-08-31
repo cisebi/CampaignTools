@@ -1,10 +1,11 @@
 ({  
     initHandlers: function(component) {
-    	var ready = component.get("v.ready");
-
-        if (ready === false) {
-           	return;
-        }
+        if (typeof jQuery !== "undefined" && typeof $j === "undefined") {
+            $j = jQuery.noConflict(true);;
+        }        
+        
+        if (typeof $j === "undefined")
+            return;
         
         var ctx = component.getElement();
         

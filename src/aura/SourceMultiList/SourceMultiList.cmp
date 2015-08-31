@@ -20,7 +20,9 @@
                 </aura:iteration>            
             </aura:set>
             </aura:if>
-            <ui:button aura:id="button" buttonTitle="Click to add a source" class="btn btn-default" label="Add new source" press="{!c.addSource}"/>
+            <aura:if isTrue="{! v.group.Segment.Operation__c != 'OR'}">
+	            <ui:button aura:id="button" buttonTitle="Click to add a source" class="btn btn-default" label="Add new source" press="{!c.addSource}"/>
+            </aura:if>
             <aura:if isTrue="{! v.group.parentCSegment == v.group.rootCSegment}">
                 <ui:button aura:id="button" buttonTitle="Click to add a group" class="btn btn-default" label="Add new group" press="{!c.addGroup}"/>
             </aura:if>

@@ -2,7 +2,7 @@
 	handleSourceType: function(component, event, helper) {
 		var selectCmp = component.find("sourceType");
         var source = component.get('v.source');
-        source.Segment.Source_Type__c = selectCmp.get("v.value")
+        source.Segment.Source_Type__c = selectCmp.get("v.value");
         component.set("v.source", source);
 	},
     
@@ -16,4 +16,10 @@
 		event.fire();
 
 	},
+       
+    handleAutocomplete: function(component, event) {
+        var source = component.get('v.source');
+        source.Segment.Source_ID__c = event.getParam('selectedOption').value;      
+        component.set("v.source", source);
+    },
 })

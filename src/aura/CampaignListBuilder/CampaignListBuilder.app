@@ -7,6 +7,10 @@
     <aura:handler event="c:addCSegmentEvent" action="{!c.handleAddCSegmentEvent}"/>    
     <ltng:require styles="/resource/bssf1" />
 
+    <!-- only needed by autocomplete component, but lightning bug fails to load it there -->
+    <ltng:require scripts="/resource/jquery,/resource/jqueryui/jqueryui/jquery-ui.js," 
+                  styles="/resource/jqueryui/jqueryui/jquery-ui.css" />
+
 	<div class="bootstrap-sf1">
         <div class="container">
             <div class="navbar navbar-inverse">
