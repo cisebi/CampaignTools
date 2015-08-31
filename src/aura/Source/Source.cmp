@@ -12,24 +12,10 @@
     	</ui:inputSelect>
         
         <aura:if isTrue="{!v.source.Segment.Source_Type__c == 'Report'}">
-            <ui:inputText class="form-control" aura:id="report" value="{!v.source.Segment.Source_ID__c}" />            
-            <c:autocomplete sObjectType="Report" autocompleteEvent="{!c.handleAutocomplete}" fields="DeveloperName" />
-            <!--                                            
-            <ui:inputSelect class="form-control" aura:id="report">
-                <ui:inputSelectOption text="Select Report"/>
-                <ui:inputSelectOption text="{!v.source.Segment.Source_ID__c}" value="true"/>
-            </ui:inputSelect>
-			-->                                                                                         
+            <c:autocomplete sObjectType="Report" autocompleteEvent="{!c.handleAutocomplete}" inputLabel="&nbsp;&nbsp;find&nbsp;" value="{!v.source.sourceName}" fields="" />
         </aura:if>
         <aura:if isTrue="{!v.source.Segment.Source_Type__c == 'Campaign'}">
-            <ui:inputText class="form-control" aura:id="campaign" value="{!v.source.Segment.Source_ID__c}" />
-            <c:autocomplete sObjectType="Campaign" autocompleteEvent="{!c.handleAutocomplete}" fields="" />
-            <!--                                            
-            <ui:inputSelect class="form-control" aura:id="campaign">
-                <ui:inputSelectOption text="Select Campaign"/>
-                <ui:inputSelectOption text="{!v.source.Segment.Source_ID__c}" value="true"/>
-            </ui:inputSelect>
-			-->                                                                                         
+            <c:autocomplete sObjectType="Campaign" autocompleteEvent="{!c.handleAutocomplete}" inputLabel="&nbsp;&nbsp;find&nbsp;" value="{!v.source.sourceName}" fields="" />
         </aura:if>
 	</div>
 </aura:component>
