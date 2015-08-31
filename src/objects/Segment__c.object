@@ -75,6 +75,10 @@
                 <fullName>OR</fullName>
                 <default>false</default>
             </picklistValues>
+            <picklistValues>
+                <fullName>SOURCE</fullName>
+                <default>false</default>
+            </picklistValues>
             <sorted>false</sorted>
         </picklist>
         <trackTrending>false</trackTrending>
