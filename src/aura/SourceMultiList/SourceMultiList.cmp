@@ -4,10 +4,10 @@
     <aura:handler event="c:deleteCSegmentEvent" action="{!c.handleDeleteCSegmentEvent}"/>
     
 	<div class="filter-list">
-	    <span><i>SourceMultiList {!v.group.Segment.Id}, Children: {!v.group.listChildCSegments.length}</i></span>
+	    <!-- <span><i>SourceMultiList {!v.group.Segment.Id}, Children: {!v.group.listChildCSegments.length}</i></span> -->
         <div class="{!v.group.Segment.Operation__c == 'AND' ? 'group-filters and' : 'group-filters or'}">
             <aura:if isTrue="{!v.group.Segment.Operation__c == 'SOURCE'}">
-                <span><i>A multilist node that is a SOURCE!</i></span>
+                <!-- <span><i>A multilist node that is a SOURCE!</i></span> -->
                     <c:Source source="{!v.group}" />
             <aura:set attribute="else">        
                 <aura:iteration items="{!v.group.listChildCSegments}" var="cseg">
@@ -21,10 +21,10 @@
             </aura:set>
             </aura:if>
             <aura:if isTrue="{! v.group.Segment.Operation__c != 'OR'}">
-	            <ui:button aura:id="button" buttonTitle="Click to add a source" class="btn btn-default" label="Add new source" press="{!c.addSource}"/>
+	            <ui:button aura:id="button" buttonTitle="Click to add a source" class="btn btn-default btn-xs" label="Add new source" press="{!c.addSource}"/>
             </aura:if>
             <aura:if isTrue="{! v.group.parentCSegment == v.group.rootCSegment}">
-                <ui:button aura:id="button" buttonTitle="Click to add a group" class="btn btn-default" label="Add new group" press="{!c.addGroup}"/>
+                <ui:button aura:id="button" buttonTitle="Click to add a group" class="btn btn-default btn-xs" label="Add new group" press="{!c.addGroup}"/>
             </aura:if>
         </div>
     </div>
