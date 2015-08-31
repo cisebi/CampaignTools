@@ -133,6 +133,13 @@ public with sharing class SegmentTreeProcessor_TEST {
     * B, D, E are leafs
     */  
     public static Segment__c segTreeTestData(string srcB, string srcD, string srcE) {
+    
+        Campaign cmpB = new Campaign(name=srcB);
+        Campaign cmpD = new Campaign(name=srcD);
+        Campaign cmpE = new Campaign(name=srcE);
+        insert cmpB;
+        insert cmpD;
+        insert cmpE;
 
         Segment__c rootSegment = new Segment__c(Operation__c=Label.logicOR);
         insert rootSegment;
@@ -145,7 +152,7 @@ public with sharing class SegmentTreeProcessor_TEST {
                 Parent_Segment__c = rootSegment.id
             ));
         }
-        childSegments[0].Source_ID__c = srcB;
+        childSegments[0].Source_ID__c = cmpB.Id;
         childSegments[0].Source_Type__c = 'Campaign';
         childSegments[1].Operation__c = label.logicAND;
         insert childSegments;
@@ -157,9 +164,9 @@ public with sharing class SegmentTreeProcessor_TEST {
                 Parent_Segment__c = childSegments[1].id
             ));
         }
-        gchildSegments[0].Source_ID__c = srcD;
+        gchildSegments[0].Source_ID__c = cmpD.Id;
         gchildSegments[0].Source_Type__c = 'Campaign';
-        gchildSegments[1].Source_ID__c = srcE;
+        gchildSegments[1].Source_ID__c = cmpE.Id;
         gchildSegments[1].Source_Type__c = 'Campaign';
         insert gchildSegments;
 
@@ -217,7 +224,8 @@ public with sharing class SegmentTreeProcessor_TEST {
         // A (B C(D, E))
         // change E to be an Exclude
         Segment__c segRoot = segTreeTestData('B', 'D', 'E');
-        list<Segment__c> listSeg = [select Id from Segment__c where Source_ID__c = 'E'];
+        Campaign cmpE = [select Id from Campaign where Name = 'E'];
+        list<Segment__c> listSeg = [select Id from Segment__c where Source_ID__c = :cmpE.Id];
         system.assertEquals(1, listSeg.size());
         listSeg[0].Exclude_Source__c = true;
         upsert listSeg;
