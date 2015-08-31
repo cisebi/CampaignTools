@@ -180,7 +180,6 @@
 		action.setCallback(this, function(response) {
 			var state = response.getState();
 			if (component.isValid() && state === "SUCCESS") {
-                alert('saved with result: ' + response.getReturnValue());
                 if (closeOnSuccess && response.getReturnValue()==true)
                     self.close(component);
 			}
