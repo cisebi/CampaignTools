@@ -132,15 +132,20 @@ public with sharing class SegmentTreeProcessor_TEST {
     * A is root
     * B, D, E are leafs
     */  
-    public static Segment__c segTreeTestData(string srcB, string srcD, string srcE) {
+    public static Segment__c segTreeTestData(string srcB, string srcD, string srcE, boolean createCampaigns) {
     
-        Campaign cmpB = new Campaign(name=srcB);
-        Campaign cmpD = new Campaign(name=srcD);
-        Campaign cmpE = new Campaign(name=srcE);
-        insert cmpB;
-        insert cmpD;
-        insert cmpE;
-
+        if (createCampaigns) {
+	        Campaign cmpB = new Campaign(name=srcB);
+	        Campaign cmpD = new Campaign(name=srcD);
+	        Campaign cmpE = new Campaign(name=srcE);
+	        insert cmpB;
+	        insert cmpD;
+	        insert cmpE;
+	        srcB = cmpB.Id;
+	        srcD = cmpD.Id;
+	        srcE = cmpE.Id;
+        }
+        
         Segment__c rootSegment = new Segment__c(Operation__c=Label.logicOR);
         insert rootSegment;
         
@@ -152,7 +157,7 @@ public with sharing class SegmentTreeProcessor_TEST {
                 Parent_Segment__c = rootSegment.id
             ));
         }
-        childSegments[0].Source_ID__c = cmpB.Id;
+        childSegments[0].Source_ID__c = srcB;
         childSegments[0].Source_Type__c = 'Campaign';
         childSegments[1].Operation__c = label.logicAND;
         insert childSegments;
@@ -164,9 +169,9 @@ public with sharing class SegmentTreeProcessor_TEST {
                 Parent_Segment__c = childSegments[1].id
             ));
         }
-        gchildSegments[0].Source_ID__c = cmpD.Id;
+        gchildSegments[0].Source_ID__c = srcD;
         gchildSegments[0].Source_Type__c = 'Campaign';
-        gchildSegments[1].Source_ID__c = cmpE.Id;
+        gchildSegments[1].Source_ID__c = srcE;
         gchildSegments[1].Source_Type__c = 'Campaign';
         insert gchildSegments;
 
@@ -180,7 +185,7 @@ public with sharing class SegmentTreeProcessor_TEST {
         if (strTestOnly != '*' && strTestOnly != 'testSimpleTreeIn') return;
         
         // A (B C(D, E))
-        CSegment csegRoot = SegmentMapper.mapRootSegment(segTreeTestData('B', 'D', 'E'));
+        CSegment csegRoot = SegmentMapper.mapRootSegment(segTreeTestData('B', 'D', 'E', true));
         
         // create Members list with combinations of sources B, D, E
         list<Segment__c> listSrc = [select Id, Source_ID__c from Segment__c where Source_ID__c != null 
@@ -223,7 +228,7 @@ public with sharing class SegmentTreeProcessor_TEST {
         
         // A (B C(D, E))
         // change E to be an Exclude
-        Segment__c segRoot = segTreeTestData('B', 'D', 'E');
+        Segment__c segRoot = segTreeTestData('B', 'D', 'E', true);
         Campaign cmpE = [select Id from Campaign where Name = 'E'];
         list<Segment__c> listSeg = [select Id from Segment__c where Source_ID__c = :cmpE.Id];
         system.assertEquals(1, listSeg.size());
