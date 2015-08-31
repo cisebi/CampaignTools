@@ -16,4 +16,8 @@ public with sharing class CSegment {
     	Segment = seg;
     	listChildCSegments = new list<CSegment>();
     }
+    
+    @AuraEnabled
+    public String sourceName { get; set; }
+    
 }
