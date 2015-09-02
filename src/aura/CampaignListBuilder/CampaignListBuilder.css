@@ -30,6 +30,8 @@
   left: 10px;
   top: 20px;
 }
+
+/************ not really working, so remove for now.
 .THIS .or .group:after,
 .THIS .or .filter:after {
   content: 'or';
@@ -38,7 +40,6 @@
   position: absolute;
   bottom: -10px;
   left: 10px;
-  /* background-color: #fafafa; */
   padding: 0 4px;
   z-index: 5;
 }
@@ -50,6 +51,8 @@
 .THIS .or .filter:last-child:after {
   display: none;
 }
+**********************/
+
 /* this is the styling for the Source component */
 .THIS .filter {
   padding: 10px 10px 10px 10px;
@@ -71,6 +74,11 @@
   width: 150px;
   display: inline-block;
 }
+
+.THIS .operationLabel {
+  margin: -5px 0px -5px 0px;
+}
+/************ not really working, so remove for now.
 .THIS .and .filter:after,
 .THIS .and .group:after {
   content: 'and';
@@ -78,7 +86,6 @@
   position: absolute;
   bottom: -10px;
   left: 10px;
-  /* background-color: #fafafa; */
   padding: 0 4px;
   z-index: 5;
 }
@@ -92,6 +99,8 @@
 .THIS .and .group:last-child:after {
   display: none;
 }
+******************************/
+
 .THIS .match-type label {
   padding: 4px 0;
   margin-right: 10px;
