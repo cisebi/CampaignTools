@@ -19,7 +19,9 @@
        
     handleAutocomplete: function(component, event) {
         var source = component.get('v.source');
-        source.Segment.Source_ID__c = event.getParam('selectedOption').value;      
+        var selOpt = event.getParam('selectedOption');
+        source.Segment.Source_ID__c = selOpt.value;  
+        source.sourceName = selOpt.label;
         component.set("v.source", source);
     },
 })
