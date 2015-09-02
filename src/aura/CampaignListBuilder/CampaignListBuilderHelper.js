@@ -242,6 +242,27 @@
         if (cseg == null || csegRoot == null || csegExcludes == null)
             return;
         
+        // if current segment is a source, we want
+        // to create an AND group for it, before we create the other new group
+        if (cseg.Segment.Operation__c == 'SOURCE') {
+            var segNew = {Operation__c:'AND'};
+            var csegNew = {
+                Segment: segNew, 
+                listChildCSegments: [],
+                rootCSegment: cseg.rootCSegment,
+                parentCSegment: cseg.paretCSegment
+            };
+            this.insertParentInTree(cseg, csegNew);
+            // if the group was the root, update the app's root
+            if (csegRoot == cseg) 
+                csegRoot = csegNew;
+            // if the group was the excludes node, update it
+            if (csegExcludes == cseg)
+                csegExcludes = csegNew;
+			// now continue using the new And group
+            cseg = csegNew;
+        }
+
         // if the current segment isn't an OR, then we have to add a level
         if (cseg.Segment.Operation__c != 'OR') {
             var segNew = {Operation__c:'OR'};
