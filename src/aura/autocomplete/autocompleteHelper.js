@@ -43,10 +43,13 @@
                     
                 var selectionEvent = component.getEvent("autocompleteEvent");
                 selectionEvent.setParams({
-                    selectedOption: ui.item 
+                    "selectedOption": ui.item 
                 });
                 selectionEvent.fire();
-            }
+            },
+            focus: function(event, ui) {
+            	event.preventDefault(); // to stop the textbox from being updated with the item's value.    
+            },
         });
     }
 
