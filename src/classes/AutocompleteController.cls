@@ -7,7 +7,7 @@ public with sharing class AutocompleteController {
         String soql = 
             ' SELECT Name, Id ' + String.escapeSingleQuotes(fields) +
             ' FROM '   + String.escapeSingleQuotes(sObjectType) +
-            ' WHERE Name Like \'' + String.escapeSingleQuotes(term) + '%\'' +
+            ' WHERE Name Like \'%' + String.escapeSingleQuotes(term) + '%\'' +
             ' ORDER By Name ' +
             ' LIMIT ' + limitSize;
         return Database.query(soql);

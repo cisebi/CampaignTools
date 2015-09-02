@@ -70,7 +70,6 @@ public with sharing class CampaignListBuilder_CTRL {
 
     @AuraEnabled
     public static Campaign getCampaign(ID campaignId) {
-        //return [select Id, Name, Campaign_List__c from Campaign where Id = '70137000000IZmX'];
         if (campaignId == null)
             return null;
         return [select Id, Name, Campaign_List__c from Campaign where Id = :campaignId];
