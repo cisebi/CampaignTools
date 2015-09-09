@@ -1,4 +1,4 @@
-<aura:component controller="CampaignListBuilder_CTRL">
+<aura:component controller="CampaignListBuilder_CTRL" >
     <aura:attribute name="campaignId" type="String" />
 	<aura:attribute name="campaign" type="Campaign"/>
     <aura:attribute name="csegRoot" type="CSegment"/>
