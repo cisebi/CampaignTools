@@ -4,6 +4,7 @@
         <members>AutocompleteController</members>
         <members>CSegment</members>
         <members>CampaignListBuilder_CTRL</members>
+        <members>CampaignList_CTRL</members>
         <members>CampaignPopulate</members>
         <members>MembersBuilder</members>
         <members>MembersBuilder_TEST</members>
@@ -21,6 +22,7 @@
         <name>ApexComponent</name>
     </types>
     <types>
+        <members>CampaignList</members>
         <members>ProcessSegmentBTN</members>
         <name>ApexPage</name>
     </types>
@@ -28,7 +30,8 @@
         <name>ApexTrigger</name>
     </types>
     <types>
-        <members>CampaignListBuilder</members>
+        <members>CampaignListApp</members>
+        <members>CampaignListCmp</members>
         <members>Source</members>
         <members>SourceMultiList</members>
         <members>addCSegmentEvent</members>
@@ -76,9 +79,12 @@
     </types>
     <types>
         <members>bssf1</members>
+        <members>jquery</members>
+        <members>jqueryui</members>
         <name>StaticResource</name>
     </types>
     <types>
+        <members>Campaign.Edit_Campaign_List</members>
         <members>Campaign.Refresh_Campaign_List</members>
         <name>WebLink</name>
     </types>

@@ -1,4 +1,5 @@
-<aura:application controller="CampaignListBuilder_CTRL">
+<aura:component controller="CampaignListBuilder_CTRL">
+    <aura:attribute name="campaignId" type="ID" />
 	<aura:attribute name="campaign" type="Campaign"/>
     <aura:attribute name="csegRoot" type="CSegment"/>
     <aura:attribute name="csegRootOriginal" type="CSegment"/>
@@ -13,7 +14,7 @@
 
 	<div class="bootstrap-sf1">
         <div class="container">
-            <div class="navbar navbar-inverse">
+            <div class="navbar navbar-inverse"> 
                 <div class="navbar-header">
 		            <a href="#" class="navbar-brand">Campaign List for {!v.campaign.Name}</a>
                 </div>
@@ -27,4 +28,4 @@
             <c:SourceMultiList group="{!v.csegExcludes}" />
          </div>
     </div>
-</aura:application>
+</aura:component>
