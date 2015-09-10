@@ -39,6 +39,7 @@
         <members>autocomplete</members>
         <members>autocompleteEvent</members>
         <members>deleteCSegmentEvent</members>
+        <members>svg</members>
         <name>AuraDefinitionBundle</name>
     </types>
     <types>
@@ -79,7 +80,7 @@
         <name>Layout</name>
     </types>
     <types>
-        <members>bssf1</members>
+        <members>LightningDesignSystem</members>
         <members>jquery</members>
         <members>jqueryui</members>
         <name>StaticResource</name>
