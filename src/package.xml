@@ -3,14 +3,26 @@
     <fullName>Campaign Tools</fullName>
     <types>
         <members>AutocompleteController</members>
+        <members>BatchableSequence</members>
         <members>CSegment</members>
         <members>CampaignListBuilder_CTRL</members>
+        <members>CampaignListCriteria</members>
+        <members>CampaignListFromCampaignBatch</members>
+        <members>CampaignListFromReportBatch</members>
+        <members>CampaignListMember</members>
+        <members>CampaignListSegment</members>
+        <members>CampaignListSegmentMapper</members>
+        <members>CampaignListService</members>
+        <members>CampaignListToCampaignBatch</members>
         <members>CampaignList_CTRL</members>
         <members>CampaignPopulate</members>
+        <members>DeleteCampaignListMembersBatch</members>
+        <members>DeleteCampaignMembersBatch</members>
         <members>MembersBuilder</members>
         <members>MembersBuilder_TEST</members>
         <members>ProcessSegmentBTN_CTRL</members>
         <members>ProcessSegmentBTN_TEST</members>
+        <members>ReportService</members>
         <members>SegmentMapper</members>
         <members>SegmentMapper_TEST</members>
         <members>SegmentTreeProcessor</members>
@@ -54,6 +66,7 @@
         <members>Segment__c.Exclude_Source__c</members>
         <members>Segment__c.Operation__c</members>
         <members>Segment__c.Parent_Segment__c</members>
+        <members>Segment__c.Report_Column_Name__c</members>
         <members>Segment__c.Root_Segment__c</members>
         <members>Segment__c.Source_ID__c</members>
         <members>Segment__c.Source_Type__c</members>
