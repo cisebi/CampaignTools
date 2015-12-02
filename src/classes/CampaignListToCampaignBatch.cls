@@ -7,7 +7,6 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
         this.campaignId = campaignId;
         this.segmentId = segmentId;
         this.listCriteria = listCriteria;
-        System.debug(listCriteria);
     }
 
     public Database.QueryLocator start(Database.BatchableContext bc) {
@@ -21,8 +20,6 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
 
         for (Member__c m : scope) {
             CampaignListMember member = new CampaignListMember(m);
-            System.debug(member);
-            System.debug(listCriteria.meetsCriteria(member));
             if (listCriteria.meetsCriteria(member)) {
                 CampaignMember cm = member.getCampaignMember();
                 cm.CampaignId = campaignId;
