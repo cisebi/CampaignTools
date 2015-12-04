@@ -1,6 +1,23 @@
+/**
+ * @author Salesforce.org
+ * @group CampaignTools
+ * @description A mapper class for serializing and deserializing
+ * CampaignListSegment objects to/from corresponding Segment__c sObjects
+ */
 public class CampaignListSegmentMapper {
+    /**
+     * @description A map of source ids to source names used for caching source
+     * name lookups
+     */
     private static Map<Id, String> sourceNames = new Map<Id, String>();
 
+    /**
+     * @description Given the id of a source, i.e. a Report or Campaign, look
+     * up the name of that source.  This might execute a SOQL query.
+     *
+     * @param sourceId The id of the source (i.e. a Report id or a Campaign id
+     * @return String (the name of the source)
+     */
     public static String getSourceNameById(Id sourceId) {
         if (!sourceNames.containsKey(sourceId)) {
             String name;
@@ -14,10 +31,24 @@ public class CampaignListSegmentMapper {
         return sourceNames.get(sourceId);
     }
 
+    /**
+     * @description Given a "campaign list" id, get a list of all of the
+     * CampaignListSegment objects associated with that campaign list
+     *
+     * @param rootSegmentId The "campaign list" id
+     * @return List<CampaignListSegment>
+     */
     public static List<CampaignListSegment> getByRootSegmentId(Id rootSegmentId) {
         return create(queryByRootSegmentId(rootSegmentId));
     }
 
+    /**
+     * @description Given a "campaign list" id, query for all of the related
+     * Segment__c sObjects associated with that campaign list
+     *
+     * @param rootSegmentId The "campaign list" id
+     * @return List<Segment__c>
+     */
     private static List<Segment__c> queryByRootSegmentId(Id rootSegmentId) {
         return [
             SELECT
@@ -33,6 +64,14 @@ public class CampaignListSegmentMapper {
         ];
     }
 
+    /**
+     * @description Given a list of Segment__c sObjects, build a list of
+     * CampaignListSegment data model instances that correspond to the given
+     * Segment__c sObjects.
+     *
+     * @param segmentSObjects (including the Parent_Segment__c, Operation__c, Source_ID__c, Exclude_Source__c, Report_Column_Name__c, and Root_Segment__c fields)
+     * @return List<CampaignListSegment>
+     */
     private static List<CampaignListSegment> create(List<Segment__c> segmentSObjects) {
         List<CampaignListSegment> segments = new List<CampaignListSegment>();
         for (Segment__c segmentSObject : segmentSObjects) {
@@ -41,6 +80,18 @@ public class CampaignListSegmentMapper {
         return segments;
     }
 
+    /**
+     * @description Given a Segment__c sObject, create a CampaignListSegment
+     * data model instance that corresponds to the given Segment__c sObject.
+     * The returned CampaignListSegment will be a specific child class of
+     * CampaignListSegment appropriate for the given Segment__c sObject.  If
+     * the given Segment__c sObject does not correspond to a known
+     * CampaignListSegment type, then an InvalidSegmentSObjectException will be
+     * thrown.
+     *
+     * @param segment The Segment__c sObject (including the Parent_Segment__c, Operation__c, Source_ID__c, Exclude_Source__c, Report_Column_Name__c, and Root_Segment__c fields)
+     * @return CampaignListSegment
+     */
     private static CampaignListSegment create(Segment__c segment) {
         Id segmentId = segment.Id;
         Id rootSegmentId = segment.Root_Segment__c;
@@ -64,6 +115,12 @@ public class CampaignListSegmentMapper {
         throw new InvalidSegmentSObjectException('Invalid Segment__c object');
     }
 
+    /** @description An exception specific to CampaignListSegmentMapper */
     public abstract class CustomException extends Exception {}
+
+    /**
+     * @description An exception for the case where a Segment__c record does
+     * not correspond to a known segment type
+     */
     public class InvalidSegmentSObjectException extends CustomException {}
 }

@@ -1,10 +1,38 @@
+/**
+ * @author Salesforce.org
+ * @group CampaignTools
+ * @description A model class that represents a potential member of a campaign
+ * list
+ */
 public class CampaignListMember {
+    /** @description The id of the campaign list member, if persisted */
     private Id memberId;
+
+    /** @description The id of the "campaign list" this member belongs to */
     private Id rootSegmentId;
+
+    /**
+     * @description The id of the related record this campaign list member
+     * corresponds to
+     */
     private Id relatedId;
+
+    /**
+     * @description The set of ids for the sources (i.e. Campaigns or Reports)
+     * that this list member is found in
+     */
     private Set<Id> sourceIds = new Set<Id>();
+
+    /**
+     * @description The set of names for the sources (i.e. Campaigns or
+     * Reports) that this list member is found in
+     */
     private Set<String> sourceNames = new Set<String>();
 
+    /**
+     * @description Construct a CampaignListMember from a Member__c sObject
+     * @param memberSObject The Member__c that holds peristed data
+     */
     public CampaignListMember(Member__c memberSObject) {
         if (null != memberSObject.Id) {
             memberId = memberSObject.Id;
@@ -35,24 +63,58 @@ public class CampaignListMember {
         }
     }
 
+    /**
+     * @description Construct a CampaignListMember from the id of a related
+     * record (a Contact or a Lead, etc), and the campaign list this member
+     * belongs to
+     *
+     * @param relatedId The id of the related Contact or Lead record
+     * @param rootSegmentId The id of the campaign list this member belongs to
+     */
     public CampaignListMember(Id relatedId, Id rootSegmentId) {
         this.relatedId = relatedId;
         this.rootSegmentId = rootSegmentId;
     }
 
+    /**
+     * @description Get the id of the related record (a Contact, Lead, etc.)
+     * that this member corresponds to
+     *
+     * @return Id
+     */
     public Id getRelatedId() {
         return relatedId;
     }
 
+    /**
+     * @description Add a source to this member.
+     *
+     * @param sourceId The id of the source Campaign, Report, etc.
+     * @param sourceName The name of the source Campaign, Report, etc.
+     * @return void
+     */
     public void addSource(Id sourceId, String sourceName) {
         sourceIds.add(sourceId);
         sourceNames.add(sourceName);
     }
 
+    /**
+     * @description Given the id of a source, determine if this member was
+     * found in that source.
+     *
+     * @param sourceId The id of a source, i.e. a Report or a Campaign, etc.
+     * @return Boolean (true if this member was found in the given source, false otherwise)
+     */
     public Boolean isFromSource(Id sourceId) {
         return sourceIds.contains(sourceId);
     }
 
+    /**
+     * @description Get a serialized version of this member as a Member__c
+     * sObject
+     *
+     * @return Member__c
+     */
     public Member__c getSObject() {
         Member__c member = new Member__c(
             Id = memberId,
@@ -73,6 +135,14 @@ public class CampaignListMember {
         return member;
     }
 
+    /**
+     * @description Get a CampaignMember that corresponds to this
+     * CampaignListMember, appropriate for inserting and adding to a campaign.
+     * This will populate the ContactId or LeadId field, as well as the
+     * Source_Names__c field of the CampaignMember sObject that is returned.
+     *
+     * @return CampaignMember
+     */
     public CampaignMember getCampaignMember() {
         CampaignMember cm = new CampaignMember();
 
