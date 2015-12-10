@@ -32,6 +32,13 @@ public class CampaignListMemberMapper implements Interface_x {
         this.upsertMembers(members.values());
     }
 
+    /**
+     * @description Create CampaignMember objects from the given list of CampaignListMembers and add them to the specified Campaign.
+     *
+     * @param members The list of CampaignListMembers that should be added to the campaign as CampaignMembers
+     * @param campaignId The id of the Campaign that the CampaignMembers should be added to
+     * @return void
+     */
     public void addMembersToCampaign(List<CampaignListMember> members, Id campaignId) {
         List<CampaignMember> campaignMembers = new List<CampaignMember>();
 
