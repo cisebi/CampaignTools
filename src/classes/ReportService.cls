@@ -176,16 +176,35 @@ public class ReportService {
         }
     }
 
+    /**
+     * @author Salesforce.org
+     * @group CampaignTools
+     * @description This Iterator will return unique items retrieved from
+     * Iterator.  To do this, it keeps track of returned items in a
+     * Set<Object>, and so consumes memory dependent on the number of items
+     * filtered.
+     */
     private class IteratorFilterUnique implements Iterator<Object> {
         private Iterator<Object> iterator;
         private Set<Object> seenObjects = new Set<Object>();
         private Boolean hasNext;
         private Object next;
 
+        /**
+         * @description Constructor
+         * @param iterator The Iterator that is to be filtered for unique items
+        */
         public IteratorFilterUnique(Iterator<Object> iterator) {
             this.iterator = iterator;
         }
 
+        /**
+         * @description Implementation of hasNext() from Iterator interface.
+         * Returns true if there is another value available from the filtered
+         * iterator that has not already been returned.
+         *
+         * @return Boolean
+         */
         public Boolean hasNext() {
             if (null != hasNext) return hasNext;
 
@@ -201,6 +220,13 @@ public class ReportService {
             return hasNext;
         }
 
+        /**
+         * @description Implementation of next() from Iterator interface.
+         * Returns the next value from the filtered iterator, ensuring that
+         * only unique values are returned.
+         *
+         * @return Object
+         */
         public Object next() {
             hasNext = null;
             return next;
