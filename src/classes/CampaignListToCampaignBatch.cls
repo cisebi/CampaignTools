@@ -15,15 +15,23 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
     private Id segmentId;
 
     /**
-     * @description the CampaignListCriteria corresponding to the given campaign list
+     * @description the CampaignListCriteria corresponding to the given
+     * campaign list
      */
     private CampaignListCriteria.Interface_x listCriteria;
 
     /**
-     * @description the ListMemberMapper to use for manipulating CampaignListMembers
+     * @description the ListMemberMapper to use for manipulating
+     * CampaignListMembers
      */
     @TestVisible
-    private CampaignListMemberMapper.Interface_x listMemberMapper;
+    private CampaignListMemberMapper.Interface_x listMemberMapper = new CampaignListMemberMapper();
+
+    /**
+     * @description the CampaignListService to use for updating Campaign status
+     */
+    @TestVisible
+    private CampaignListService.Interface_x listService = new CampaignListService();
 
     /**
      * @description Construct the batch process to populate the given campaign
@@ -38,7 +46,6 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
         this.campaignId = campaignId;
         this.segmentId = segmentId;
         this.listCriteria = listCriteria;
-        listMemberMapper = new CampaignListMemberMapper();
     }
 
     /**
@@ -73,6 +80,23 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
         }
 
         listMemberMapper.addMembersToCampaign(eligibleMembers, campaignId);
+    }
+
+    /**
+     * @description Implementation of finish() from Database.Batchable
+     * interface.  This will call BatachableSequence's finish() method and then
+     * update the specified campaign's status to indicate that it was
+     * successfully populated from the specified campaign list.
+    *
+    * @param bc The BatchableContext for this batch
+    * @return void
+    */
+    public override void finish(Database.BatchableContext bc) {
+        super.finish(bc);
+        listService.updateCampaignStatus(
+            campaignId,
+            CampaignListService.UpdateStatus.SUCCESS
+        );
     }
 
     /**

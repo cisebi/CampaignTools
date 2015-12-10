@@ -69,6 +69,7 @@
         <name>AuraDefinitionBundle</name>
     </types>
     <types>
+        <members>Campaign.Campaign_List_Update_Status__c</members>
         <members>Campaign.Campaign_List__c</members>
         <members>CampaignMember.Source_Names__c</members>
         <members>Member__c.Contact__c</members>

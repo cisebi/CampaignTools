@@ -81,6 +81,8 @@ private class CampaignListToCampaignBatch_TEST {
         CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(null, null, null);
         batch.setScope(200);
 
+        batch.listService = new CampaignListServiceStub();
+
         Test.startTest();
 
         Id jobId = batch.executeBatch();
@@ -88,5 +90,30 @@ private class CampaignListToCampaignBatch_TEST {
         Test.stopTest();
 
         System.assertEquals(AsyncApexJob.sObjectType, jobId.getSobjectType());
+    }
+
+    public static testMethod void testFinish() {
+        Id campaignId = Schema.SObjectType.Campaign.getKeyPrefix() + '000000000001';
+
+
+        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(campaignId, null, null);
+
+        CampaignListServiceStub listServiceStub = new CampaignListServiceStub();
+        batch.listService = listServiceStub;
+
+        batch.finish(null);
+
+        System.assertEquals(campaignId, listServiceStub.updatedCampaignId);
+        System.assertEquals(CampaignListService.UpdateStatus.SUCCESS, listServiceStub.updatedStatus);
+    }
+
+    private class CampaignListServiceStub implements CampaignListService.Interface_x {
+        public Id updatedCampaignId;
+        public CampaignListService.UpdateStatus updatedStatus;
+        public void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId) {}
+        public void updateCampaignStatus(Id campaignId, CampaignListService.UpdateStatus status) {
+            updatedCampaignId = campaignId;
+            updatedStatus = status;
+        }
     }
 }

@@ -33,9 +33,16 @@ private class CampaignListService_TEST {
 
 
         CampaignListService service = new CampaignListService();
+        CampaignListServiceStub serviceStub = new CampaignListServiceStub();
+        service.listService = serviceStub;
 
         service.updateCampaignFromCampaignList(destinationCampaignId, rootSegment.Id, bsStub);
 
+        // assert that the destination campaign was updated to indicate a
+        // running update
+
+        System.assertEquals(destinationCampaignId, serviceStub.updatedCampaignId);
+        System.assertEquals(CampaignListService.UpdateStatus.RUNNING, serviceStub.updatedStatus);
 
         // assert that the batches in this sequence exist in the expected
         // order, with a report source batch and a campaign source batch (in
@@ -91,5 +98,32 @@ private class CampaignListService_TEST {
         public Id run() {
             return null;
         }
+    }
+
+    private class CampaignListServiceStub implements CampaignListService.Interface_x {
+        public Id updatedCampaignId;
+        public CampaignListService.UpdateStatus updatedStatus;
+        public void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId) {}
+        public void updateCampaignStatus(Id campaignId, CampaignListService.UpdateStatus status) {
+            updatedCampaignId = campaignId;
+            updatedStatus = status;
+        }
+    }
+    private static testMethod void testUpdateCampaignStatus() {
+        Campaign c = new Campaign(Name = 'Test Campaign');
+        insert c;
+
+        CampaignListService listService = new CampaignListService();
+
+        listService.updateCampaignStatus(c.Id, CampaignListService.UpdateStatus.SUCCESS);
+
+        c = [
+            SELECT Campaign_List_Update_Status__c
+            FROM Campaign
+            WHERE Id = :c.Id
+            LIMIT 1
+        ];
+
+        System.assertEquals('SUCCESS', c.Campaign_List_Update_Status__c);
     }
 }
