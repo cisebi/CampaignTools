@@ -1,5 +1,5 @@
 @isTest
-public class CampaignListSegmentMapper_TEST {
+private class CampaignListSegmentMapper_TEST {
     private static testMethod void testGetSourceNameByCampaignId() {
         Campaign testCampaign = new Campaign(Name='Test Campaign');
         insert testCampaign;

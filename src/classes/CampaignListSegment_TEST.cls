@@ -1,5 +1,5 @@
 @isTest
-public class CampaignListSegment_TEST {
+private class CampaignListSegment_TEST {
     private static testMethod void testAndSegment() {
         Id segmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000A';
         Id rootSegmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000B';

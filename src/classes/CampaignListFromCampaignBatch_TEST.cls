@@ -1,5 +1,5 @@
 @isTest
-public class CampaignListFromCampaignBatch_TEST {
+private class CampaignListFromCampaignBatch_TEST {
     private static testMethod void testCampaignListFromCampaignBatch() {
         TestCampaign testCampaign = new TestCampaign('Test', 100, 100);
         Id testRootSegmentId = Segment__c.getSObjectType().getDescribe().getKeyPrefix() + '000000000001';

@@ -14,7 +14,7 @@ public class BatchableSequence implements Interface_x {
     }
 
     /** @description A list of the Batchables in this sequence, in order */
-    @testVisible
+    @TestVisible
     private List<Batch> batches = new List<Batch>();
 
     /**

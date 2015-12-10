@@ -1,5 +1,5 @@
 @isTest
-public class DeleteCampaignListMembersBatch_TEST {
+private class DeleteCampaignListMembersBatch_TEST {
     private static testMethod void testDeleteCampaignListMembersBatch() {
         Segment__c rootSegment = new Segment__c();
         insert rootSegment;

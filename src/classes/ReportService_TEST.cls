@@ -1,5 +1,5 @@
 @isTest
-public class ReportService_TEST {
+private class ReportService_TEST {
     @isTest(SeeAllData=True)
     public static void testReportIterator() {
 

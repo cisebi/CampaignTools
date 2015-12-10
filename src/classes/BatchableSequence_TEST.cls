@@ -1,5 +1,5 @@
 @isTest
-public class BatchableSequence_TEST {
+private class BatchableSequence_TEST {
     private static testMethod void testAddBatchWithoutScopeAddsDefaultScope() {
         BatchableSequence bs = new BatchableSequence();
         ConcreteBatch batch = new ConcreteBatch();

@@ -1,5 +1,5 @@
 @isTest
-public class CampaignListToCampaignBatch_TEST {
+private class CampaignListToCampaignBatch_TEST {
     private static testMethod void testStart() {
         Segment__c rootSegment = new Segment__c();
         insert rootSegment;

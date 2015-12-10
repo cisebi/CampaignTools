@@ -1,5 +1,5 @@
 @isTest
-public class CampaignListCriteria_TEST {
+private class CampaignListCriteria_TEST {
     private static Integer nextId = 1;
 
     private static Id getNextId(Schema.SObjectType sObjectType) {

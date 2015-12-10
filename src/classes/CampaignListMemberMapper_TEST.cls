@@ -1,5 +1,5 @@
 @isTest
-public class CampaignListMemberMapper_TEST {
+private class CampaignListMemberMapper_TEST {
     private static testMethod void testUpdateByRelatedIdsUpdatesMembersAndUpserts() {
         Account company = new Account(Name = 'Test Company');
         insert company;

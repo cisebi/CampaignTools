@@ -1,5 +1,5 @@
 @isTest
-public class CampaignListFromReportBatch_TEST {
+private class CampaignListFromReportBatch_TEST {
 
     private static testMethod void testGetValueIteratorReturnsPresetIterable() {
         List<Object> testIterable = new List<Object>{'Test Iterable Item'};

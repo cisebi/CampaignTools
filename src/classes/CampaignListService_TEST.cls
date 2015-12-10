@@ -1,5 +1,5 @@
 @isTest
-public class CampaignListService_TEST {
+private class CampaignListService_TEST {
     private static testMethod void testUpdateCampaignFromCampaignList() {
         Id sourceReportId = Schema.SObjectType.Report.getKeyPrefix() + '000000000001';
         Id sourceCampaignId = Schema.SObjectType.Campaign.getKeyPrefix() + '000000000002';

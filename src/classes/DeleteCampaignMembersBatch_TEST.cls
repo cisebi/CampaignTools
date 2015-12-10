@@ -1,5 +1,5 @@
 @isTest
-public class DeleteCampaignMembersBatch_TEST {
+private class DeleteCampaignMembersBatch_TEST {
     private static testMethod void testDeleteCampaignMembersBatch() {
         CampaignListFromCampaignBatch_TEST.TestCampaign tc = new CampaignListFromCampaignBatch_TEST.TestCampaign('Test', 100, 100);
 
