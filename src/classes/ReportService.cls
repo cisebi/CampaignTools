@@ -9,23 +9,6 @@ public class ReportService {
      * @description Runs a report and returns the results.  The given
      * indexColumn is the name of a column that can be used for sorting the
      * report for pagination, such that the values in this column can be used
-     * to filter the report to exclude previously processed results.  This is a
-     * technique to work around the limitation that only the first 2,000 rows
-     * of a report's results can be obtained through the Analytics API at a
-     * time.
-     *
-     * @param reportId The id of the report to run
-     * @param indexColumn The name of the column to use for "indexing" (i.e., sorting and filtering) the report
-     * @return Reports.ReportResults
-     */
-    public static Reports.ReportResults getReportResults(Id reportId, String indexColumn) {
-        return getReportResults(reportId, indexColumn, null);
-    }
-
-    /**
-     * @description Runs a report and returns the results.  The given
-     * indexColumn is the name of a column that can be used for sorting the
-     * report for pagination, such that the values in this column can be used
      * to filter the report to exclude previously processed results.  The given
      * pageIndex value is an index into the report results corresponding to the
      * last row processed, and is used to filter out results from the report
@@ -38,8 +21,14 @@ public class ReportService {
      * @param pageIndex The value to use to determine where ReportResults processing last left off.  If null, the report is processed from the "beginning"
      * @return Reports.ReportResults
      */
-    public static Reports.ReportResults getReportResults(Id reportId, String indexColumn, String pageIndex) {
-        Reports.ReportMetadata metadata = new Reports.ReportMetadata();
+    private static Reports.ReportResults getReportResults(Id reportId, String indexColumn, String pageIndex) {
+        Reports.ReportMetadata metadata = Reports.ReportManager.describeReport(reportId).getReportMetadata();
+
+        metadata.setReportFormat(Reports.ReportFormat.TABULAR);
+
+        metadata.setDetailColumns(
+            new List<String>{indexColumn}
+        );
 
         Reports.SortColumn sortColumn = new Reports.SortColumn();
         sortColumn.setSortColumn(indexColumn);
@@ -47,14 +36,13 @@ public class ReportService {
         metadata.setSortBy(new List<Reports.SortColumn>{sortColumn});
 
         if (null != pageIndex) {
-            Reports.ReportFilter reportFilter = new Reports.ReportFilter(
+            List<Reports.ReportFilter> reportFilters = metadata.getReportFilters();
+            reportFilters.add(new Reports.ReportFilter(
                 indexColumn,
                 'greaterThan',
                 pageIndex
-            );
-            metadata.setReportFilters(
-                new List<Reports.ReportFilter>{reportFilter}
-            );
+            ));
+            metadata.setReportFilters(reportFilters);
         }
 
         Reports.ReportResults results = Reports.ReportManager.runReport(
@@ -67,61 +55,31 @@ public class ReportService {
     }
 
     /**
-     * @description Given a report id and the API name of a column in that
-     * report, this method determines the integer column offset of that column
-     * in the ReportResults ReportDetailRows.  If the column can not be found
-     * in the report, this method throws a NoSuchColumnException.
-     *
-     * @param reportId The id of the report the column belongs to
-     * @param columnName The API name of a column in that report
-     * @return Integer
-     */
-    public static Integer getColumnOffsetByName(Id reportId, String columnName) {
-        Reports.ReportMetadata metadata = Reports.ReportManager.describeReport(reportId).getReportMetadata();
-
-        List<String> columns = metadata.getDetailColumns();
-
-        for (Integer i=0; i < columns.size(); i++) {
-            if (columnName == columns.get(i)) {
-                return i;
-            }
-        }
-
-        throw new NoSuchColumnException(
-            'The column named ' + columnName + ' was not found in report ' + reportId
-        );
-    }
-
-    /**
      * @author Salesforce.org
      * @group CampaignTools
      * @description A custom Iterator that can be used to iterate over the
-     * values from a given column in a given report.  This class will iterate
-     * over every row in the given report.  To work around a limitation in the
-     * Analytics API that a report run will only return the first 2,000 rows,
-     * the column being iterated over is expected to be a filterable and
+     * unique values from a given column in a given report.  This class will
+     * iterate over every row in the given report.  To work around a limitation
+     * in the Analytics API that a report run will only return the first 2,000
+     * rows, the column being iterated over is expected to be a filterable and
      * sortable column.  This requirement comes from the technique of
      * paginating report results 2,000 records at a time by adding a sort to
      * the report and then filtering the report to exclude records from
-     * previous "pages" of the report.  This implies that the column contain
-     * unique values over the report rows so that filtering on the column will
-     * not lead to missed records that fall "in between" the report pages.
+     * previous "pages" of the report.  This will only return unique values
+     * from the given column, meaning that if a value has already been returned
+     * by this iterator then that value will be skipped next time.
      */
     public class ReportRowValueIterableIterator implements Iterator<Object>, Iterable<Object> {
         /** @description The id of the report to iterate over */
+        @TestVisible
         private Id reportId;
 
         /**
          * @description The name of the column in the report to return values
          * from and use for indexing
          */
+        @TestVisible
         private String columnName;
-
-        /**
-         * @description The integer column offset into the ReportDetailRow that
-         * corresponds to the columnName
-         */
-        private Integer columnOffset;
 
         /**
          * @description The value of the last row processed.  This value is
@@ -159,10 +117,6 @@ public class ReportService {
         public ReportRowValueIterableIterator(Id reportId, String columnName) {
             this.reportId = reportId;
             this.columnName = columnName;
-            columnOffset = ReportService.getColumnOffsetByName(
-                reportId,
-                columnName
-            );
         }
 
         /**
@@ -170,7 +124,7 @@ public class ReportService {
          * @return Iterator<Object>
          */
         public Iterator<Object> iterator() {
-            return this;
+            return new IteratorFilterUnique(this);
         }
 
         /**
@@ -198,7 +152,7 @@ public class ReportService {
                 runReport();
             }
             Reports.ReportDetailRow row = currentPageRowIterator.next();
-            lastRowValue = row.getDataCells().get(columnOffset).getValue();
+            lastRowValue = row.getDataCells().get(0).getValue();
             return lastRowValue;
         }
 
@@ -222,13 +176,34 @@ public class ReportService {
         }
     }
 
+    private class IteratorFilterUnique implements Iterator<Object> {
+        private Iterator<Object> iterator;
+        private Set<Object> seenObjects = new Set<Object>();
+        private Boolean hasNext;
+        private Object next;
 
-    /** @description An exception specific to ReportService */
-    public virtual class CustomException extends Exception {}
+        public IteratorFilterUnique(Iterator<Object> iterator) {
+            this.iterator = iterator;
+        }
 
-    /**
-     * @description An exception for the case that a given column name could
-     * not be found in the given report
-     */
-    public class NoSuchColumnException extends CustomException {}
+        public Boolean hasNext() {
+            if (null != hasNext) return hasNext;
+
+            while (iterator.hasNext()) {
+                next = iterator.next();
+                if (!seenObjects.contains(next)) {
+                    seenObjects.add(next);
+                    hasNext = true;
+                    return hasNext;
+                }
+            }
+            hasNext = false;
+            return hasNext;
+        }
+
+        public Object next() {
+            hasNext = null;
+            return next;
+        }
+    }
 }

@@ -9,25 +9,41 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
      * @description The id of the "campaign list" which the members should be
      * added to
      */
+    @TestVisible
     private Id rootSegmentId;
 
     /**
      * @description The id of the Report from which to gather potential
      * members
      */
+    @TestVisible
     private Id reportId;
 
     /**
      * @description The name of the column in the report that holds the id of
      * the Contact or Lead to be included in the campaign list
      */
+    @TestVisible
     private String idColumnName;
 
     /**
      * @description The name of the Report from which to gather potential
      * members
      */
+    @TestVisible
     private String reportName;
+
+    /**
+     * @description The mapper to use for campaign members
+     */
+    @TestVisible
+    private CampaignListMemberMapper.Interface_x campaignListMemberMapper;
+
+    /**
+     * @description
+     */
+    @TestVisible
+    private Iterable<Object> valueIterator;
 
     /**
      * @description Construct the batch process to gather potential members
@@ -42,19 +58,33 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
         this.reportId = reportId;
         this.idColumnName = idColumnName;
         this.reportName = reportName;
+        campaignListMemberMapper = new CampaignListMemberMapper();
+    }
+
+    /**
+     * @description Get the iterator that will provide values to the execute()
+     * method.  If an iterable is already specified for this batch, it will be
+     * used.  Otherwise, an instance of the default implementation,
+     * ReportService.ReportRowValueIterableIterator, will be used.
+     *
+     * @return Iterable<Object>
+     */
+    @TestVisible
+    private Iterable<Object> getValueIterable() {
+        if (null == valueIterator) {
+            valueIterator = new ReportService.ReportRowValueIterableIterator(reportId, idColumnName);
+        }
+        return valueIterator;
     }
 
     /**
      * @description Implementation of start() from Database.Batchable
      * interface.
      *
-     * @return ReportService.ReportRowValueIterableIterator An iterable that will provide values from the id column of the given report
+     * @return Iterable<Object> An iterable that will provide values from the id column of the given report
      */
-    public ReportService.ReportRowValueIterableIterator start(Database.BatchableContext bc) {
-        return new ReportService.ReportRowValueIterableIterator(
-            reportId,
-            idColumnName
-        );
+    public Iterable<Object> start(Database.BatchableContext bc) {
+        return getValueIterable();
     }
 
     /**
@@ -71,7 +101,7 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
             ids.add((Id) o);
         }
 
-        CampaignListService.updateMembersByRelatedIdsAndSource(
+        this.campaignListMemberMapper.updateByRelatedIdsAndSource(
             ids,
             rootSegmentId,
             reportId,

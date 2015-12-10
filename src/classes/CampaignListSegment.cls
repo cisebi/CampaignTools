@@ -47,6 +47,22 @@ public abstract class CampaignListSegment {
     }
 
     /**
+     * @description get "campaign list" id this segment belongs to
+     * @return Id
+     */
+    public Id getRootSegmentId() {
+        return rootSegmentId;
+    }
+
+    /**
+     * @description get this segment's parent id
+     * @return Id
+     */
+    public Id getParentId() {
+        return parentId;
+    }
+
+    /**
      * @author Salesforce.org
      * @group CampaignTools
      * @description This is a specific type of CampaignListSegment that
@@ -122,6 +138,13 @@ public abstract class CampaignListSegment {
         private Boolean isExclusion;
 
         /**
+         * @description The CampaignListSegmentMapper to use for retrieving
+         * this source's name
+         */
+        @TestVisible
+        private CampaignListSegmentMapper.MapperInterface segmentMapper;
+
+        /**
          * @description Construct a SourceSegment
          * @param segmentId The id of this segment
          * @param rootSegmentId The id of the "campaign list" this segment belongs to
@@ -131,6 +154,25 @@ public abstract class CampaignListSegment {
             super(segmentId, rootSegmentId, parentId);
             this.sourceId = sourceId;
             this.isExclusion = isExclusion;
+            this.segmentMapper = new CampaignListSegmentMapper();
+        }
+
+        /**
+         * @description get the id of the source this segment corresponds to
+         * @return Id
+         */
+        public Id getSourceId() {
+            return sourceId;
+        }
+
+        /**
+         * @description Is this source segment intended to exclude members
+         * found in the source?
+         *
+         * @return Boolean
+         */
+        public Boolean isExclusion() {
+            return isExclusion;
         }
 
         /**
@@ -151,7 +193,7 @@ public abstract class CampaignListSegment {
          * @return String
          */
         public String getSourceName() {
-            return CampaignListSegmentMapper.getSourceNameById(sourceId);
+            return segmentMapper.getSourceNameById(sourceId);
         }
 
         /**
@@ -226,6 +268,16 @@ public abstract class CampaignListSegment {
         public ReportSourceSegment(Id segmentId, Id rootSegmentId, Id parentId, Id sourceId, Boolean isExclusion, String columnName) {
             super(segmentId, rootSegmentId, parentId, sourceId, isExclusion);
             this.columnName = columnName;
+        }
+
+        /**
+         * @description Get the column name of the report that this source
+         * segment is intending to use to retrieve values from the report
+         *
+         * @return String
+         */
+        public String getColumnName() {
+           return columnName;
         }
 
         /**

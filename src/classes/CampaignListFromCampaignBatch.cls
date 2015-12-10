@@ -9,19 +9,28 @@ public class CampaignListFromCampaignBatch extends BatchableSequence.Batch imple
      * @description The id of the "campaign list" which the members should be
      * added to
      */
+    @TestVisible
     private Id rootSegmentId;
 
     /**
      * @description The id of the Campaign from which to gather potential
      * members
      */
+    @TestVisible
     private Id campaignId;
 
     /**
      * @description The name of the Campaign from which to gather potential
      * members
      */
+    @TestVisible
     private String campaignName;
+
+    /**
+     * @description The service to use for campaign lists
+     */
+    @TestVisible
+    private CampaignListMemberMapper.Interface_x campaignListMemberMapper;
 
     /**
      * @description Construct the batch process to gather potential members
@@ -35,6 +44,7 @@ public class CampaignListFromCampaignBatch extends BatchableSequence.Batch imple
         this.rootSegmentId = rootSegmentId;
         this.campaignId = campaignId;
         this.campaignName = campaignName;
+        campaignListMemberMapper = new CampaignListMemberMapper();
     }
 
     /**
@@ -69,7 +79,7 @@ public class CampaignListFromCampaignBatch extends BatchableSequence.Batch imple
             }
         }
 
-        CampaignListService.updateMembersByRelatedIdsAndSource(
+        this.campaignListMemberMapper.updateByRelatedIdsAndSource(
             new List<Id>(ids),
             rootSegmentId,
             campaignId,

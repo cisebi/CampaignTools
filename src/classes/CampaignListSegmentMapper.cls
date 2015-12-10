@@ -4,7 +4,12 @@
  * @description A mapper class for serializing and deserializing
  * CampaignListSegment objects to/from corresponding Segment__c sObjects
  */
-public class CampaignListSegmentMapper {
+public class CampaignListSegmentMapper implements MapperInterface {
+    public interface MapperInterface {
+        String getSourceNameById(Id sourceId);
+        List<CampaignListSegment> getByRootSegmentId(Id rootSegmentId);
+    }
+
     /**
      * @description A map of source ids to source names used for caching source
      * name lookups
@@ -18,13 +23,17 @@ public class CampaignListSegmentMapper {
      * @param sourceId The id of the source (i.e. a Report id or a Campaign id
      * @return String (the name of the source)
      */
-    public static String getSourceNameById(Id sourceId) {
+    public String getSourceNameById(Id sourceId) {
         if (!sourceNames.containsKey(sourceId)) {
             String name;
-            if (Report.sObjectType == sourceId.getSObjectType()) {
-                name = 'Report: ' + [SELECT Name FROM Report WHERE Id = :sourceId].Name;
-            } else if (Campaign.sObjectType == sourceId.getSObjectType()) {
-                name = 'Campaign: ' + [SELECT Name FROM Campaign WHERE Id = :sourceId].Name;
+            try {
+                if (Report.sObjectType == sourceId.getSObjectType()) {
+                    name = 'Report: ' + [SELECT Name FROM Report WHERE Id = :sourceId].Name;
+                } else if (Campaign.sObjectType == sourceId.getSObjectType()) {
+                    name = 'Campaign: ' + [SELECT Name FROM Campaign WHERE Id = :sourceId].Name;
+                }
+            } catch (System.QueryException e) {
+                name = '';
             }
             sourceNames.put(sourceId, name);
         }
@@ -38,7 +47,7 @@ public class CampaignListSegmentMapper {
      * @param rootSegmentId The "campaign list" id
      * @return List<CampaignListSegment>
      */
-    public static List<CampaignListSegment> getByRootSegmentId(Id rootSegmentId) {
+    public List<CampaignListSegment> getByRootSegmentId(Id rootSegmentId) {
         return create(queryByRootSegmentId(rootSegmentId));
     }
 
@@ -49,7 +58,7 @@ public class CampaignListSegmentMapper {
      * @param rootSegmentId The "campaign list" id
      * @return List<Segment__c>
      */
-    private static List<Segment__c> queryByRootSegmentId(Id rootSegmentId) {
+    private List<Segment__c> queryByRootSegmentId(Id rootSegmentId) {
         return [
             SELECT
                 Parent_Segment__c,
@@ -72,7 +81,7 @@ public class CampaignListSegmentMapper {
      * @param segmentSObjects (including the Parent_Segment__c, Operation__c, Source_ID__c, Exclude_Source__c, Report_Column_Name__c, and Root_Segment__c fields)
      * @return List<CampaignListSegment>
      */
-    private static List<CampaignListSegment> create(List<Segment__c> segmentSObjects) {
+    private List<CampaignListSegment> create(List<Segment__c> segmentSObjects) {
         List<CampaignListSegment> segments = new List<CampaignListSegment>();
         for (Segment__c segmentSObject : segmentSObjects) {
             segments.add(create(segmentSObject));
@@ -92,7 +101,8 @@ public class CampaignListSegmentMapper {
      * @param segment The Segment__c sObject (including the Parent_Segment__c, Operation__c, Source_ID__c, Exclude_Source__c, Report_Column_Name__c, and Root_Segment__c fields)
      * @return CampaignListSegment
      */
-    private static CampaignListSegment create(Segment__c segment) {
+    @TestVisible
+    private CampaignListSegment create(Segment__c segment) {
         Id segmentId = segment.Id;
         Id rootSegmentId = segment.Root_Segment__c;
         Id parentId = segment.Parent_Segment__c;

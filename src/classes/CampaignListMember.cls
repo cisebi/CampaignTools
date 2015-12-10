@@ -77,6 +77,15 @@ public class CampaignListMember {
     }
 
     /**
+     * @description Get the id of this member record
+     *
+     * @return Id
+     */
+    public Id getId() {
+        return memberId;
+    }
+
+    /**
      * @description Get the id of the related record (a Contact, Lead, etc.)
      * that this member corresponds to
      *
@@ -107,6 +116,15 @@ public class CampaignListMember {
      */
     public Boolean isFromSource(Id sourceId) {
         return sourceIds.contains(sourceId);
+    }
+
+    /**
+     * @description Does this CampaignListMember meet the given CampaignListCriteria?
+     * @param criteria
+     * @return Boolean
+     */
+    public Boolean meetsCriteria(CampaignListCriteria.Interface_x criteria) {
+        return criteria.meetsCriteria(this);
     }
 
     /**

@@ -6,6 +6,7 @@
  */
 public class DeleteCampaignListMembersBatch extends BatchableSequence.Batch implements Database.Batchable<sObject> {
     /** @description The "campaign list" id */
+    @TestVisible
     private Id rootSegmentId;
 
     /**

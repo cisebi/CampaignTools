@@ -4,7 +4,10 @@
  * @description This represents the criteria used to determine whether a
  * Contact or a Lead should be included in a Campaign.
  */
-public class CampaignListCriteria {
+public class CampaignListCriteria implements Interface_x {
+    public interface Interface_x {
+        Boolean meetsCriteria(CampaignListMember m);
+    }
 
     /** @description The root node of the criteria tree */
     private CriteriaTreeNode rootNode;
@@ -200,6 +203,24 @@ public class CampaignListCriteria {
             this.parentId = parentId;
             this.sourceId = sourceId;
             this.isExclusion = isExclusion;
+        }
+
+        /**
+         * @description Get the id of this node's source.
+         * @return Id
+         */
+        public Id getSourceId() {
+            return sourceId;
+        }
+
+        /**
+         * @description Is this source node intended to exclude the members
+         * found in the source?
+         *
+         * @return Boolean
+         */
+        public Boolean isExclusion() {
+            return isExclusion;
         }
 
         /**

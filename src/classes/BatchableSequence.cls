@@ -6,9 +6,15 @@
  * Batchable in the sequence upon finishing.  You can use this class to cause a
  * series of Batchable classes to execute in serial order.
  */
-public class BatchableSequence {
+public class BatchableSequence implements Interface_x {
+    public interface Interface_x {
+        Batch add(Batch b);
+        Batch add(Batch b, Integer scope);
+        Id run();
+    }
 
     /** @description A list of the Batchables in this sequence, in order */
+    @testVisible
     private List<Batch> batches = new List<Batch>();
 
     /**
@@ -62,6 +68,7 @@ public class BatchableSequence {
     public abstract class Batch {
 
         /** @description The next batch to run after this one finishes */
+        @TestVisible
         private Batch next;
 
         /** @description The scope size with which to run this batch */

@@ -7,15 +7,23 @@
  */
 public class CampaignListToCampaignBatch extends BatchableSequence.Batch implements Database.Batchable<sObject> {
     /** @description The id of the Campaign to populate */
+    @TestVisible
     private Id campaignId;
 
     /** @description The "campaign list" id */
+    @TestVisible
     private Id segmentId;
 
     /**
      * @description the CampaignListCriteria corresponding to the given campaign list
      */
-    private CampaignListCriteria listCriteria;
+    private CampaignListCriteria.Interface_x listCriteria;
+
+    /**
+     * @description the ListMemberMapper to use for manipulating CampaignListMembers
+     */
+    @TestVisible
+    private CampaignListMemberMapper.Interface_x listMemberMapper;
 
     /**
      * @description Construct the batch process to populate the given campaign
@@ -26,10 +34,11 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
      * @param segmentId The "campaign list id
      * @param listCriteria The CampaignListCriteria that corresponds to the given campaign list
      */
-    public CampaignListToCampaignBatch(Id campaignId, Id segmentId, CampaignListCriteria listCriteria) {
+    public CampaignListToCampaignBatch(Id campaignId, Id segmentId, CampaignListCriteria.Interface_x listCriteria) {
         this.campaignId = campaignId;
         this.segmentId = segmentId;
         this.listCriteria = listCriteria;
+        listMemberMapper = new CampaignListMemberMapper();
     }
 
     /**
@@ -54,18 +63,16 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
      * @return void
      */
     public void execute(Database.BatchableContext bc, List<Member__c> scope) {
-        List<CampaignMember> campaignMembers = new List<CampaignMember>();
+        List<CampaignListMember> eligibleMembers = new List<CampaignListMember>();
 
         for (Member__c m : scope) {
             CampaignListMember member = new CampaignListMember(m);
-            if (listCriteria.meetsCriteria(member)) {
-                CampaignMember cm = member.getCampaignMember();
-                cm.CampaignId = campaignId;
-                campaignMembers.add(cm);
+            if (member.meetsCriteria(listCriteria)) {
+                eligibleMembers.add(member);
             }
         }
 
-        insert campaignMembers;
+        listMemberMapper.addMembersToCampaign(eligibleMembers, campaignId);
     }
 
     /**
