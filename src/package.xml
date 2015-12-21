@@ -7,8 +7,6 @@
         <members>BatchableSequence_TEST</members>
         <members>CSegment</members>
         <members>CampaignListBuilder_CTRL</members>
-        <members>CampaignListCriteria</members>
-        <members>CampaignListCriteria_TEST</members>
         <members>CampaignListFromCampaignBatch</members>
         <members>CampaignListFromCampaignBatch_TEST</members>
         <members>CampaignListFromReportBatch</members>
@@ -21,6 +19,7 @@
         <members>CampaignListSegmentMapper</members>
         <members>CampaignListSegmentMapper_TEST</members>
         <members>CampaignListSegment_TEST</members>
+        <members>CampaignListSegment_TEST2</members>
         <members>CampaignListService</members>
         <members>CampaignListService_TEST</members>
         <members>CampaignListToCampaignBatch</members>

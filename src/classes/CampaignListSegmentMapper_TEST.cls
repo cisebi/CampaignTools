@@ -66,17 +66,20 @@ private class CampaignListSegmentMapper_TEST {
         insert reportSegment;
 
         CampaignListSegmentMapper segmentMapper = new CampaignListSegmentMapper();
-        List<CampaignListSegment> segmentModels = segmentMapper.getByRootSegmentId(
+        CampaignListSegment segmentTree = segmentMapper.getSegmentTreeByRootId(
             rootSegmentId
         );
 
-        System.assertEquals(4, segmentModels.size());
-
         Map<Id, CampaignListSegment> segmentModelsById = new Map<Id, CampaignListSegment>();
 
-        for (CampaignListSegment segmentModel : segmentModels) {
-            segmentModelsById.put(segmentModel.getId(), segmentModel);
+        CampaignListSegment.TreeIterator segmentTreeIterator = segmentTree.iterator();
+
+        while (segmentTreeIterator.hasNext()) {
+            CampaignListSegment next = segmentTreeIterator.next();
+            segmentModelsById.put(next.getId(), next);
         }
+
+        System.assertEquals(4, segmentModelsById.size());
 
         CampaignListSegment.OrSegment orSegmentModel = (CampaignListSegment.OrSegment) segmentModelsById.get(orSegment.Id);
         System.assertEquals(null, orSegmentModel.getRootSegmentId());

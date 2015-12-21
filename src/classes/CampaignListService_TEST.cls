@@ -82,7 +82,7 @@ private class CampaignListService_TEST {
         System.assertEquals('test_column_name', reportBatch.idColumnName);
         System.assertEquals(rootSegment.Id, campaignBatch.rootSegmentId);
         System.assertEquals(sourceCampaignId, campaignBatch.campaignId);
-        System.assertEquals(rootSegment.Id, campaignListToCampaignBatch.segmentId);
+        System.assertEquals(rootSegment.Id, campaignListToCampaignBatch.rootSegment.getId());
         System.assertEquals(destinationCampaignId, campaignListToCampaignBatch.campaignId);
         System.assertEquals(rootSegment.Id, deleteCampaignListMembersBatch2.rootSegmentId);
     }

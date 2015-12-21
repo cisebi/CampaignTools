@@ -14,9 +14,6 @@ private class CampaignListSegment_TEST {
         System.assertEquals(segmentId, segment.getId());
         System.assertEquals(rootSegmentId, segment.getRootSegmentId());
         System.assertEquals(parentId, segment.getParentId());
-
-        CampaignListCriteria.AndNode criteriaNode = (CampaignListCriteria.AndNode) segment.getCriteriaTreeNode();
-        System.assertEquals(parentId, criteriaNode.getParentId());
     }
 
     private static testMethod void testOrSegment() {
@@ -33,9 +30,6 @@ private class CampaignListSegment_TEST {
         System.assertEquals(segmentId, segment.getId());
         System.assertEquals(rootSegmentId, segment.getRootSegmentId());
         System.assertEquals(parentId, segment.getParentId());
-
-        CampaignListCriteria.OrNode criteriaNode = (CampaignListCriteria.OrNode) segment.getCriteriaTreeNode();
-        System.assertEquals(parentId, criteriaNode.getParentId());
     }
 
     private static testMethod void testCampaignSourceSegment() {
@@ -57,11 +51,6 @@ private class CampaignListSegment_TEST {
         System.assertEquals(parentId, segment.getParentId());
         System.assertEquals(sourceId, segment.getSourceId());
         System.assertEquals(false, segment.isExclusion());
-
-        CampaignListCriteria.SourceNode criteriaNode = (CampaignListCriteria.SourceNode) segment.getCriteriaTreeNode();
-        System.assertEquals(parentId, criteriaNode.getParentId());
-        System.assertEquals(sourceId, criteriaNode.getSourceId());
-        System.assertEquals(false, criteriaNode.isExclusion());
 
         CampaignListSegmentMapperStub mapperStub = new CampaignListSegmentMapperStub();
         mapperStub.expectedSourceId = sourceId;
@@ -99,11 +88,6 @@ private class CampaignListSegment_TEST {
         System.assertEquals(false, segment.isExclusion());
         System.assertEquals('test_column_name', segment.getColumnName());
 
-        CampaignListCriteria.SourceNode criteriaNode = (CampaignListCriteria.SourceNode) segment.getCriteriaTreeNode();
-        System.assertEquals(parentId, criteriaNode.getParentId());
-        System.assertEquals(sourceId, criteriaNode.getSourceId());
-        System.assertEquals(false, criteriaNode.isExclusion());
-
         CampaignListSegmentMapperStub mapperStub = new CampaignListSegmentMapperStub();
         mapperStub.expectedSourceId = sourceId;
         mapperStub.sourceName = 'Test Report';
@@ -126,7 +110,7 @@ private class CampaignListSegment_TEST {
             System.assertEquals(expectedSourceId, sourceId);
             return sourceName;
         }
-        public List<CampaignListSegment> getByRootSegmentId(Id rootSegmentId) {
+        public CampaignListSegment getSegmentTreeByRootId(Id rootSegmentId) {
             return null;
         }
     }

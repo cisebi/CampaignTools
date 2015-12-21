@@ -17,7 +17,10 @@ private class CampaignListToCampaignBatch_TEST {
         );
         insert member2;
 
-        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(null, rootSegment.Id, null);
+        CampaignListSegmentStub rootSegmentStub = new CampaignListSegmentStub();
+        rootSegmentStub.segmentId = rootSegment.Id;
+
+        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(null, rootSegmentStub);
 
         Database.QueryLocatorIterator qli = batch.start(null).iterator();
 
@@ -41,14 +44,14 @@ private class CampaignListToCampaignBatch_TEST {
 
         Id campaignId = Schema.sObjectType.Campaign.getKeyPrefix() + '000000000001';
 
-        CampaignListCriteriaStub listCriteria = new CampaignListCriteriaStub();
-        listCriteria.acceptIds.add(member1.Id);
+        CampaignListSegmentStub rootSegment = new CampaignListSegmentStub();
+        rootSegment.acceptIds.add(member1.Id);
 
         CampaignListMemberMapperStub mapperStub = new CampaignListMemberMapperStub();
         mapperStub.expectedCampaignId = campaignId;
         mapperStub.expectedMemberIds.add(member1.Id);
 
-        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(campaignId, null, listCriteria);
+        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(campaignId, rootSegment);
         batch.listMemberMapper = mapperStub;
 
         batch.execute(
@@ -57,10 +60,14 @@ private class CampaignListToCampaignBatch_TEST {
         );
     }
 
-    private class CampaignListCriteriaStub implements CampaignListCriteria.Interface_x {
+    private class CampaignListSegmentStub implements CampaignListSegment.Interface_x {
+        public Id segmentId;
         public Set<Id> acceptIds = new Set<Id>();
         public Boolean meetsCriteria(CampaignListMember m) {
             return acceptIds.contains(m.getId());
+        }
+        public Id getId() {
+            return segmentId;
         }
     }
 
@@ -78,7 +85,8 @@ private class CampaignListToCampaignBatch_TEST {
     }
 
     public static testMethod void testExecuteBatch() {
-        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(null, null, null);
+        CampaignListSegmentStub rootSegment = new CampaignListSegmentStub();
+        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(null, rootSegment);
         batch.setScope(200);
 
         batch.listService = new CampaignListServiceStub();
@@ -96,7 +104,7 @@ private class CampaignListToCampaignBatch_TEST {
         Id campaignId = Schema.SObjectType.Campaign.getKeyPrefix() + '000000000001';
 
 
-        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(campaignId, null, null);
+        CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(campaignId, null);
 
         CampaignListServiceStub listServiceStub = new CampaignListServiceStub();
         batch.listService = listServiceStub;

@@ -10,15 +10,9 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
     @TestVisible
     private Id campaignId;
 
-    /** @description The "campaign list" id */
+    /** @description The "campaign list" root segment */
     @TestVisible
-    private Id segmentId;
-
-    /**
-     * @description the CampaignListCriteria corresponding to the given
-     * campaign list
-     */
-    private CampaignListCriteria.Interface_x listCriteria;
+    private CampaignListSegment.Interface_x rootSegment;
 
     /**
      * @description the ListMemberMapper to use for manipulating
@@ -39,13 +33,11 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
      * the given CampaignListCriteria
      *
      * @param campaignId The id of the Campaign to populate
-     * @param segmentId The "campaign list id
-     * @param listCriteria The CampaignListCriteria that corresponds to the given campaign list
+     * @param rootSegment The "campaign list" root segment
      */
-    public CampaignListToCampaignBatch(Id campaignId, Id segmentId, CampaignListCriteria.Interface_x listCriteria) {
+    public CampaignListToCampaignBatch(Id campaignId, CampaignListSegment.Interface_x rootSegment) {
         this.campaignId = campaignId;
-        this.segmentId = segmentId;
-        this.listCriteria = listCriteria;
+        this.rootSegment = rootSegment;
     }
 
     /**
@@ -55,8 +47,9 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
      * @return Database.QueryLocator The Member__c records from the specified campaign list
      */
     public Database.QueryLocator start(Database.BatchableContext bc) {
+        Id rootSegmentId = rootSegment.getId();
         return Database.getQueryLocator(
-            'SELECT Contact__c, Lead__c, Root_Segment__c, Sources__c, Source_Names__c FROM Member__c WHERE Root_Segment__c = :segmentId'
+            'SELECT Contact__c, Lead__c, Root_Segment__c, Sources__c, Source_Names__c FROM Member__c WHERE Root_Segment__c = :rootSegmentId'
         );
     }
 
@@ -74,7 +67,7 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
 
         for (Member__c m : scope) {
             CampaignListMember member = new CampaignListMember(m);
-            if (member.meetsCriteria(listCriteria)) {
+            if (member.meetsCriteria(rootSegment)) {
                 eligibleMembers.add(member);
             }
         }

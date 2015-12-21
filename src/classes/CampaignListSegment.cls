@@ -5,7 +5,12 @@
  * list.  A "segment" of a campaign list is one part of the criteria that
  * defines the campaign list.
  */
-public abstract class CampaignListSegment {
+public abstract class CampaignListSegment implements Iterable<CampaignListSegment>, Interface_x {
+    public interface Interface_x {
+        Id getId();
+        Boolean meetsCriteria(CampaignListMember m);
+    }
+
     /** @description This segment's id */
     private Id segmentId;
 
@@ -18,13 +23,9 @@ public abstract class CampaignListSegment {
     private Id parentId;
 
     /**
-     * @description Get a CriteriaTreeNode that corresponds to this segment.
-     * The CriteriaTreeNode differs from a CampaignListSegment in that the
-     * CriteriaListSegment is a data model class that corresponds to a single
-     * Segment__c sObject, but a CriteriaTreeNode is an object intended to
-     * exist as part of the criteria tree in a CampaignListCriteria instance.
+     * @description This segment's children segments, if it has any
      */
-    public abstract CampaignListCriteria.CriteriaTreeNode getCriteriaTreeNode();
+    private List<CampaignListSegment> children = new List<CampaignListSegment>();
 
     /**
      * @description Construct a CampaignListSegment
@@ -63,6 +64,82 @@ public abstract class CampaignListSegment {
     }
 
     /**
+     * @description Add a child segment to this segment
+     * @param term The segment to add as a child.
+     * @return void
+     */
+    public void addChild(CampaignListSegment child) {
+        children.add(child);
+    }
+
+    /**
+     * @description Get this segment's child segments
+     * @return List<CampaignListSegment>
+     */
+    public List<CampaignListSegment> getChildren() {
+        return children;
+    }
+
+    /**
+     * @description Determine whether the given CampaignListMember meets
+     * the criteria of *this segment*.  If the segment is a grouping node, i.e.
+     * 'And' and 'Or' segments, then this will evaluate the criteria
+     * recursively for each term.
+     *
+     * @return Boolean (true if the CampaignListMember is eligible by the criteria of the criteria sub-tree represented by this segment.
+     */
+    public abstract Boolean meetsCriteria(CampaignListMember m);
+
+    public TreeIterator iterator() {
+        return new TreeIterator(this);
+    }
+
+    /**
+     * @author Salesforce.org
+     * @group CampaignTools
+     * @description An iterator that iterates over trees in depth first order
+     */
+    public class TreeIterator implements Iterator<CampaignListSegment> {
+        /**
+         * @description a temporary list of nodes that have yet to be iterated
+         * over.
+         */
+        private List<CampaignListSegment> nextSegments = new List<CampaignListSegment>();
+
+        /**
+         * @description Construct a new TreeIterator starting at the given root
+         * node.
+         *
+         * @param rootSegment
+         */
+        public TreeIterator(CampaignListSegment rootSegment) {
+            nextSegments.add(rootSegment);
+        }
+
+        /**
+         * @description Implementation of Iterator.hasNext() method.  Returns
+         * true if there is another node in the tree to iterate over.
+         *
+         * @return Boolean
+         */
+        public Boolean hasNext() {
+            return !nextSegments.isEmpty();
+        }
+
+        /**
+         * @description Implementation of Iterator.next().  Returns the next
+         * node in the tree.
+         *
+         * @return CampaignListSegment
+         */
+        public CampaignListSegment next() {
+            CampaignListSegment next = nextSegments.remove(nextSegments.size() - 1);
+            nextSegments.addAll(next.getChildren());
+            return next;
+        }
+    }
+
+    /**
      * @author Salesforce.org
      * @group CampaignTools
      * @description This is a specific type of CampaignListSegment that
@@ -80,14 +157,22 @@ public abstract class CampaignListSegment {
         }
 
         /**
-         * @description Get a CriteriaTreeNode that corresponds to this
-         * AndSegment.  In this case, a CampaignListCriteria.AndNode.
+         * @description Determine whether the given CampaignListMember meets
+         * the criteria of all of the terms within this AND grouping of
+         * segments.
          *
-         * @return CampaignListCriteria.CriteriaTreeNode
+         * @param m The CampaignListMember to determine whether eligible for inclusion in a campaign list
+         * @return Boolean (true if the given CampaignListMember is eligible by the criteria of this segment, false otherwise)
          */
-        public override CampaignListCriteria.CriteriaTreeNode getCriteriaTreeNode() {
-            return new CampaignListCriteria.AndNode(parentId);
+        public override Boolean meetsCriteria(CampaignListMember m) {
+            for (CampaignListSegment child : children) {
+                if (!child.meetsCriteria(m)) {
+                    return false;
+                }
+            }
+            return true;
         }
+
     }
 
     /**
@@ -108,13 +193,17 @@ public abstract class CampaignListSegment {
         }
 
         /**
-         * @description Get a CriteriaTreeNode that corresponds to this
-         * OrSegment.  In this case, a CampaignListCriteria.OrNode.
-         *
-         * @return CampaignListCriteria.CriteriaTreeNode
+         * @description Determine whether the given CampaignListMember meets the criteria of all of the terms within this OR grouping of segments.
+         * @param m The CampaignListMember to determine whether eligible for inclusion in a campaign list
+         * @return Boolean (true if the given CampaignListMember is eligible by the criteria of this segment, false otherwise)
          */
-        public override CampaignListCriteria.CriteriaTreeNode getCriteriaTreeNode() {
-            return new CampaignListCriteria.OrNode(parentId);
+        public override Boolean meetsCriteria(CampaignListMember m) {
+            for (CampaignListSegment child : children) {
+                if (child.meetsCriteria(m)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -176,13 +265,19 @@ public abstract class CampaignListSegment {
         }
 
         /**
-         * @description Get a CriteriaTreeNode that corresponds to this
-         * OrSegment.  In this case, a CampaignListCriteria.SourceNode.
+         * @description Determine whether the given CampaignListMember is
+         * eligible for inclusion in a campaign list based on whether the
+         * CampaignListMember was found in this segment's source.
          *
-         * @return CampaignListCriteria.CriteriaTreeNode
+         * @param m The CampaignListMember to test for eligibility
+         * @return Boolean (True if the CampaignListMember was found in this segment's source and this is not an exclusion source, or if the CampaignListMember was *not* found in this segment's source and this is an exclusion source. False, otherwise)
          */
-        public override CampaignListCriteria.CriteriaTreeNode getCriteriaTreeNode() {
-            return new CampaignListCriteria.SourceNode(parentId, sourceId, isExclusion);
+        public override Boolean meetsCriteria(CampaignListMember m) {
+            if (isExclusion) {
+                return !m.isFromSource(sourceId);
+            } else {
+                return m.isFromSource(sourceId);
+            }
         }
 
         /**

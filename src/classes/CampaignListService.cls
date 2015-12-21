@@ -66,20 +66,22 @@ public class CampaignListService implements Interface_x {
     @TestVisible
     private void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId, BatchableSequence.Interface_x batchSequence) {
         CampaignListSegmentMapper segmentMapper = new CampaignListSegmentMapper();
-        List<CampaignListSegment> segments = segmentMapper.getByRootSegmentId(rootSegmentId);
-        CampaignListCriteria criteria = new CampaignListCriteria(segments);
+        CampaignListSegment segmentTree = segmentMapper.getSegmentTreeByRootId(rootSegmentId);
 
         batchSequence.add(new DeleteCampaignMembersBatch(campaignId), 5000);
         batchSequence.add(new DeleteCampaignListMembersBatch(rootSegmentId), 5000);
 
-        for (CampaignListSegment segment : segments) {
-            if (segment instanceof CampaignListSegment.SourceSegment) {
-                CampaignListSegment.SourceSegment sourceSegment = (CampaignListSegment.SourceSegment) segment;
+        CampaignListSegment.TreeIterator segmentTreeIterator = segmentTree.iterator();
+
+        while (segmentTreeIterator.hasNext()) {
+            CampaignListSegment next = segmentTreeIterator.next();
+            if (next instanceof CampaignListSegment.SourceSegment) {
+                CampaignListSegment.SourceSegment sourceSegment = (CampaignListSegment.SourceSegment) next;
                 batchSequence.add(sourceSegment.getBatchProcessor());
             }
         }
 
-        batchSequence.add(new CampaignListToCampaignBatch(campaignId, rootSegmentId, criteria), 10000);
+        batchSequence.add(new CampaignListToCampaignBatch(campaignId, segmentTree), 10000);
         batchSequence.add(new DeleteCampaignListMembersBatch(rootSegmentId), 5000);
 
         listService.updateCampaignStatus(campaignId, UpdateStatus.RUNNING);

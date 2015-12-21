@@ -1,5 +1,5 @@
 @isTest
-private class CampaignListCriteria_TEST {
+private class CampaignListSegment_TEST2 {
     private static Integer nextId = 1;
 
     private static Id getNextId(Schema.SObjectType sObjectType) {
@@ -20,7 +20,6 @@ private class CampaignListCriteria_TEST {
         Id sourceASegmentId = getNextId(Segment__c.sObjectType);
         Id sourceAId = getNextId(Campaign.sObjectType);
         Id sourceBId = getNextId(Campaign.sObjectType);
-        List<CampaignListSegment> segments = new List<CampaignListSegment>();
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -29,9 +28,8 @@ private class CampaignListCriteria_TEST {
             sourceAId,
             false
         );
-        segments.add(sourceASegment);
 
-        CampaignListCriteria criteria = new CampaignListCriteria(segments);
+        CampaignListSegment rootSegment = sourceASegment;
 
         /*
          * Test members:
@@ -52,10 +50,10 @@ private class CampaignListCriteria_TEST {
             null
         );
 
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('()')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
     }
 
     private static testMethod void testCriteriaWithSingleSourceExclusion() {
@@ -67,7 +65,6 @@ private class CampaignListCriteria_TEST {
         Id sourceASegmentId = getNextId(Segment__c.sObjectType);
         Id sourceAId = getNextId(Campaign.sObjectType);
         Id sourceBId = getNextId(Campaign.sObjectType);
-        List<CampaignListSegment> segments = new List<CampaignListSegment>();
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -76,9 +73,8 @@ private class CampaignListCriteria_TEST {
             sourceAId,
             true
         );
-        segments.add(sourceASegment);
 
-        CampaignListCriteria criteria = new CampaignListCriteria(segments);
+        CampaignListSegment rootSegment = sourceASegment;
 
         /*
          * Test members:
@@ -99,10 +95,10 @@ private class CampaignListCriteria_TEST {
             null
         );
 
-        System.assertEquals(true, criteria.meetsCriteria(members.get('()')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(B)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
     }
 
     private static testMethod void testCriteriaWithAndRootNodeAndTwoSources() {
@@ -120,14 +116,12 @@ private class CampaignListCriteria_TEST {
         Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
         Id sourceBId = getNextId(Campaign.sObjectType);
         Id sourceCId = getNextId(Campaign.sObjectType);
-        List<CampaignListSegment> segments = new List<CampaignListSegment>();
 
         CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
             andSegmentId,
             null,
             null
         );
-        segments.add(andSegment);
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -136,7 +130,6 @@ private class CampaignListCriteria_TEST {
             sourceAId,
             false
         );
-        segments.add(sourceASegment);
 
         CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
             sourceBSegmentId,
@@ -145,9 +138,10 @@ private class CampaignListCriteria_TEST {
             sourceBId,
             false
         );
-        segments.add(sourceBSegment);
 
-        CampaignListCriteria criteria = new CampaignListCriteria(segments);
+        CampaignListSegment rootSegment = andSegment;
+        rootSegment.addChild(sourceASegment);
+        rootSegment.addChild(sourceBSegment);
 
         /*
          * Test members:
@@ -168,14 +162,14 @@ private class CampaignListCriteria_TEST {
             null
         );
 
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('()')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B, C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, C)')));
 
     }
 
@@ -194,14 +188,12 @@ private class CampaignListCriteria_TEST {
         Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
         Id sourceBId = getNextId(Campaign.sObjectType);
         Id sourceCId = getNextId(Campaign.sObjectType);
-        List<CampaignListSegment> segments = new List<CampaignListSegment>();
 
         CampaignListSegment orSegment = new CampaignListSegment.OrSegment(
             orSegmentId,
             null,
             null
         );
-        segments.add(orSegment);
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -210,7 +202,6 @@ private class CampaignListCriteria_TEST {
             sourceAId,
             false
         );
-        segments.add(sourceASegment);
 
         CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
             sourceBSegmentId,
@@ -219,9 +210,10 @@ private class CampaignListCriteria_TEST {
             sourceBId,
             false
         );
-        segments.add(sourceBSegment);
 
-        CampaignListCriteria criteria = new CampaignListCriteria(segments);
+        CampaignListSegment rootSegment = orSegment;
+        rootSegment.addChild(sourceASegment);
+        rootSegment.addChild(sourceBSegment);
 
         /*
          * Test members:
@@ -242,14 +234,14 @@ private class CampaignListCriteria_TEST {
             null
         );
 
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(B)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, C)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(B, C)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('()')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B, C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(C)')));
     }
 
     private static testMethod void testCriteriaWithAndRootNodeAndTwoSourcesWithOneExclusion() {
@@ -267,14 +259,12 @@ private class CampaignListCriteria_TEST {
         Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
         Id sourceBId = getNextId(Campaign.sObjectType);
         Id sourceCId = getNextId(Campaign.sObjectType);
-        List<CampaignListSegment> segments = new List<CampaignListSegment>();
 
         CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
             andSegmentId,
             null,
             null
         );
-        segments.add(andSegment);
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -283,7 +273,6 @@ private class CampaignListCriteria_TEST {
             sourceAId,
             true
         );
-        segments.add(sourceASegment);
 
         CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
             sourceBSegmentId,
@@ -292,9 +281,10 @@ private class CampaignListCriteria_TEST {
             sourceBId,
             false
         );
-        segments.add(sourceBSegment);
 
-        CampaignListCriteria criteria = new CampaignListCriteria(segments);
+        CampaignListSegment rootSegment = andSegment;
+        rootSegment.addChild(sourceASegment);
+        rootSegment.addChild(sourceBSegment);
 
         /*
          * Test members:
@@ -315,14 +305,14 @@ private class CampaignListCriteria_TEST {
             null
         );
 
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(B)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(B, C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('()')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, B)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, B, C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B, C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B, C)')));
     }
 
     private static testMethod void testCriteriaWithOrRootNodeAndTwoSourcesWithOneExclusion() {
@@ -340,14 +330,12 @@ private class CampaignListCriteria_TEST {
         Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
         Id sourceBId = getNextId(Campaign.sObjectType);
         Id sourceCId = getNextId(Campaign.sObjectType);
-        List<CampaignListSegment> segments = new List<CampaignListSegment>();
 
         CampaignListSegment orSegment = new CampaignListSegment.OrSegment(
             orSegmentId,
             null,
             null
         );
-        segments.add(orSegment);
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -356,7 +344,6 @@ private class CampaignListCriteria_TEST {
             sourceAId,
             true
         );
-        segments.add(sourceASegment);
 
         CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
             sourceBSegmentId,
@@ -365,9 +352,10 @@ private class CampaignListCriteria_TEST {
             sourceBId,
             false
         );
-        segments.add(sourceBSegment);
 
-        CampaignListCriteria criteria = new CampaignListCriteria(segments);
+        CampaignListSegment rootSegment = orSegment;
+        rootSegment.addChild(sourceASegment);
+        rootSegment.addChild(sourceBSegment);
 
         /*
          * Test members:
@@ -388,14 +376,14 @@ private class CampaignListCriteria_TEST {
             null
         );
 
-        System.assertEquals(true, criteria.meetsCriteria(members.get('()')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(B)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(C)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(B, C)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B, C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, C)')));
     }
 
     private static testMethod void testCriteriaWithComplexCriteriaTree() {
@@ -426,28 +414,23 @@ private class CampaignListCriteria_TEST {
         Id sourceDId = getNextId(Campaign.sObjectType);
         Id sourceEId = getNextId(Campaign.sObjectType);
 
-        List<CampaignListSegment> segments = new List<CampaignListSegment>();
-
         CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
             andSegmentId,
             null,
             null
         );
-        segments.add(andSegment);
 
         CampaignListSegment orSegment1 = new CampaignListSegment.OrSegment(
             orSegment1Id,
             null,
             andSegmentId
         );
-        segments.add(orSegment1);
 
         CampaignListSegment orSegment2 = new CampaignListSegment.OrSegment(
             orSegment2Id,
             null,
             andSegmentId
         );
-        segments.add(orSegment2);
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -456,7 +439,6 @@ private class CampaignListCriteria_TEST {
             sourceAId,
             false
         );
-        segments.add(sourceASegment);
 
         CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
             sourceBSegmentId,
@@ -465,7 +447,6 @@ private class CampaignListCriteria_TEST {
             sourceBId,
             true
         );
-        segments.add(sourceBSegment);
 
         CampaignListSegment sourceCSegment = new CampaignListSegment.CampaignSourceSegment(
             sourceCSegmentId,
@@ -474,7 +455,6 @@ private class CampaignListCriteria_TEST {
             sourceCId,
             false
         );
-        segments.add(sourceCSegment);
 
         CampaignListSegment sourceDSegment = new CampaignListSegment.CampaignSourceSegment(
             sourceDSegmentId,
@@ -483,9 +463,14 @@ private class CampaignListCriteria_TEST {
             sourceDId,
             false
         );
-        segments.add(sourceDSegment);
 
-        CampaignListCriteria criteria = new CampaignListCriteria(segments);
+        CampaignListSegment rootSegment = andSegment;
+        rootSegment.addChild(orSegment1);
+        orSegment1.addChild(sourceASegment);
+        orSegment1.addChild(sourceBSegment);
+        rootSegment.addChild(orSegment2);
+        orSegment2.addChild(sourceCSegment);
+        orSegment2.addChild(sourceDSegment);
 
         /*
          * Test members:
@@ -515,39 +500,39 @@ private class CampaignListCriteria_TEST {
             sourceEId
         );
 
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(C)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, C)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, C)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(D)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, D)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, D)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(C, D)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, C, D)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, C, D)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(C, E)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, C, E)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, C, E)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(D, E)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, D, E)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, D, E)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(C, D, E)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, C, D, E)')));
-        System.assertEquals(true, criteria.meetsCriteria(members.get('(A, B, C, D, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, C)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(D)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, D)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, D)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(C, D)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, C, D)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, C, D)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(C, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, C, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, C, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(D, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, D, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, D, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(C, D, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, C, D, E)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, C, D, E)')));
 
-        System.assertEquals(false, criteria.meetsCriteria(members.get('()')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, B)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B, C)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B, D)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B, C, D)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(E)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, E)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B, E)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(A, B, E)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B, C, E)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B, D, E)')));
-        System.assertEquals(false, criteria.meetsCriteria(members.get('(B, C, D, E)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, C)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, D)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, C, D)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(E)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, E)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, E)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B, E)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, C, E)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, D, E)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, C, D, E)')));
     }
 
     private static Map<String, CampaignListMember> getTestMembersWithSources(Id A, Id B, Id C, Id D, Id E) {

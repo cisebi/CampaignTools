@@ -7,7 +7,7 @@
 public class CampaignListSegmentMapper implements MapperInterface {
     public interface MapperInterface {
         String getSourceNameById(Id sourceId);
-        List<CampaignListSegment> getByRootSegmentId(Id rootSegmentId);
+        CampaignListSegment getSegmentTreeByRootId(Id rootSegmentId);
     }
 
     /**
@@ -41,14 +41,30 @@ public class CampaignListSegmentMapper implements MapperInterface {
     }
 
     /**
-     * @description Given a "campaign list" id, get a list of all of the
-     * CampaignListSegment objects associated with that campaign list
+     * @description Given the id of the root segment of a campaign list, get the tree of segments that correspond to that campaign list.
      *
      * @param rootSegmentId The "campaign list" id
-     * @return List<CampaignListSegment>
+     * @return CampaignListSegment
      */
-    public List<CampaignListSegment> getByRootSegmentId(Id rootSegmentId) {
-        return create(queryByRootSegmentId(rootSegmentId));
+    public CampaignListSegment getSegmentTreeByRootId(Id rootSegmentId) {
+        CampaignListSegment rootSegment;
+        Map<Id, CampaignListSegment> segments = new Map<Id, CampaignListSegment>();
+
+        for (Segment__c segment : queryByRootSegmentId(rootSegmentId)) {
+            segments.put(segment.Id, create(segment));
+        }
+
+        for (CampaignListSegment segment : segments.values()) {
+            Id pid = segment.getParentId();
+
+            if (null == pid) {
+                rootSegment = segment;
+            } else if (segments.containsKey(pid)) {
+                segments.get(pid).addChild(segment);
+            }
+        }
+
+        return rootSegment;
     }
 
     /**
@@ -71,22 +87,6 @@ public class CampaignListSegmentMapper implements MapperInterface {
             WHERE Root_Segment__c = :rootSegmentId
             OR Id = :rootSegmentId
         ];
-    }
-
-    /**
-     * @description Given a list of Segment__c sObjects, build a list of
-     * CampaignListSegment data model instances that correspond to the given
-     * Segment__c sObjects.
-     *
-     * @param segmentSObjects (including the Parent_Segment__c, Operation__c, Source_ID__c, Exclude_Source__c, Report_Column_Name__c, and Root_Segment__c fields)
-     * @return List<CampaignListSegment>
-     */
-    private List<CampaignListSegment> create(List<Segment__c> segmentSObjects) {
-        List<CampaignListSegment> segments = new List<CampaignListSegment>();
-        for (Segment__c segmentSObject : segmentSObjects) {
-            segments.add(create(segmentSObject));
-        }
-        return segments;
     }
 
     /**

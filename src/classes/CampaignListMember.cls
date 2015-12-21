@@ -119,12 +119,13 @@ public class CampaignListMember {
     }
 
     /**
-     * @description Does this CampaignListMember meet the given CampaignListCriteria?
-     * @param criteria
+     * @description Does this CampaignListMember meet the criteria of the given CampaignListSegment?
+     *
+     * @param segment
      * @return Boolean
      */
-    public Boolean meetsCriteria(CampaignListCriteria.Interface_x criteria) {
-        return criteria.meetsCriteria(this);
+    public Boolean meetsCriteria(CampaignListSegment.Interface_x segment) {
+        return segment.meetsCriteria(this);
     }
 
     /**
