@@ -6,6 +6,7 @@
         <members>BatchableSequence</members>
         <members>BatchableSequence_TEST</members>
         <members>CSegment</members>
+        <members>CampaignList</members>
         <members>CampaignListBuilder_CTRL</members>
         <members>CampaignListFromCampaignBatch</members>
         <members>CampaignListFromCampaignBatch_TEST</members>
@@ -25,6 +26,7 @@
         <members>CampaignListToCampaignBatch</members>
         <members>CampaignListToCampaignBatch_TEST</members>
         <members>CampaignList_CTRL</members>
+        <members>CampaignList_TEST</members>
         <members>CampaignPopulate</members>
         <members>DeleteCampaignListMembersBatch</members>
         <members>DeleteCampaignListMembersBatch_TEST</members>

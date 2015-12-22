@@ -4,12 +4,7 @@
  * @description A mapper class for serializing and deserializing
  * CampaignListSegment objects to/from corresponding Segment__c sObjects
  */
-public class CampaignListSegmentMapper implements MapperInterface {
-    public interface MapperInterface {
-        String getSourceNameById(Id sourceId);
-        CampaignListSegment getSegmentTreeByRootId(Id rootSegmentId);
-    }
-
+public class CampaignListSegmentMapper implements CampaignList.SegmentMapper {
     /**
      * @description A map of source ids to source names used for caching source
      * name lookups
@@ -46,15 +41,15 @@ public class CampaignListSegmentMapper implements MapperInterface {
      * @param rootSegmentId The "campaign list" id
      * @return CampaignListSegment
      */
-    public CampaignListSegment getSegmentTreeByRootId(Id rootSegmentId) {
-        CampaignListSegment rootSegment;
-        Map<Id, CampaignListSegment> segments = new Map<Id, CampaignListSegment>();
+    public CampaignList.Segment getSegmentTreeByRootId(Id rootSegmentId) {
+        CampaignList.Segment rootSegment;
+        Map<Id, CampaignList.Segment> segments = new Map<Id, CampaignList.Segment>();
 
         for (Segment__c segment : queryByRootSegmentId(rootSegmentId)) {
             segments.put(segment.Id, create(segment));
         }
 
-        for (CampaignListSegment segment : segments.values()) {
+        for (CampaignList.Segment segment : segments.values()) {
             Id pid = segment.getParentId();
 
             if (null == pid) {

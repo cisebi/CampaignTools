@@ -1,9 +1,9 @@
 @isTest
 private class CampaignListSegment_TEST {
     private static testMethod void testAndSegment() {
-        Id segmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000A';
-        Id rootSegmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000B';
-        Id parentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000C';
+        Id segmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id parentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
 
         CampaignListSegment.AndSegment segment = new CampaignListSegment.AndSegment(
             segmentId,
@@ -17,9 +17,9 @@ private class CampaignListSegment_TEST {
     }
 
     private static testMethod void testOrSegment() {
-        Id segmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000A';
-        Id rootSegmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000B';
-        Id parentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000C';
+        Id segmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id parentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
 
         CampaignListSegment.OrSegment segment = new CampaignListSegment.OrSegment(
             segmentId,
@@ -33,10 +33,10 @@ private class CampaignListSegment_TEST {
     }
 
     private static testMethod void testCampaignSourceSegment() {
-        Id segmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000A';
-        Id rootSegmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000B';
-        Id parentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000C';
-        Id sourceId = Schema.sObjectType.Campaign.getKeyPrefix() + '00000000000D';
+        Id segmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id parentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         CampaignListSegment.CampaignSourceSegment segment = new CampaignListSegment.CampaignSourceSegment(
             segmentId,
@@ -52,13 +52,12 @@ private class CampaignListSegment_TEST {
         System.assertEquals(sourceId, segment.getSourceId());
         System.assertEquals(false, segment.isExclusion());
 
-        CampaignListSegmentMapperStub mapperStub = new CampaignListSegmentMapperStub();
-        mapperStub.expectedSourceId = sourceId;
+        CampaignList_TEST.SegmentMapperStub mapperStub = new CampaignList_TEST.SegmentMapperStub();
         mapperStub.sourceName = 'Test Campaign';
-
-        segment.segmentMapper = mapperStub;
+        CampaignList.setSegmentMapper(mapperStub);
 
         System.assertEquals('Test Campaign', segment.getSourceName());
+        System.assertEquals(sourceId, mapperStub.sourceId);
 
         CampaignListFromCampaignBatch batch = (CampaignListFromCampaignBatch) segment.getBatchProcessor();
         System.assertEquals(rootSegmentId, batch.rootSegmentId);
@@ -67,10 +66,10 @@ private class CampaignListSegment_TEST {
     }
 
     private static testMethod void testReportSourceSegment() {
-        Id segmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000A';
-        Id rootSegmentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000B';
-        Id parentId = Schema.sObjectType.Segment__c.getKeyPrefix() + '00000000000C';
-        Id sourceId = Schema.sObjectType.Report.getKeyPrefix() + '00000000000D';
+        Id segmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id parentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceId = CampaignList_TEST.getNextId(Report.sObjectType);
 
         CampaignListSegment.ReportSourceSegment segment = new CampaignListSegment.ReportSourceSegment(
             segmentId,
@@ -88,30 +87,17 @@ private class CampaignListSegment_TEST {
         System.assertEquals(false, segment.isExclusion());
         System.assertEquals('test_column_name', segment.getColumnName());
 
-        CampaignListSegmentMapperStub mapperStub = new CampaignListSegmentMapperStub();
-        mapperStub.expectedSourceId = sourceId;
+        CampaignList_TEST.SegmentMapperStub mapperStub = new CampaignList_TEST.SegmentMapperStub();
         mapperStub.sourceName = 'Test Report';
-
-        segment.segmentMapper = mapperStub;
+        CampaignList.setSegmentMapper(mapperStub);
 
         System.assertEquals('Test Report', segment.getSourceName());
+        System.assertEquals(sourceId, mapperStub.sourceId);
 
         CampaignListFromReportBatch batch = (CampaignListFromReportBatch) segment.getBatchProcessor();
         System.assertEquals(rootSegmentId, batch.rootSegmentId);
         System.assertEquals(sourceId, batch.reportId);
         System.assertEquals('Test Report', batch.reportName);
         System.assertEquals('test_column_name', batch.idColumnName);
-    }
-
-    private class CampaignListSegmentMapperStub implements CampaignListSegmentMapper.MapperInterface {
-        public Id expectedSourceId;
-        public String sourceName;
-        public String getSourceNameById(Id sourceId) {
-            System.assertEquals(expectedSourceId, sourceId);
-            return sourceName;
-        }
-        public CampaignListSegment getSegmentTreeByRootId(Id rootSegmentId) {
-            return null;
-        }
     }
 }

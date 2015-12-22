@@ -1,9 +1,9 @@
 @isTest
 private class CampaignListService_TEST {
     private static testMethod void testUpdateCampaignFromCampaignList() {
-        Id sourceReportId = Schema.SObjectType.Report.getKeyPrefix() + '000000000001';
-        Id sourceCampaignId = Schema.SObjectType.Campaign.getKeyPrefix() + '000000000002';
-        Id destinationCampaignId = Schema.SObjectType.Campaign.getKeyPrefix() + '000000000003';
+        Id sourceReportId = CampaignList_TEST.getNextId(Report.sObjectType);
+        Id sourceCampaignId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id destinationCampaignId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         Segment__c rootSegment = new Segment__c(
             Operation__c = 'AND'
@@ -31,18 +31,17 @@ private class CampaignListService_TEST {
 
         BatchableSequenceStub bsStub = new BatchableSequenceStub();
 
+        CampaignList_TEST.ServiceStub serviceStub = new CampaignList_TEST.ServiceStub();
+        CampaignList.setService(serviceStub);
 
         CampaignListService service = new CampaignListService();
-        CampaignListServiceStub serviceStub = new CampaignListServiceStub();
-        service.listService = serviceStub;
-
         service.updateCampaignFromCampaignList(destinationCampaignId, rootSegment.Id, bsStub);
 
         // assert that the destination campaign was updated to indicate a
         // running update
 
         System.assertEquals(destinationCampaignId, serviceStub.updatedCampaignId);
-        System.assertEquals(CampaignListService.UpdateStatus.RUNNING, serviceStub.updatedStatus);
+        System.assertEquals(CampaignList.UpdateStatus.RUNNING, serviceStub.updatedStatus);
 
         // assert that the batches in this sequence exist in the expected
         // order, with a report source batch and a campaign source batch (in
@@ -100,22 +99,13 @@ private class CampaignListService_TEST {
         }
     }
 
-    private class CampaignListServiceStub implements CampaignListService.Interface_x {
-        public Id updatedCampaignId;
-        public CampaignListService.UpdateStatus updatedStatus;
-        public void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId) {}
-        public void updateCampaignStatus(Id campaignId, CampaignListService.UpdateStatus status) {
-            updatedCampaignId = campaignId;
-            updatedStatus = status;
-        }
-    }
     private static testMethod void testUpdateCampaignStatus() {
         Campaign c = new Campaign(Name = 'Test Campaign');
         insert c;
 
         CampaignListService listService = new CampaignListService();
 
-        listService.updateCampaignStatus(c.Id, CampaignListService.UpdateStatus.SUCCESS);
+        listService.updateCampaignStatus(c.Id, CampaignList.UpdateStatus.SUCCESS);
 
         c = [
             SELECT Campaign_List_Update_Status__c

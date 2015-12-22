@@ -1,16 +1,19 @@
 @isTest
 private class CampaignListMember_TEST {
     private static testMethod void testContactMemberFromSObject() {
-        Id segmentId = Schema.sObjectType.Member__c.getKeyPrefix() + '000000000001';
-        Id rootSegmentId = Schema.sObjectType.Member__c.getKeyPrefix() + '000000000002';
-        Id contactId = Schema.sObjectType.Contact.getKeyPrefix() + '000000000001';
-        Id reportId = Schema.sObjectType.Report.getKeyPrefix() + '000000000001';
-        Id campaignId = Schema.sObjectType.Campaign.getKeyPrefix() + '000000000001';
+        Id memberId = CampaignList_TEST.getNextId(Member__c.sObjectType);
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id contactId = CampaignList_TEST.getNextId(Contact.sObjectType);
+
+        Id reportId = CampaignList_TEST.getNextId(Report.sObjectType);
+        Id campaignId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id campaignId2 = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
         Set<Id> sourceIds = new Set<Id>{reportId, campaignId};
         Set<String> sourceNames = new Set<String>{'Report Name', 'Campaign Name'};
 
         Member__c m = new Member__c(
-            Id = segmentId,
+            Id = memberId,
             Root_Segment__c = rootSegmentId,
             Contact__c = contactId,
             Sources__c = JSON.serialize(sourceIds),
@@ -19,14 +22,15 @@ private class CampaignListMember_TEST {
 
         CampaignListMember member = new CampaignListMember(m);
 
+        System.assertEquals(memberId, member.getId());
         System.assertEquals(contactId, member.getRelatedId());
         System.assert(member.isFromSource(reportId));
         System.assert(member.isFromSource(campaignId));
-        System.assert(!member.isFromSource(segmentId));
+        System.assert(!member.isFromSource(campaignId2));
 
         Member__c memberSObject = member.getSObject();
 
-        System.assertEquals(segmentId, memberSObject.Id);
+        System.assertEquals(memberId, memberSObject.Id);
         System.assertEquals(rootSegmentId, memberSObject.Root_Segment__c);
         System.assertEquals(contactId, memberSObject.Contact__c);
         System.assertEquals(null, memberSObject.Lead__c);
@@ -50,16 +54,19 @@ private class CampaignListMember_TEST {
     }
 
     private static testMethod void testLeadMemberFromSObject() {
-        Id segmentId = Schema.sObjectType.Member__c.getKeyPrefix() + '000000000001';
-        Id rootSegmentId = Schema.sObjectType.Member__c.getKeyPrefix() + '000000000002';
-        Id leadId = Schema.sObjectType.Lead.getKeyPrefix() + '000000000001';
-        Id reportId = Schema.sObjectType.Report.getKeyPrefix() + '000000000001';
-        Id campaignId = Schema.sObjectType.Campaign.getKeyPrefix() + '000000000001';
+        Id memberId = CampaignList_TEST.getNextId(Member__c.sObjectType);
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id leadId = CampaignList_TEST.getNextId(Lead.sObjectType);
+
+        Id reportId = CampaignList_TEST.getNextId(Report.sObjectType);
+        Id campaignId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id campaignId2 = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
         Set<Id> sourceIds = new Set<Id>{reportId, campaignId};
         Set<String> sourceNames = new Set<String>{'Report Name', 'Campaign Name'};
 
         Member__c m = new Member__c(
-            Id = segmentId,
+            Id = memberId,
             Root_Segment__c = rootSegmentId,
             Lead__c = leadId,
             Sources__c = JSON.serialize(sourceIds),
@@ -68,14 +75,15 @@ private class CampaignListMember_TEST {
 
         CampaignListMember member = new CampaignListMember(m);
 
+        System.assertEquals(memberId, member.getId());
         System.assertEquals(leadId, member.getRelatedId());
         System.assert(member.isFromSource(reportId));
         System.assert(member.isFromSource(campaignId));
-        System.assert(!member.isFromSource(segmentId));
+        System.assert(!member.isFromSource(campaignId2));
 
         Member__c memberSObject = member.getSObject();
 
-        System.assertEquals(segmentId, memberSObject.Id);
+        System.assertEquals(memberId, memberSObject.Id);
         System.assertEquals(rootSegmentId, memberSObject.Root_Segment__c);
         System.assertEquals(leadId, memberSObject.Lead__c);
         System.assertEquals(null, memberSObject.Contact__c);
@@ -99,10 +107,12 @@ private class CampaignListMember_TEST {
     }
 
     private static testMethod void testContactMemberFromIds() {
-        Id rootSegmentId = Schema.sObjectType.Member__c.getKeyPrefix() + '000000000002';
-        Id contactId = Schema.sObjectType.Contact.getKeyPrefix() + '000000000001';
-        Id reportId = Schema.sObjectType.Report.getKeyPrefix() + '000000000001';
-        Id campaignId = Schema.sObjectType.Campaign.getKeyPrefix() + '000000000001';
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id contactId = CampaignList_TEST.getNextId(Contact.sObjectType);
+
+        Id reportId = CampaignList_TEST.getNextId(Report.sObjectType);
+        Id campaignId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
         Set<Id> sourceIds = new Set<Id>{reportId, campaignId};
         Set<String> sourceNames = new Set<String>{'Report Name', 'Campaign Name'};
 
@@ -134,10 +144,12 @@ private class CampaignListMember_TEST {
     }
 
     private static testMethod void testLeadMemberFromIds() {
-        Id rootSegmentId = Schema.sObjectType.Member__c.getKeyPrefix() + '000000000002';
-        Id leadId = Schema.sObjectType.Lead.getKeyPrefix() + '000000000001';
-        Id reportId = Schema.sObjectType.Report.getKeyPrefix() + '000000000001';
-        Id campaignId = Schema.sObjectType.Campaign.getKeyPrefix() + '000000000001';
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id leadId = CampaignList_TEST.getNextId(Lead.sObjectType);
+
+        Id reportId = CampaignList_TEST.getNextId(Report.sObjectType);
+        Id campaignId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
         Set<Id> sourceIds = new Set<Id>{reportId, campaignId};
         Set<String> sourceNames = new Set<String>{'Report Name', 'Campaign Name'};
 

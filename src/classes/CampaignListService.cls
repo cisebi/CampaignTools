@@ -4,40 +4,7 @@
  * @description A service class that provides methods to perform actions
  * related to campaign lists.
  */
-public class CampaignListService implements Interface_x {
-    public interface Interface_x {
-        void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId);
-        void updateCampaignStatus(Id campaignId, UpdateStatus status);
-    }
-
-    /**
-     * @description This enum has values that correspond the state of a
-     * Campaign as it is being updated from a campaign list.  RUNNING means
-     * that the Campaign is currently being updated.  SUCCESS means that the
-     * last time the Campaign was updated from a campaign list, there were no
-     * issues.  FAILURE means that the last time the Campaign was attempted to
-     * be updated from a campaign list, there was an error that prevented
-     * successful update.
-     */
-    public enum UpdateStatus {
-        RUNNING,
-        SUCCESS,
-        FAILURE
-    }
-
-    /**
-     * @description The CampaignListService to use for internal operations
-     */
-    @TestVisible
-    private CampaignListService.Interface_x listService;
-
-    /**
-     * @description Constructor
-     */
-    public CampaignListService() {
-        listService = this;
-    }
-
+public class CampaignListService implements CampaignList.Service {
     /**
      * @description Given a Campaign id and a corresponding "campaign list" id,
      * clear the Campaign's CampaignMembers and repopulate the Campaign with
@@ -65,16 +32,15 @@ public class CampaignListService implements Interface_x {
      */
     @TestVisible
     private void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId, BatchableSequence.Interface_x batchSequence) {
-        CampaignListSegmentMapper segmentMapper = new CampaignListSegmentMapper();
-        CampaignListSegment segmentTree = segmentMapper.getSegmentTreeByRootId(rootSegmentId);
+        CampaignList.Segment segmentTree = CampaignList.getSegmentMapper().getSegmentTreeByRootId(rootSegmentId);
 
         batchSequence.add(new DeleteCampaignMembersBatch(campaignId), 5000);
         batchSequence.add(new DeleteCampaignListMembersBatch(rootSegmentId), 5000);
 
-        CampaignListSegment.TreeIterator segmentTreeIterator = segmentTree.iterator();
+        Iterator<CampaignList.Segment> segmentTreeIterator = segmentTree.iterator();
 
         while (segmentTreeIterator.hasNext()) {
-            CampaignListSegment next = segmentTreeIterator.next();
+            CampaignList.Segment next = segmentTreeIterator.next();
             if (next instanceof CampaignListSegment.SourceSegment) {
                 CampaignListSegment.SourceSegment sourceSegment = (CampaignListSegment.SourceSegment) next;
                 batchSequence.add(sourceSegment.getBatchProcessor());
@@ -84,7 +50,7 @@ public class CampaignListService implements Interface_x {
         batchSequence.add(new CampaignListToCampaignBatch(campaignId, segmentTree), 10000);
         batchSequence.add(new DeleteCampaignListMembersBatch(rootSegmentId), 5000);
 
-        listService.updateCampaignStatus(campaignId, UpdateStatus.RUNNING);
+        CampaignList.getService().updateCampaignStatus(campaignId, CampaignList.UpdateStatus.RUNNING);
 
         batchSequence.run();
     }
@@ -97,7 +63,7 @@ public class CampaignListService implements Interface_x {
      * @param status The status to update the campaign to
      * @return void
      */
-    public void updateCampaignStatus(Id campaignId, UpdateStatus status) {
+    public void updateCampaignStatus(Id campaignId, CampaignList.UpdateStatus status) {
         Campaign c = new Campaign(
             Id = campaignId,
             Campaign_List_Update_Status__c = status.name()

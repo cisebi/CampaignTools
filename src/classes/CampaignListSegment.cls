@@ -5,12 +5,7 @@
  * list.  A "segment" of a campaign list is one part of the criteria that
  * defines the campaign list.
  */
-public abstract class CampaignListSegment implements Iterable<CampaignListSegment>, Interface_x {
-    public interface Interface_x {
-        Id getId();
-        Boolean meetsCriteria(CampaignListMember m);
-    }
-
+public abstract class CampaignListSegment implements CampaignList.Segment {
     /** @description This segment's id */
     private Id segmentId;
 
@@ -25,7 +20,7 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
     /**
      * @description This segment's children segments, if it has any
      */
-    private List<CampaignListSegment> children = new List<CampaignListSegment>();
+    private List<CampaignList.Segment> children = new List<CampaignList.Segment>();
 
     /**
      * @description Construct a CampaignListSegment
@@ -68,15 +63,11 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
      * @param term The segment to add as a child.
      * @return void
      */
-    public void addChild(CampaignListSegment child) {
+    public void addChild(CampaignList.Segment child) {
         children.add(child);
     }
 
-    /**
-     * @description Get this segment's child segments
-     * @return List<CampaignListSegment>
-     */
-    public List<CampaignListSegment> getChildren() {
+    public List<CampaignList.Segment> getChildren() {
         return children;
     }
 
@@ -88,52 +79,25 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
      *
      * @return Boolean (true if the CampaignListMember is eligible by the criteria of the criteria sub-tree represented by this segment.
      */
-    public abstract Boolean meetsCriteria(CampaignListMember m);
+    public abstract Boolean meetsCriteria(CampaignList.Member m);
 
     public TreeIterator iterator() {
         return new TreeIterator(this);
     }
 
-    /**
-     * @author Salesforce.org
-     * @group CampaignTools
-     * @description An iterator that iterates over trees in depth first order
-     */
-    public class TreeIterator implements Iterator<CampaignListSegment> {
-        /**
-         * @description a temporary list of nodes that have yet to be iterated
-         * over.
-         */
-        private List<CampaignListSegment> nextSegments = new List<CampaignListSegment>();
+    public class TreeIterator implements Iterator<CampaignList.Segment> {
+        private List<CampaignList.Segment> nextSegments = new List<CampaignList.Segment>();
 
-        /**
-         * @description Construct a new TreeIterator starting at the given root
-         * node.
-         *
-         * @param rootSegment
-         */
-        public TreeIterator(CampaignListSegment rootSegment) {
+        public TreeIterator(CampaignList.Segment rootSegment) {
             nextSegments.add(rootSegment);
         }
 
-        /**
-         * @description Implementation of Iterator.hasNext() method.  Returns
-         * true if there is another node in the tree to iterate over.
-         *
-         * @return Boolean
-         */
         public Boolean hasNext() {
             return !nextSegments.isEmpty();
         }
 
-        /**
-         * @description Implementation of Iterator.next().  Returns the next
-         * node in the tree.
-         *
-         * @return CampaignListSegment
-         */
-        public CampaignListSegment next() {
-            CampaignListSegment next = nextSegments.remove(nextSegments.size() - 1);
+        public CampaignList.Segment next() {
+            CampaignList.Segment next = nextSegments.remove(nextSegments.size() - 1);
             nextSegments.addAll(next.getChildren());
             return next;
         }
@@ -164,8 +128,8 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
          * @param m The CampaignListMember to determine whether eligible for inclusion in a campaign list
          * @return Boolean (true if the given CampaignListMember is eligible by the criteria of this segment, false otherwise)
          */
-        public override Boolean meetsCriteria(CampaignListMember m) {
-            for (CampaignListSegment child : children) {
+        public override Boolean meetsCriteria(CampaignList.Member m) {
+            for (CampaignList.Segment child : children) {
                 if (!child.meetsCriteria(m)) {
                     return false;
                 }
@@ -197,8 +161,8 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
          * @param m The CampaignListMember to determine whether eligible for inclusion in a campaign list
          * @return Boolean (true if the given CampaignListMember is eligible by the criteria of this segment, false otherwise)
          */
-        public override Boolean meetsCriteria(CampaignListMember m) {
-            for (CampaignListSegment child : children) {
+        public override Boolean meetsCriteria(CampaignList.Member m) {
+            for (CampaignList.Segment child : children) {
                 if (child.meetsCriteria(m)) {
                     return true;
                 }
@@ -227,13 +191,6 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
         private Boolean isExclusion;
 
         /**
-         * @description The CampaignListSegmentMapper to use for retrieving
-         * this source's name
-         */
-        @TestVisible
-        private CampaignListSegmentMapper.MapperInterface segmentMapper;
-
-        /**
          * @description Construct a SourceSegment
          * @param segmentId The id of this segment
          * @param rootSegmentId The id of the "campaign list" this segment belongs to
@@ -243,7 +200,6 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
             super(segmentId, rootSegmentId, parentId);
             this.sourceId = sourceId;
             this.isExclusion = isExclusion;
-            this.segmentMapper = new CampaignListSegmentMapper();
         }
 
         /**
@@ -272,7 +228,7 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
          * @param m The CampaignListMember to test for eligibility
          * @return Boolean (True if the CampaignListMember was found in this segment's source and this is not an exclusion source, or if the CampaignListMember was *not* found in this segment's source and this is an exclusion source. False, otherwise)
          */
-        public override Boolean meetsCriteria(CampaignListMember m) {
+        public override Boolean meetsCriteria(CampaignList.Member m) {
             if (isExclusion) {
                 return !m.isFromSource(sourceId);
             } else {
@@ -288,7 +244,7 @@ public abstract class CampaignListSegment implements Iterable<CampaignListSegmen
          * @return String
          */
         public String getSourceName() {
-            return segmentMapper.getSourceNameById(sourceId);
+            return CampaignList.getSegmentMapper().getSourceNameById(sourceId);
         }
 
         /**

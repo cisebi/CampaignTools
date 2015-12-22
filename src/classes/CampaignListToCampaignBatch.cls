@@ -12,20 +12,7 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
 
     /** @description The "campaign list" root segment */
     @TestVisible
-    private CampaignListSegment.Interface_x rootSegment;
-
-    /**
-     * @description the ListMemberMapper to use for manipulating
-     * CampaignListMembers
-     */
-    @TestVisible
-    private CampaignListMemberMapper.Interface_x listMemberMapper = new CampaignListMemberMapper();
-
-    /**
-     * @description the CampaignListService to use for updating Campaign status
-     */
-    @TestVisible
-    private CampaignListService.Interface_x listService = new CampaignListService();
+    private CampaignList.Segment rootSegment;
 
     /**
      * @description Construct the batch process to populate the given campaign
@@ -35,7 +22,7 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
      * @param campaignId The id of the Campaign to populate
      * @param rootSegment The "campaign list" root segment
      */
-    public CampaignListToCampaignBatch(Id campaignId, CampaignListSegment.Interface_x rootSegment) {
+    public CampaignListToCampaignBatch(Id campaignId, CampaignList.Segment rootSegment) {
         this.campaignId = campaignId;
         this.rootSegment = rootSegment;
     }
@@ -63,16 +50,16 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
      * @return void
      */
     public void execute(Database.BatchableContext bc, List<Member__c> scope) {
-        List<CampaignListMember> eligibleMembers = new List<CampaignListMember>();
+        List<CampaignList.Member> eligibleMembers = new List<CampaignList.Member>();
 
         for (Member__c m : scope) {
-            CampaignListMember member = new CampaignListMember(m);
+            CampaignList.Member member = new CampaignListMember(m);
             if (member.meetsCriteria(rootSegment)) {
                 eligibleMembers.add(member);
             }
         }
 
-        listMemberMapper.addMembersToCampaign(eligibleMembers, campaignId);
+        CampaignList.getMemberMapper().addMembersToCampaign(eligibleMembers, campaignId);
     }
 
     /**
@@ -86,9 +73,9 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
     */
     public override void finish(Database.BatchableContext bc) {
         super.finish(bc);
-        listService.updateCampaignStatus(
+        CampaignList.getService().updateCampaignStatus(
             campaignId,
-            CampaignListService.UpdateStatus.SUCCESS
+            CampaignList.UpdateStatus.SUCCESS
         );
     }
 

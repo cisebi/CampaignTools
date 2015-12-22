@@ -1,7 +1,7 @@
 @isTest
 private class DeleteCampaignMembersBatch_TEST {
     private static testMethod void testDeleteCampaignMembersBatch() {
-        CampaignListFromCampaignBatch_TEST.TestCampaign tc = new CampaignListFromCampaignBatch_TEST.TestCampaign('Test', 100, 100);
+        CampaignList_TEST.TestCampaign tc = new CampaignList_TEST.TestCampaign('Test', 100, 100);
 
         Integer memberCount = [
             SELECT COUNT()

@@ -34,12 +34,6 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
     private String reportName;
 
     /**
-     * @description The mapper to use for campaign members
-     */
-    @TestVisible
-    private CampaignListMemberMapper.Interface_x campaignListMemberMapper;
-
-    /**
      * @description
      */
     @TestVisible
@@ -58,7 +52,6 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
         this.reportId = reportId;
         this.idColumnName = idColumnName;
         this.reportName = reportName;
-        campaignListMemberMapper = new CampaignListMemberMapper();
     }
 
     /**
@@ -101,7 +94,7 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
             ids.add((Id) o);
         }
 
-        this.campaignListMemberMapper.updateByRelatedIdsAndSource(
+        CampaignList.getMemberMapper().updateByRelatedIdsAndSource(
             ids,
             rootSegmentId,
             reportId,

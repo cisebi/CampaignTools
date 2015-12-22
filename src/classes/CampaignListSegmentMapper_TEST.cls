@@ -44,7 +44,7 @@ private class CampaignListSegmentMapper_TEST {
         );
         insert andSegment;
 
-        Id campaignSourceId = Campaign.sObjectType.getDescribe().getKeyPrefix() + '000000000001';
+        Id campaignSourceId = CampaignList_TEST.getNextId(Campaign.sObjectType);
         Segment__c campaignSegment = new Segment__c(
             Operation__c = 'SOURCE',
             Source_ID__c = campaignSourceId,
@@ -54,7 +54,7 @@ private class CampaignListSegmentMapper_TEST {
         );
         insert campaignSegment;
 
-        Id reportSourceId = Report.sObjectType.getDescribe().getKeyPrefix() + '000000000001';
+        Id reportSourceId = CampaignList_TEST.getNextId(Report.sObjectType);
         Segment__c reportSegment = new Segment__c(
             Operation__c = 'SOURCE',
             Source_ID__c = reportSourceId,
@@ -66,16 +66,17 @@ private class CampaignListSegmentMapper_TEST {
         insert reportSegment;
 
         CampaignListSegmentMapper segmentMapper = new CampaignListSegmentMapper();
-        CampaignListSegment segmentTree = segmentMapper.getSegmentTreeByRootId(
+
+        CampaignList.Segment segmentTree = segmentMapper.getSegmentTreeByRootId(
             rootSegmentId
         );
 
-        Map<Id, CampaignListSegment> segmentModelsById = new Map<Id, CampaignListSegment>();
+        Map<Id, CampaignList.Segment> segmentModelsById = new Map<Id, CampaignList.Segment>();
 
-        CampaignListSegment.TreeIterator segmentTreeIterator = segmentTree.iterator();
+        Iterator<CampaignList.Segment> segmentTreeIterator = segmentTree.iterator();
 
         while (segmentTreeIterator.hasNext()) {
-            CampaignListSegment next = segmentTreeIterator.next();
+            CampaignList.Segment next = segmentTreeIterator.next();
             segmentModelsById.put(next.getId(), next);
         }
 
@@ -125,7 +126,7 @@ private class CampaignListSegmentMapper_TEST {
     private static testMethod void testCreateCampaignListSegmentWithInvalidSegmentSouceType() {
         Segment__c invalidSegment = new Segment__c(
             Operation__c = 'SOURCE',
-            Source_ID__c = Schema.sObjectType.ListView.getKeyPrefix() + '000000000001',
+            Source_ID__c = CampaignList_TEST.getNextId(Schema.sObjectType.ListView.getSObjectType()),
             Exclude_Source__c = false
         );
 

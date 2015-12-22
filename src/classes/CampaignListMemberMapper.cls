@@ -1,9 +1,4 @@
-public class CampaignListMemberMapper implements Interface_x {
-    public interface Interface_x {
-        void updateByRelatedIdsAndSource(List<Id> relatedIds, Id rootSegmentId, Id sourceId, String sourceName);
-        void addMembersToCampaign(List<CampaignListMember> members, Id campaignId);
-    }
-
+public class CampaignListMemberMapper implements CampaignList.MemberMapper {
     /**
      * @description Given a list of related record ids, i.e. Contact or Lead
      * record ids, a campaign list id, and the id and name of a source, i.e. a
@@ -20,7 +15,7 @@ public class CampaignListMemberMapper implements Interface_x {
      * @return void
      */
     public void updateByRelatedIdsAndSource(List<Id> relatedIds, Id rootSegmentId, Id sourceId, String sourceName) {
-        Map<Id, CampaignListMember> members = this.getByRelatedIds(relatedIds);
+        Map<Id, CampaignList.Member> members = this.getByRelatedIds(relatedIds);
 
         for (Id id_x : relatedIds) {
             if (!members.containsKey(id_x)) {
@@ -39,10 +34,10 @@ public class CampaignListMemberMapper implements Interface_x {
      * @param campaignId The id of the Campaign that the CampaignMembers should be added to
      * @return void
      */
-    public void addMembersToCampaign(List<CampaignListMember> members, Id campaignId) {
+    public void addMembersToCampaign(List<CampaignList.Member> members, Id campaignId) {
         List<CampaignMember> campaignMembers = new List<CampaignMember>();
 
-        for (CampaignListMember member : members) {
+        for (CampaignList.Member member : members) {
             CampaignMember cm = member.getCampaignMember();
             cm.CampaignId = campaignId;
             campaignMembers.add(cm);
@@ -65,7 +60,7 @@ public class CampaignListMemberMapper implements Interface_x {
      * @param ids A list of Contact or Lead ids
      * @return Map<Id, CampaignListMember>
      */
-    private Map<Id, CampaignListMember> getByRelatedIds(List<Id> ids) {
+    private Map<Id, CampaignList.Member> getByRelatedIds(List<Id> ids) {
         List<Member__c> members = [
             SELECT
                 Contact__c,
@@ -78,10 +73,10 @@ public class CampaignListMemberMapper implements Interface_x {
             OR Lead__c IN :ids
         ];
 
-        Map<Id, CampaignListMember> memberMap = new Map<Id, CampaignListMember>();
+        Map<Id, CampaignList.Member> memberMap = new Map<Id, CampaignList.Member>();
 
         for (Member__c memberSObject : members) {
-            CampaignListMember m = new CampaignListMember(memberSObject);
+            CampaignList.Member m = new CampaignListMember(memberSObject);
             memberMap.put(m.getRelatedId(), m);
         }
 
@@ -95,7 +90,7 @@ public class CampaignListMemberMapper implements Interface_x {
      * @param members
      * @return void
      */
-    private void upsertMembers(List<CampaignListMember> members) {
+    private void upsertMembers(List<CampaignList.Member> members) {
         upsert getMemberSObjects(members);
     }
 
@@ -106,10 +101,10 @@ public class CampaignListMemberMapper implements Interface_x {
      * @param members
      * @return List<Member__c>
      */
-    private List<Member__c> getMemberSObjects(List<CampaignListMember> members) {
+    private List<Member__c> getMemberSObjects(List<CampaignList.Member> members) {
         List<Member__c> memberSObjects = new List<Member__c>();
 
-        for (CampaignListMember member : members) {
+        for (CampaignList.Member member : members) {
             memberSObjects.add(member.getSObject());
         }
 

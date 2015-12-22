@@ -1,25 +1,14 @@
 @isTest
 private class CampaignListSegment_TEST2 {
-    private static Integer nextId = 1;
-
-    private static Id getNextId(Schema.SObjectType sObjectType) {
-        String id_x = '' + nextId++;
-        while (id_x.length() < 12) {
-            id_x = '0' + id_x;
-        }
-        id_x = sObjectType.getDescribe().getKeyPrefix() + id_x;
-        return id_x;
-    }
-
     private static testMethod void testCriteriaWithSingleSource() {
         /*
          * Criteria tree as s-expression:
          * (SOURCE A)
          */
 
-        Id sourceASegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceAId = getNextId(Campaign.sObjectType);
-        Id sourceBId = getNextId(Campaign.sObjectType);
+        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -62,9 +51,9 @@ private class CampaignListSegment_TEST2 {
          * (NOT (SOURCE A))
          */
 
-        Id sourceASegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceAId = getNextId(Campaign.sObjectType);
-        Id sourceBId = getNextId(Campaign.sObjectType);
+        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
             sourceASegmentId,
@@ -110,12 +99,12 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id andSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceAId = getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceBId = getNextId(Campaign.sObjectType);
-        Id sourceCId = getNextId(Campaign.sObjectType);
+        Id andSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
             andSegmentId,
@@ -182,12 +171,12 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id orSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceAId = getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceBId = getNextId(Campaign.sObjectType);
-        Id sourceCId = getNextId(Campaign.sObjectType);
+        Id orSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         CampaignListSegment orSegment = new CampaignListSegment.OrSegment(
             orSegmentId,
@@ -253,12 +242,12 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id andSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceAId = getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceBId = getNextId(Campaign.sObjectType);
-        Id sourceCId = getNextId(Campaign.sObjectType);
+        Id andSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
             andSegmentId,
@@ -324,12 +313,12 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id orSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceAId = getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceBId = getNextId(Campaign.sObjectType);
-        Id sourceCId = getNextId(Campaign.sObjectType);
+        Id orSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         CampaignListSegment orSegment = new CampaignListSegment.OrSegment(
             orSegmentId,
@@ -401,18 +390,18 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id andSegmentId = getNextId(Segment__c.sObjectType);
-        Id orSegment1Id = getNextId(Segment__c.sObjectType);
-        Id orSegment2Id = getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceAId = getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceBId = getNextId(Campaign.sObjectType);
-        Id sourceCSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceCId = getNextId(Campaign.sObjectType);
-        Id sourceDSegmentId = getNextId(Segment__c.sObjectType);
-        Id sourceDId = getNextId(Campaign.sObjectType);
-        Id sourceEId = getNextId(Campaign.sObjectType);
+        Id andSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id orSegment1Id = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id orSegment2Id = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceCSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceDSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id sourceDId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id sourceEId = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
         CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
             andSegmentId,

@@ -1,9 +1,6 @@
 @isTest
 private class CampaignListMemberMapper_TEST {
     private static testMethod void testUpdateByRelatedIdsUpdatesMembersAndUpserts() {
-        Account company = new Account(Name = 'Test Company');
-        insert company;
-
         Contact contact1 = new Contact(LastName='Test Contact 1');
         insert contact1;
 
@@ -12,23 +9,23 @@ private class CampaignListMemberMapper_TEST {
 
         Lead lead1 = new Lead(
             LastName = 'Test Lead 1',
-            Company = company.Id
+            Company = 'Test Company'
         );
         insert lead1;
 
         Lead lead2 = new Lead(
             LastName='Test Lead 2',
-            Company = company.Id
+            Company = 'Test Company'
         );
         insert lead2;
 
         Segment__c rootSegment = new Segment__c();
         insert rootSegment;
 
-        Id sourceId1 = Schema.sObjectType.Report.getKeyPrefix() + '000000000001';
+        Id sourceId1 = CampaignList_TEST.getNextId(Report.sObjectType);
         String sourceName1 = 'Test Report';
 
-        Id sourceId2 = Schema.sObjectType.Campaign.getKeyPrefix() + '000000000001';
+        Id sourceId2 = CampaignList_TEST.getNextId(Campaign.sObjectType);
         String sourceName2 = 'Test Campaign';
 
         Member__c existingContactMember = new Member__c(

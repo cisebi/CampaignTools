@@ -4,7 +4,7 @@
  * @description A model class that represents a potential member of a campaign
  * list
  */
-public class CampaignListMember {
+public class CampaignListMember implements CampaignList.Member {
     /** @description The id of the campaign list member, if persisted */
     private Id memberId;
 
@@ -124,7 +124,7 @@ public class CampaignListMember {
      * @param segment
      * @return Boolean
      */
-    public Boolean meetsCriteria(CampaignListSegment.Interface_x segment) {
+    public Boolean meetsCriteria(CampaignList.Segment segment) {
         return segment.meetsCriteria(this);
     }
 
