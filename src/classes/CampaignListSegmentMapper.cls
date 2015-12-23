@@ -56,6 +56,14 @@ public class CampaignListSegmentMapper implements CampaignList.SegmentMapper {
                 rootSegment = segment;
             } else if (segments.containsKey(pid)) {
                 segments.get(pid).addChild(segment);
+            } else {
+                throw new CampaignList.InvalidSegmentSObjectException(String.format(
+                    'Unknown parent ({0}) found in segment {1}',
+                    new List<String>{
+                        pid,
+                        segment.getId()
+                    }
+                ));
             }
         }
 
@@ -117,15 +125,6 @@ public class CampaignListSegmentMapper implements CampaignList.SegmentMapper {
                 return new CampaignListSegment.ReportSourceSegment(segmentId, rootSegmentId, parentId, sourceId, isExcluded, columnName);
             }
         }
-        throw new InvalidSegmentSObjectException('Invalid Segment__c object');
+        throw new CampaignList.InvalidSegmentSObjectException('Invalid Segment__c object');
     }
-
-    /** @description An exception specific to CampaignListSegmentMapper */
-    public abstract class CustomException extends Exception {}
-
-    /**
-     * @description An exception for the case where a Segment__c record does
-     * not correspond to a known segment type
-     */
-    public class InvalidSegmentSObjectException extends CustomException {}
 }

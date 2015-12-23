@@ -105,6 +105,55 @@ private class CampaignListSegmentMapper_TEST {
         System.assertEquals('test_column_name', reportSegmentModel.getColumnName());
     }
 
+    private static testMethod void testGetSegmentTreeDetectsSegmentWithInvalidParent() {
+        Segment__c parentSegment1 = new Segment__c(
+            Operation__c = 'OR'
+        );
+        insert parentSegment1;
+
+        Segment__c parentSegment2 = new Segment__c(
+            Operation__c = 'AND'
+        );
+        insert parentSegment2;
+
+        Id rootSegmentId = parentSegment1.Id;
+
+        Id campaignSourceId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Segment__c campaignSegment = new Segment__c(
+            Operation__c = 'SOURCE',
+            Source_ID__c = campaignSourceId,
+            Exclude_Source__c = true,
+            Parent_Segment__c = parentSegment1.Id,
+            Root_Segment__c = rootSegmentId
+        );
+        insert campaignSegment;
+
+        Id reportSourceId = CampaignList_TEST.getNextId(Report.sObjectType);
+        Segment__c reportSegment = new Segment__c(
+            Operation__c = 'SOURCE',
+            Source_ID__c = reportSourceId,
+            Exclude_Source__c = false,
+            Report_Column_Name__c = 'test_column_name',
+            Parent_Segment__c = parentSegment2.Id,
+            Root_Segment__c = rootSegmentId
+        );
+        insert reportSegment;
+
+        CampaignListSegmentMapper segmentMapper = new CampaignListSegmentMapper();
+
+        Boolean exceptionThrown = false;
+
+        try {
+            CampaignList.Segment segmentTree = segmentMapper.getSegmentTreeByRootId(
+                rootSegmentId
+            );
+        } catch (CampaignList.InvalidSegmentSObjectException e) {
+            exceptionThrown = true;
+        }
+
+        System.assert(exceptionThrown);
+    }
+
     private static testMethod void testCreateCampaignListSegmentWithInvalidSegmentOperation() {
         Segment__c invalidSegment = new Segment__c(
             Operation__c = 'INVALID'
@@ -116,7 +165,7 @@ private class CampaignListSegmentMapper_TEST {
 
         try {
             segmentMapper.create(invalidSegment);
-        } catch (CampaignListSegmentMapper.InvalidSegmentSObjectException e) {
+        } catch (CampaignList.InvalidSegmentSObjectException e) {
             invalidSegmentExceptionThrown = true;
         }
 
@@ -136,7 +185,7 @@ private class CampaignListSegmentMapper_TEST {
 
         try {
             segmentMapper.create(invalidSegment);
-        } catch (CampaignListSegmentMapper.InvalidSegmentSObjectException e) {
+        } catch (CampaignList.InvalidSegmentSObjectException e) {
             invalidSegmentExceptionThrown = true;
         }
 

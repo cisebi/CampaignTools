@@ -34,6 +34,10 @@ public abstract class CampaignList {
         Segment getSegmentTreeByRootId(Id rootSegmentId);
     }
 
+    public abstract class CustomException extends System.Exception {}
+    public abstract class SegmentMapperException extends CustomException {}
+    public class InvalidSegmentSObjectException extends SegmentMapperException {}
+
     /**
      * @description This enum has values that correspond the state of a
      * Campaign as it is being updated from a campaign list.  RUNNING means

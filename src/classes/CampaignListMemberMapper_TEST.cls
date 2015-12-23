@@ -22,6 +22,9 @@ private class CampaignListMemberMapper_TEST {
         Segment__c rootSegment = new Segment__c();
         insert rootSegment;
 
+        Segment__c otherRootSegment = new Segment__c();
+        insert otherRootSegment;
+
         Id sourceId1 = CampaignList_TEST.getNextId(Report.sObjectType);
         String sourceName1 = 'Test Report';
 
@@ -41,6 +44,22 @@ private class CampaignListMemberMapper_TEST {
             Root_Segment__c = rootSegment.Id
         );
         insert existingLeadMember;
+
+        // these two members belong to a different campaign list, but point to the same contact and leads:
+
+        Member__c existingContactMember2 = new Member__c(
+            Contact__c = contact1.Id,
+            Root_Segment__c = otherRootSegment.Id,
+            Sources__c = JSON.serialize(new Set<Id>{sourceId2}),
+            Source_Names__c = JSON.serialize(new Set<String>{sourceName2})
+        );
+        insert existingContactMember2;
+
+        Member__c existingLeadMember2 = new Member__c(
+            Lead__c = lead1.Id,
+            Root_Segment__c = otherRootSegment.Id
+        );
+        insert existingLeadMember2;
 
         List<Id> relatedIds = new List<Id>{
             contact1.Id,
