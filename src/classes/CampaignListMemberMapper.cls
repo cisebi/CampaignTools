@@ -15,7 +15,7 @@ public class CampaignListMemberMapper implements CampaignList.MemberMapper {
      * @return void
      */
     public void updateByRelatedIdsAndSource(List<Id> relatedIds, Id rootSegmentId, Id sourceId, String sourceName) {
-        Map<Id, CampaignList.Member> members = this.getByRelatedIds(relatedIds);
+        Map<Id, CampaignList.Member> members = this.getByRelatedIds(relatedIds, rootSegmentId);
 
         for (Id id_x : relatedIds) {
             if (!members.containsKey(id_x)) {
@@ -58,9 +58,10 @@ public class CampaignListMemberMapper implements CampaignList.MemberMapper {
      * id, to allow lookups into this collection by related record id.
      *
      * @param ids A list of Contact or Lead ids
+     * @param rootSegmentId The "campaign list" id being operated on
      * @return Map<Id, CampaignListMember>
      */
-    private Map<Id, CampaignList.Member> getByRelatedIds(List<Id> ids) {
+    private Map<Id, CampaignList.Member> getByRelatedIds(List<Id> ids, Id rootSegmentId) {
         List<Member__c> members = [
             SELECT
                 Contact__c,
@@ -69,8 +70,11 @@ public class CampaignListMemberMapper implements CampaignList.MemberMapper {
                 Source_Names__c,
                 Sources__c
             FROM Member__c
-            WHERE Contact__c IN :ids
-            OR Lead__c IN :ids
+            WHERE Root_Segment__c = :rootSegmentId
+            AND (
+                Contact__c IN :ids
+                OR Lead__c IN :ids
+            )
         ];
 
         Map<Id, CampaignList.Member> memberMap = new Map<Id, CampaignList.Member>();

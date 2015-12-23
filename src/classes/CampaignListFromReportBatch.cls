@@ -45,6 +45,7 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
      *
      * @param rootSegmentId The id of the "campaign list" which the members should be added to
      * @param reportId The id of the Report from which to gather potential members
+     * @param idColumnName The name of the column in the report to retrieve id values from
      * @param reportName The name of the Report from which to gather potential members
      */
     public CampaignListFromReportBatch(Id rootSegmentId, Id reportId, String idColumnName, String reportName) {
