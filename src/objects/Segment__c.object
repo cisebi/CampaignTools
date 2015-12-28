@@ -97,6 +97,17 @@
         <type>Lookup</type>
     </fields>
     <fields>
+        <fullName>Report_Column_Name__c</fullName>
+        <description>If this segment represents a report source, this field should hold the name of the report column from which the Contact or Lead id should be retrieved.</description>
+        <externalId>false</externalId>
+        <label>Report Column Name</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Root_Segment__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>
         <externalId>false</externalId>
