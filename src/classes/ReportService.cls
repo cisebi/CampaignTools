@@ -163,10 +163,10 @@ public class ReportService {
          * @return Boolean
          */
         public Boolean hasNext() {
-            if (!hasRunReport) {
+            if (!hasRunReport || (!currentPageRowIterator.hasNext() && !hasAllData)) {
                 runReport();
             }
-            return currentPageRowIterator.hasNext() || !hasAllData;
+            return currentPageRowIterator.hasNext();
         }
 
         /**
@@ -177,8 +177,8 @@ public class ReportService {
          * @return Id
          */
         public Id next() {
-            if (!hasRunReport || !currentPageRowIterator.hasNext()) {
-                runReport();
+            if (!hasNext()) {
+                return null;
             }
             Reports.ReportDetailRow row = currentPageRowIterator.next();
             lastRowId = (Id) row.getDataCells().get(0).getValue();
