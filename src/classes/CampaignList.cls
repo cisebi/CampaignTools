@@ -1,0 +1,118 @@
+/*
+    Copyright (c) 2015 Salesforce.org
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the Salesforce.com Foundation nor the names of
+      its contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+*/
+/**
+ * @author Salesforce.org
+ * @group CampaignTools
+ * @description This class holds interface definitions for other objects in the
+ * CampaignTools group, as well as some service locator methods.
+ */
+public abstract class CampaignList {
+
+    public interface Service {
+        void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId);
+        void updateCampaignStatus(Id campaignId, UpdateStatus status);
+    }
+
+    public interface Member {
+        Id getId();
+        Id getRelatedId();
+        void addSource(Id sourceId, String sourceName);
+        Boolean isFromSource(Id sourceId);
+        Boolean meetsCriteria(Segment segment);
+        Member__c getSObject();
+        CampaignMember getCampaignMember();
+    }
+
+    public interface MemberMapper {
+        void updateByRelatedIdsAndSource(List<Id> relatedIds, Id rootSegmentId, Id sourceId, String sourceName);
+        void addMembersToCampaign(List<Member> members, Id campaignId);
+    }
+
+    public interface Segment extends Iterable<Segment>{
+        Id getId();
+        Id getParentId();
+        Id getRootSegmentId();
+        void addChild(CampaignList.Segment child);
+        List<Segment> getChildren();
+        Boolean meetsCriteria(Member member);
+    }
+
+    public interface SegmentMapper {
+        String getSourceNameById(Id sourceId);
+        Segment getSegmentTreeByRootId(Id rootSegmentId);
+    }
+
+    public abstract class CustomException extends System.Exception {}
+    public abstract class SegmentMapperException extends CustomException {}
+    public class InvalidSegmentSObjectException extends SegmentMapperException {}
+
+    /**
+     * @description This enum has values that correspond the state of a
+     * Campaign as it is being updated from a campaign list.  RUNNING means
+     * that the Campaign is currently being updated.  SUCCESS means that the
+     * last time the Campaign was updated from a campaign list, there were no
+     * issues.  FAILURE means that the last time the Campaign was attempted to
+     * be updated from a campaign list, there was an error that prevented
+     * successful update.
+     */
+    public enum UpdateStatus {
+        RUNNING,
+        SUCCESS,
+        FAILURE
+    }
+
+    private static Service service_x = new CampaignListService();
+    private static MemberMapper memberMapper_x = new CampaignListMemberMapper();
+    private static SegmentMapper segmentMapper_x = new CampaignListSegmentMapper();
+
+    public static void setService(Service s) {
+        service_x = s;
+    }
+
+    public static Service getService() {
+        return service_x;
+    }
+
+    public static void setMemberMapper(MemberMapper mm) {
+        memberMapper_x = mm;
+    }
+
+    public static MemberMapper getMemberMapper() {
+        return memberMapper_x;
+    }
+
+    public static void setSegmentMapper(SegmentMapper sm) {
+        segmentMapper_x = sm;
+    }
+
+    public static SegmentMapper getSegmentMapper() {
+        return segmentMapper_x;
+    }
+}
