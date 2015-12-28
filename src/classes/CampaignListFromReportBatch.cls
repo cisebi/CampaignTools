@@ -4,7 +4,7 @@
  * @description Batch process for gathering potential campaign list members
  * from a given report.
  */
-public class CampaignListFromReportBatch extends BatchableSequence.Batch implements Database.Batchable<Object> {
+public class CampaignListFromReportBatch extends BatchableSequence.Batch implements Database.Batchable<Id> {
     /**
      * @description The id of the "campaign list" which the members should be
      * added to
@@ -37,7 +37,7 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
      * @description
      */
     @TestVisible
-    private Iterable<Object> valueIterator;
+    private Iterable<Id> idIterator;
 
     /**
      * @description Construct the batch process to gather potential members
@@ -56,29 +56,29 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
     }
 
     /**
-     * @description Get the iterator that will provide values to the execute()
+     * @description Get the iterator that will provide ids to the execute()
      * method.  If an iterable is already specified for this batch, it will be
      * used.  Otherwise, an instance of the default implementation,
      * ReportService.ReportRowValueIterableIterator, will be used.
      *
-     * @return Iterable<Object>
+     * @return Iterable<Id>
      */
     @TestVisible
-    private Iterable<Object> getValueIterable() {
-        if (null == valueIterator) {
-            valueIterator = new ReportService.ReportRowValueIterableIterator(reportId, idColumnName);
+    private Iterable<Id> getIdIterable() {
+        if (null == idIterator) {
+            idIterator = new ReportService.ReportRowIdIterableIterator(reportId, idColumnName);
         }
-        return valueIterator;
+        return idIterator;
     }
 
     /**
      * @description Implementation of start() from Database.Batchable
      * interface.
      *
-     * @return Iterable<Object> An iterable that will provide values from the id column of the given report
+     * @return Iterable<Id> An iterable that will provide values from the id column of the given report
      */
-    public Iterable<Object> start(Database.BatchableContext bc) {
-        return getValueIterable();
+    public Iterable<Id> start(Database.BatchableContext bc) {
+        return getIdIterable();
     }
 
     /**
@@ -89,12 +89,7 @@ public class CampaignListFromReportBatch extends BatchableSequence.Batch impleme
      *
      * @return void
      */
-    public void execute(Database.BatchableContext bc, List<Object> scope) {
-        List<Id> ids = new List<Id>();
-        for (Object o : scope) {
-            ids.add((Id) o);
-        }
-
+    public void execute(Database.BatchableContext bc, List<Id> ids) {
         CampaignList.getMemberMapper().updateByRelatedIdsAndSource(
             ids,
             rootSegmentId,

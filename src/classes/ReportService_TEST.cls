@@ -26,17 +26,17 @@ private class ReportService_TEST {
 
         Test.startTest();
 
-        Iterable<Object> reportRowValueIterable = new ReportService.ReportRowValueIterableIterator(
+        Iterable<Id> reportRowIdIterable = new ReportService.ReportRowIdIterableIterator(
             testReport.Id,
             'CONTACT_ID'
         );
 
-        Iterator<Object> reportRowValueIterator = reportRowValueIterable.iterator();
+        Iterator<Id> reportRowIdIterator = reportRowIdIterable.iterator();
 
         Set<Id> actualIds = new Set<Id>();
 
-        while(reportRowValueIterator.hasNext()) {
-            actualIds.add((Id) reportRowValueIterator.next());
+        while(reportRowIdIterator.hasNext()) {
+            actualIds.add(reportRowIdIterator.next());
         }
 
         Test.stopTest();

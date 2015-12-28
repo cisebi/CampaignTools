@@ -58,18 +58,18 @@ public class ReportService {
      * @author Salesforce.org
      * @group CampaignTools
      * @description A custom Iterator that can be used to iterate over the
-     * unique values from a given column in a given report.  This class will
+     * unique ids from a given column in a given report.  This class will
      * iterate over every row in the given report.  To work around a limitation
      * in the Analytics API that a report run will only return the first 2,000
      * rows, the column being iterated over is expected to be a filterable and
      * sortable column.  This requirement comes from the technique of
      * paginating report results 2,000 records at a time by adding a sort to
      * the report and then filtering the report to exclude records from
-     * previous "pages" of the report.  This will only return unique values
+     * previous "pages" of the report.  This will only return unique ids
      * from the given column, meaning that if a value has already been returned
      * by this iterator then that value will be skipped next time.
      */
-    public class ReportRowValueIterableIterator implements Iterator<Object>, Iterable<Object> {
+    public class ReportRowIdIterableIterator implements Iterator<Id>, Iterable<Id> {
         /** @description The id of the report to iterate over */
         @TestVisible
         private Id reportId;
@@ -82,10 +82,10 @@ public class ReportService {
         private String columnName;
 
         /**
-         * @description The value of the last row processed.  This value is
+         * @description The id of the last row processed.  This id is
          * used to filter results to retrieve the next "page"
          */
-        private Object lastRowValue;
+        private Id lastRowId;
 
         /**
          * @description True if the last report run is the last page of
@@ -114,17 +114,17 @@ public class ReportService {
          * @param reportId The id of the report to iterate over
          * @param columnName The name of the column to retrieve values from in the report
          */
-        public ReportRowValueIterableIterator(Id reportId, String columnName) {
+        public ReportRowIdIterableIterator(Id reportId, String columnName) {
             this.reportId = reportId;
             this.columnName = columnName;
         }
 
         /**
          * @description Implementation of iterator() from Iterable interface
-         * @return Iterator<Object>
+         * @return Iterator<Id>
          */
-        public Iterator<Object> iterator() {
-            return new IteratorFilterUnique(this);
+        public Iterator<Id> iterator() {
+            return new IteratorMonotonicIncreasingIdFilter(this);
         }
 
         /**
@@ -142,18 +142,18 @@ public class ReportService {
 
         /**
          * @description Implementation of next() from Iterator interface.
-         * Returns the value from the specified column from the next available
+         * Returns the id from the specified column from the next available
          * report result detail row.
          *
-         * @return Object
+         * @return Id
          */
-        public Object next() {
+        public Id next() {
             if (!hasRunReport || !currentPageRowIterator.hasNext()) {
                 runReport();
             }
             Reports.ReportDetailRow row = currentPageRowIterator.next();
-            lastRowValue = row.getDataCells().get(0).getValue();
-            return lastRowValue;
+            lastRowId = (Id) row.getDataCells().get(0).getValue();
+            return lastRowId;
         }
 
         /**
@@ -168,7 +168,7 @@ public class ReportService {
             Reports.ReportResults results = ReportService.getReportResults(
                 reportId,
                 columnName,
-                (String) lastRowValue
+                (String) lastRowId
             );
             hasAllData = results.getAllData();
             Reports.ReportFactWithDetails facts = (Reports.ReportFactWithDetails) results.getFactMap().get('T!T');
@@ -179,30 +179,28 @@ public class ReportService {
     /*
      * @author Salesforce.org
      * @group CampaignTools
-     * @description This Iterator will return unique items retrieved from
-     * Iterator.  To do this, it keeps track of returned items in a
-     * Set<Object>, and so consumes memory dependent on the number of items
-     * filtered.
+     * @description This Iterator will return ids retrieved from
+     * Iterator only if they are strictly greater than the previously returned id.
      */
     @TestVisible
-    private class IteratorFilterUnique implements Iterator<Object> {
-        private Iterator<Object> iterator;
-        private Set<Object> seenObjects = new Set<Object>();
+    private class IteratorMonotonicIncreasingIdFilter implements Iterator<Id> {
+        private Iterator<Id> iterator;
+        private Id lastSeenId;
         private Boolean hasNext;
-        private Object next;
+        private Id next;
 
         /*
          * @description Constructor
          * @param iterator The Iterator that is to be filtered for unique items
         */
-        public IteratorFilterUnique(Iterator<Object> iterator) {
+        public IteratorMonotonicIncreasingIdFilter(Iterator<Id> iterator) {
             this.iterator = iterator;
         }
 
         /*
          * @description Implementation of hasNext() from Iterator interface.
          * Returns true if there is another value available from the filtered
-         * iterator that has not already been returned.
+         * iterator that is strictly greater than the most recently returned id.
          *
          * @return Boolean
          */
@@ -210,9 +208,8 @@ public class ReportService {
             if (null != hasNext) return hasNext;
 
             while (iterator.hasNext()) {
-                next = iterator.next();
-                if (!seenObjects.contains(next)) {
-                    seenObjects.add(next);
+                next = (Id) iterator.next();
+                if (next > lastSeenId) {
                     hasNext = true;
                     return hasNext;
                 }
@@ -228,7 +225,7 @@ public class ReportService {
          *
          * @return Object
          */
-        public Object next() {
+        public Id next() {
             hasNext = null;
             return next;
         }

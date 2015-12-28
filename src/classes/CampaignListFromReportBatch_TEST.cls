@@ -1,7 +1,9 @@
 @isTest
 private class CampaignListFromReportBatch_TEST {
     private static testMethod void testGetValueIteratorReturnsPresetIterable() {
-        List<Object> testIterable = new List<Object>{'Test Iterable Item'};
+        List<Id> testIterable = new List<Id>{
+            CampaignList_TEST.getNextId(Contact.sObjectType)
+        };
 
         CampaignListFromReportBatch batch = new CampaignListFromReportBatch(
             CampaignList_TEST.getNextId(Segment__c.sObjectType),
@@ -10,9 +12,9 @@ private class CampaignListFromReportBatch_TEST {
             'Test Source Name'
         );
 
-        batch.valueIterator = testIterable;
+        batch.idIterator = testIterable;
 
-        System.assertEquals(testIterable, batch.getValueIterable());
+        System.assertEquals(testIterable, batch.getIdIterable());
     }
 
     private static testMethod void testGetValueIteratorReturnsDefaultIterable() {
@@ -25,7 +27,7 @@ private class CampaignListFromReportBatch_TEST {
             'Test Source Name'
         );
 
-        ReportService.ReportRowValueIterableIterator actualIterator = (ReportService.ReportRowValueIterableIterator) batch.getValueIterable();
+        ReportService.ReportRowIdIterableIterator actualIterator = (ReportService.ReportRowIdIterableIterator) batch.getIdIterable();
 
         System.assertNotEquals(null, actualIterator);
         System.assertEquals(testReportId, actualIterator.reportId);
@@ -50,7 +52,7 @@ private class CampaignListFromReportBatch_TEST {
             relatedIds.add(CampaignList_TEST.getNextId(Contact.sObjectType));
         }
         
-        batch.valueIterator = (List<Object>) relatedIds;
+        batch.idIterator = relatedIds;
         
         CampaignList_TEST.MemberMapperStub listMemberStub = new CampaignList_TEST.MemberMapperStub();
         CampaignList.setMemberMapper(listMemberStub);                
