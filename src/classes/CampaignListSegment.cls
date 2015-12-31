@@ -105,16 +105,6 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
     }
 
     /**
-     * @description Is this segment intended to exclude members or negate
-     * child segments?
-     *
-     * @return Boolean
-     */
-    public Boolean isExclusion() {
-        return isExclusion;
-    }
-
-    /**
      * @description Add a child segment to this segment
      * @param term The segment to add as a child.
      * @return void
