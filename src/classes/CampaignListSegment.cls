@@ -47,6 +47,12 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
     private Id parentId;
 
     /**
+     * @description True if this source is intended to be used to exclude
+     * members from the campaign list.  False, otherwise.
+     */
+    private Boolean isExclusion;
+
+    /**
      * @description This segment's children segments, if it has any
      */
     private List<CampaignList.Segment> children = new List<CampaignList.Segment>();
@@ -57,10 +63,11 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
      * @param rootSegmentId The id of the "campaign list" this segment belongs to
      * @param parentId The immediate parent of this segment
      */
-    public CampaignListSegment(Id segmentId, Id rootSegmentId, Id parentId) {
+    public CampaignListSegment(Id segmentId, Id rootSegmentId, Id parentId, Boolean isExclusion) {
         this.segmentId = segmentId;
         this.rootSegmentId = rootSegmentId;
         this.parentId = parentId;
+        this.isExclusion = isExclusion;
     }
 
     /**
@@ -85,6 +92,16 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
      */
     public Id getParentId() {
         return parentId;
+    }
+
+    /**
+     * @description Is this segment intended to exclude members or negate
+     * child segments?
+     *
+     * @return Boolean
+     */
+    public Boolean isExclusion() {
+        return isExclusion;
     }
 
     /**
@@ -145,27 +162,58 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
          * @param rootSegmentId The id of the "campaign list" this segment belongs to
          * @param parentId The immediate parent of this segment
          */
-        public AndSegment(Id segmentId, Id rootSegmentId, Id parentId) {
-            super(segmentId, rootSegmentId, parentId);
+        public AndSegment(Id segmentId, Id rootSegmentId, Id parentId, Boolean isExclusion) {
+            super(segmentId, rootSegmentId, parentId, isExclusion);
         }
 
         /**
          * @description Determine whether the given CampaignListMember meets
          * the criteria of all of the terms within this AND grouping of
-         * segments.
+         * segments.  A CampaignListSegment can only return a valid result if
+         * it has at least one valid child.  If this CampaignListSegment is
+         * not valid, then this method will return null.
          *
          * @param m The CampaignListMember to determine whether eligible for inclusion in a campaign list
-         * @return Boolean (true if the given CampaignListMember is eligible by the criteria of this segment, false otherwise)
+         * @return Boolean (true if the given CampaignListMember is eligible by the criteria of this segment, false if it isn't eligible, or null if the segment is not valid)
          */
         public override Boolean meetsCriteria(CampaignList.Member m) {
-            for (CampaignList.Segment child : children) {
-                if (!child.meetsCriteria(m)) {
-                    return false;
-                }
-            }
-            return true;
-        }
+            /*
+             Since this node can only return a valid result if it has at
+             least one valid child, we will keep track of the number of
+             valid children we encounter while iterating over this node's
+             children (if any).  As we ask each child node whether the given
+             member meets its criteria, we check if the child node returns a
+             valid result (i.e., not null).  If the child node returns null,
+             indicating an invalid child node, we skip that child node in
+             the iteration and do not increment the valid child node
+             counter.  If we did get a valid result (i.e. a boolean) from
+             the child node, we use that result to potentially invalidate
+             our assumption that this node should return true (since a valid
+             'and' node is false if at least one of its children is false,
+             otherwise true).  Since the child node returned a valid result,
+             we increment the valid child count.  Finally, after we've
+             iterated over all of the child nodes, we return null if this
+             node did not have at least one valid child, otherwise we
+             return the accumulated result of this node, negating it if
+             this node is negated (i.e. if isExclusion is true).
+            */
+            Boolean meetsCriteria = true;
+            Integer numberOfValidChildren = 0;
 
+            List<Boolean> childCriteria = new List<Boolean>();
+            for (CampaignList.Segment child : children) {
+                Boolean childMeetsCriteria = child.meetsCriteria(m);
+                if (null == childMeetsCriteria) continue;
+                meetsCriteria &= childMeetsCriteria;
+                numberOfValidChildren++;
+            }
+
+            if (numberOfValidChildren < 1) {
+                return null;
+            }
+
+            return isExclusion ^ meetsCriteria;
+        }
     }
 
     /**
@@ -181,22 +229,57 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
          * @param rootSegmentId The id of the "campaign list" this segment belongs to
          * @param parentId The immediate parent of this segment
          */
-        public OrSegment(Id segmentId, Id rootSegmentId, Id parentId) {
-            super(segmentId, rootSegmentId, parentId);
+        public OrSegment(Id segmentId, Id rootSegmentId, Id parentId, Boolean isExclusion) {
+            super(segmentId, rootSegmentId, parentId, isExclusion);
         }
 
         /**
-         * @description Determine whether the given CampaignListMember meets the criteria of all of the terms within this OR grouping of segments.
+         * @description Determine whether the given CampaignListMember meets
+         * the criteria of all of the terms within this OR grouping of
+         * segments.  A CampaignListSegment can only return a valid result if
+         * it has at least one valid child.  If this CampaignListSegment is
+         * not valid, then this method will return null.
+         *
          * @param m The CampaignListMember to determine whether eligible for inclusion in a campaign list
-         * @return Boolean (true if the given CampaignListMember is eligible by the criteria of this segment, false otherwise)
+         * @return Boolean (true if the given CampaignListMember is eligible by the criteria of this segment, false if it isn't eligible, or null if the segment is not valid)
          */
         public override Boolean meetsCriteria(CampaignList.Member m) {
+            /*
+             Since this node can only return a valid result if it has at
+             least one valid child, we will keep track of the number of
+             valid children we encounter while iterating over this node's
+             children (if any).  As we ask each child node whether the given
+             member meets its criteria, we check if the child node returns a
+             valid result (i.e., not null).  If the child node returns null,
+             indicating an invalid child node, we skip that child node in
+             the iteration and do not increment the valid child node
+             counter.  If we did get a valid result (i.e. a boolean) from
+             the child node, we use that result to potentially invalidate
+             our assumption that this node should return false (since a valid
+             'or' node is true if at least one of its children is true,
+             otherwise false).  Since the child node returned a valid result,
+             we increment the valid child count.  Finally, after we've
+             iterated over all of the child nodes, we return null if this
+             node did not have at least one valid child, otherwise we
+             return the accumulated result of this node, negating it if
+             this node is negated (i.e. if isExclusion is true).
+            */
+            Boolean meetsCriteria = false;
+            Integer numberOfValidChildren = 0;
+
+            List<Boolean> childCriteria = new List<Boolean>();
             for (CampaignList.Segment child : children) {
-                if (child.meetsCriteria(m)) {
-                    return true;
-                }
+                Boolean childMeetsCriteria = child.meetsCriteria(m);
+                if (null == childMeetsCriteria) continue;
+                meetsCriteria |= childMeetsCriteria;
+                numberOfValidChildren++;
             }
-            return false;
+
+            if (numberOfValidChildren < 1) {
+                return null;
+            }
+
+            return isExclusion ^ meetsCriteria;
         }
     }
 
@@ -214,21 +297,14 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
         private Id sourceId;
 
         /**
-         * @description True if this source is intended to be used to exclude
-         * members from the campaign list.  False, otherwise.
-         */
-        private Boolean isExclusion;
-
-        /**
          * @description Construct a SourceSegment
          * @param segmentId The id of this segment
          * @param rootSegmentId The id of the "campaign list" this segment belongs to
          * @param parentId The immediate parent of this segment
          */
-        public SourceSegment(Id segmentId, Id rootSegmentId, Id parentId, Id sourceId, Boolean isExclusion) {
-            super(segmentId, rootSegmentId, parentId);
+        public SourceSegment(Id segmentId, Id rootSegmentId, Id parentId, Boolean isExclusion, Id sourceId) {
+            super(segmentId, rootSegmentId, parentId, isExclusion);
             this.sourceId = sourceId;
-            this.isExclusion = isExclusion;
         }
 
         /**
@@ -237,16 +313,6 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
          */
         public Id getSourceId() {
             return sourceId;
-        }
-
-        /**
-         * @description Is this source segment intended to exclude members
-         * found in the source?
-         *
-         * @return Boolean
-         */
-        public Boolean isExclusion() {
-            return isExclusion;
         }
 
         /**
@@ -299,8 +365,8 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
          * @param sourceId The id of the source Campaign
          * @param isExclusion True if this source is intended to exclude members that are found in the given campaign.  False, otherwise.
          */
-        public CampaignSourceSegment(Id segmentId, Id rootSegmentId, Id parentId, Id sourceId, Boolean isExclusion) {
-            super(segmentId, rootSegmentId, parentId, sourceId, isExclusion);
+        public CampaignSourceSegment(Id segmentId, Id rootSegmentId, Id parentId, Boolean isExclusion, Id sourceId) {
+            super(segmentId, rootSegmentId, parentId, isExclusion, sourceId);
         }
 
         /**
@@ -345,8 +411,8 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
          * @param isExclusion True if this source is intended to exclude members that are found in the given report.  False, otherwise.
          * @param columnName the name of the column in the source report that holds the id of the related Contact or Lead
          */
-        public ReportSourceSegment(Id segmentId, Id rootSegmentId, Id parentId, Id sourceId, Boolean isExclusion, String columnName) {
-            super(segmentId, rootSegmentId, parentId, sourceId, isExclusion);
+        public ReportSourceSegment(Id segmentId, Id rootSegmentId, Id parentId, Boolean isExclusion, Id sourceId, String columnName) {
+            super(segmentId, rootSegmentId, parentId, isExclusion, sourceId);
             this.columnName = columnName;
         }
 
