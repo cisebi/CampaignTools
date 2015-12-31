@@ -1,7 +1,7 @@
 ({
-    
-    doInit: function(component, event, helper) {       
-       	helper.initHandlers(component);
+
+    doInit: function(component, event, helper) {
+        helper.initHandlers(component);
     }
-    
+
 })
