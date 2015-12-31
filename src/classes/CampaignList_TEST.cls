@@ -99,7 +99,9 @@ public class CampaignList_TEST {
 
     public class SegmentMapperStub implements CampaignList.SegmentMapper {
         public Id sourceId;
+        public Id rootSegmentId;
         public String sourceName;
+        public String serialized;
         public CampaignList.Segment rootSegment;
         public String getSourceNameById(Id sourceId) {
             this.sourceId = sourceId;
@@ -108,15 +110,24 @@ public class CampaignList_TEST {
         public CampaignList.Segment getSegmentTreeByRootId(Id rootSegmentId) {
             return null;
         }
-        public void upsertSegmentTreeByRootSegment(CampaignList.Segment rootSegment) {
+        public Id upsertSegmentTreeByRootSegment(CampaignList.Segment rootSegment) {
             this.rootSegment = rootSegment;
+            return rootSegmentId;
+        }
+        public CampaignList.Segment deserializeSegmentFromJSON(String serialized) {
+            this.serialized = serialized;
+            return null;
         }
     }
 
     public class ServiceStub implements CampaignList.Service {
         public Id updatedCampaignId;
+        public Id updatedRootSegmentId;
         public CampaignList.UpdateStatus updatedStatus;
-        public void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId) {}
+        public void updateCampaignFromCampaignList(Id campaignId, Id rootSegmentId) {
+            updatedCampaignId = campaignId;
+            updatedRootSegmentId = rootSegmentId;
+        }
         public void updateCampaignStatus(Id campaignId, CampaignList.UpdateStatus status) {
             updatedCampaignId = campaignId;
             updatedStatus = status;

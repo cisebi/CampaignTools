@@ -69,9 +69,9 @@ public abstract class CampaignList {
     }
 
     public interface SegmentMapper {
-        String getSourceNameById(Id sourceId);
         Segment getSegmentTreeByRootId(Id rootSegmentId);
-        void upsertSegmentTreeByRootSegment(CampaignList.Segment rootSegment);
+        Id upsertSegmentTreeByRootSegment(CampaignList.Segment rootSegment);
+        Segment deserializeSegmentFromJSON(String serialized);
     }
 
     public abstract class CustomException extends System.Exception {}

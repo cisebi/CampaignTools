@@ -5,7 +5,6 @@
         <members>AutocompleteController</members>
         <members>BatchableSequence</members>
         <members>BatchableSequence_TEST</members>
-        <members>CSegment</members>
         <members>CampaignList</members>
         <members>CampaignListBuilder_CTRL</members>
         <members>CampaignListFromCampaignBatch</members>
@@ -27,23 +26,14 @@
         <members>CampaignListToCampaignBatch_TEST</members>
         <members>CampaignList_CTRL</members>
         <members>CampaignList_TEST</members>
-        <members>CampaignPopulate</members>
         <members>DeleteCampaignListMembersBatch</members>
         <members>DeleteCampaignListMembersBatch_TEST</members>
         <members>DeleteCampaignMembersBatch</members>
         <members>DeleteCampaignMembersBatch_TEST</members>
-        <members>MembersBuilder</members>
-        <members>MembersBuilder_TEST</members>
         <members>ProcessSegmentBTN_CTRL</members>
         <members>ProcessSegmentBTN_TEST</members>
         <members>ReportService</members>
         <members>ReportService_TEST</members>
-        <members>SegmentMapper</members>
-        <members>SegmentMapper_TEST</members>
-        <members>SegmentTreeProcessor</members>
-        <members>SegmentTreeProcessor_TEST</members>
-        <members>SegmentTreeSave</members>
-        <members>SegmentTreeSave_TEST</members>
         <name>ApexClass</name>
     </types>
     <types>

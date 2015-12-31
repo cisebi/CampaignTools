@@ -76,6 +76,23 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
     }
 
     /**
+     * @description Return a Segment__c sObject that represents this CampaignListSegment
+     *
+     * @return Segment__c
+     */
+    public virtual Segment__c getSObject() {
+        Segment__c s = new Segment__c(
+            Id = segmentId,
+            Parent_Segment__c = parentId,
+            Root_Segment__c = rootSegmentId
+        );
+        if (null != isExclusion) {
+            s.Exclude_Source__c = isExclusion;
+        }
+        return s;
+    }
+
+    /**
      * @description get this segment's id
      * @return Id
      */
@@ -99,7 +116,9 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
     }
 
     public void setRootSegmentId(Id rootSegmentId) {
-        this.rootSegmentId = rootSegmentId;
+        if (rootSegmentId != segmentId) {
+            this.rootSegmentId = rootSegmentId;
+        }
         for (CampaignList.Segment child : children) {
             child.setRootSegmentId(rootSegmentId);
         }
@@ -114,7 +133,9 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
     }
 
     public void setParentId(Id parentId) {
-        this.parentId = parentId;
+        if (parentId != segmentId) {
+            this.parentId = parentId;
+        }
     }
 
     /**
@@ -245,6 +266,17 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
 
             return isExclusion ^ meetsCriteria;
         }
+
+        /**
+         * @description Return a Segment__c sObject that represents this CampaignListSegment
+         *
+         * @return Segment__c
+         */
+        public override Segment__c getSObject() {
+            Segment__c s = super.getSObject();
+            s.Operation__c = 'AND';
+            return s;
+        }
     }
 
     /**
@@ -314,6 +346,17 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
 
             return isExclusion ^ meetsCriteria;
         }
+
+        /**
+         * @description Return a Segment__c sObject that represents this CampaignListSegment
+         *
+         * @return Segment__c
+         */
+        public override Segment__c getSObject() {
+            Segment__c s = super.getSObject();
+            s.Operation__c = 'OR';
+            return s;
+        }
     }
 
     /**
@@ -328,6 +371,11 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
          * a Report id or a Campaign id, etc.
          */
         private Id sourceId;
+
+        /**
+         * @description The name associated with this source
+         */
+        private String sourceName;
 
         /**
          * @description Construct a SourceSegment
@@ -365,14 +413,34 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
         }
 
         /**
-         * @description Get the name of this source.  Note that this may
-         * execute a SOQL query to find the name of this source using the
-         * sourceId.
+         * @description Get the name of this source.
          *
          * @return String
          */
         public String getSourceName() {
-            return CampaignList.getSegmentMapper().getSourceNameById(sourceId);
+                return sourceName;
+        }
+
+        /**
+         * @description Set the name of the source this segment is associated with
+         *
+         * @param sourceName The name of the source
+         * @return void
+         */
+        public void setSourceName(String sourceName) {
+           this.sourceName = sourceName;
+        }
+
+        /**
+         * @description Return a Segment__c sObject that represents this CampaignListSegment
+         *
+         * @return Segment__c
+         */
+        public virtual override Segment__c getSObject() {
+            Segment__c s = super.getSObject();
+            s.Operation__c = 'SOURCE';
+            s.Source_ID__c = sourceId;
+            return s;
         }
 
         /**
@@ -415,7 +483,7 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
             CampaignListFromCampaignBatch batch = new CampaignListFromCampaignBatch(
                 rootSegmentId,
                 sourceId,
-                getSourceName()
+                'Campaign: ' + getSourceName()
             );
 
             batch.setScope(10000);
@@ -475,12 +543,24 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
                 rootSegmentId,
                 sourceId,
                 columnName,
-                getSourceName()
+                'Report: ' + getSourceName()
             );
 
             batch.setScope(2000);
 
             return batch;
         }
+
+        /**
+         * @description Return a Segment__c sObject that represents this CampaignListSegment
+         *
+         * @return Segment__c
+         */
+        public override Segment__c getSObject() {
+            Segment__c s = super.getSObject();
+            s.Report_Column_Name__c = columnName;
+            return s;
+        }
+
     }
 }
