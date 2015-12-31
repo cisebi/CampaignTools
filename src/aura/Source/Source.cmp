@@ -1,15 +1,15 @@
 <aura:component >
     <aura:attribute name="source" type="CSegment"/>
- 	<aura:registerEvent name="deleteCSegmentEvent" type="c:deleteCSegmentEvent"/>
-    
- 	<div class="filter slds-form--inline">
+    <aura:registerEvent name="deleteCSegmentEvent" type="c:deleteCSegmentEvent"/>
+
+    <div class="filter slds-form--inline">
         <div class="slds-form-element">
             <ui:inputSelect class="slds-select" aura:id="sourceType" change="{!c.handleSourceType}">
                 <ui:inputSelectOption text="Select Source Type"/>
                 <ui:inputSelectOption text="Campaign" label="Campaign" value="{!v.source.Segment.Source_Type__c == 'Campaign'}" />
                 <ui:inputSelectOption text="Report" label="Report" value="{!v.source.Segment.Source_Type__c == 'Report'}" />
             </ui:inputSelect>
-        </div>        
+        </div>
         <div class="slds-form-element" style="width:60%">
             <aura:if isTrue="{!v.source.Segment.Source_Type__c == 'Report'}">
                 <c:autocomplete sObjectType="Report" autocompleteEvent="{!c.handleAutocomplete}" placeholder="find..." value="{!v.source.sourceName}" fields="" />
@@ -17,7 +17,7 @@
             <aura:if isTrue="{!v.source.Segment.Source_Type__c == 'Campaign'}">
                 <c:autocomplete sObjectType="Campaign" autocompleteEvent="{!c.handleAutocomplete}" placeholder="find..." value="{!v.source.sourceName}" fields="" />
             </aura:if>
-        </div>        
+        </div>
         <ui:button aura:id="deleteSource" buttonTitle="Delete Source" class="slds-button--small" label="del" press="{!c.delete}"/>
-	</div>
+    </div>
 </aura:component>
