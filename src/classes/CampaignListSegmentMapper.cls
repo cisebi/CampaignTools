@@ -155,4 +155,81 @@ public class CampaignListSegmentMapper implements CampaignList.SegmentMapper {
         }
         throw new CampaignList.InvalidSegmentSObjectException('Invalid Segment__c object');
     }
+
+    public void upsertSegmentTreeByRootSegment(CampaignList.Segment rootSegment) {
+        List<CampaignList.Segment> segments = new List<CampaignList.Segment>();
+        List<Segment__c> segmentSObjects = new List<Segment__c>();
+
+        Iterator<CampaignList.Segment> segmentIterator = rootSegment.iterator();
+
+        while(segmentIterator.hasNext()) {
+            CampaignList.Segment next = segmentIterator.next();
+            segments.add(next);
+            segmentSObjects.add(next.getSObject());
+        }
+
+        upsert segmentSObjects;
+
+        Id rootSegmentId = segmentSObjects.get(0).Id;
+
+        rootSegment.setRootSegmentId(rootSegmentId);
+
+        for (Integer i = 0; i < segmentSObjects.size(); i++) {
+            segments.get(i).setId(segmentSObjects.get(i).Id);
+        }
+
+        segmentSObjects.clear();
+
+        segmentIterator = rootSegment.iterator();
+
+        while(segmentIterator.hasNext()) {
+            segmentSObjects.add(segmentIterator.next().getSObject());
+        }
+
+        upsert segmentSObjects;
+
+        List<Segment__c> redundantSegments = [
+            SELECT Id
+            FROM Segment__c
+            WHERE Root_Segment__c = :rootSegmentId
+            AND Id NOT IN :segmentSObjects
+        ];
+
+        delete redundantSegments;
+    }
+
+    public CampaignList.Segment deserializeSegmentFromJSON(String serialized) {
+        SegmentJSONObject jsonObject = (SegmentJSONObject) JSON.deserialize(serialized, SegmentJSONObject.class);
+        return jsonObject.getConcreteInstance();
+    }
+
+    private class SegmentJSONObject {
+        CampaignList.SegmentType segmentType;
+        Id segmentId;
+        Id rootSegmentId;
+        Id parentId;
+        Id sourceId;
+        Boolean isExclusion;
+        String columnName;
+        List<SegmentJSONObject> children;
+
+        public CampaignList.Segment getConcreteInstance() {
+            CampaignList.Segment segment;
+            if (CampaignList.SegmentType.AND_SEGMENT == segmentType) {
+                segment = new CampaignListSegment.AndSegment(segmentId, rootSegmentId, parentId, isExclusion);
+            } else if (CampaignList.SegmentType.OR_SEGMENT == segmentType) {
+                segment = new CampaignListSegment.OrSegment(segmentId, rootSegmentId, parentId, isExclusion);
+            } else if (CampaignList.SegmentType.CAMPAIGN_SOURCE_SEGMENT == segmentType) {
+                segment = new CampaignListSegment.CampaignSourceSegment(segmentId, rootSegmentId, parentId, isExclusion, sourceId);
+            } else if (CampaignList.SegmentType.REPORT_SOURCE_SEGMENT == segmentType) {
+                segment = new CampaignListSegment.ReportSourceSegment(segmentId, rootSegmentId, parentId, isExclusion, sourceId, columnName);
+            }
+
+            for (SegmentJSONObject jsonObject : children) {
+                segment.addChild(jsonObject.getConcreteInstance());
+            }
+
+            return segment;
+        }
+    }
 }

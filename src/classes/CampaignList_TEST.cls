@@ -42,6 +42,8 @@ public class CampaignList_TEST {
 
     public class SegmentStub implements CampaignList.Segment {
         public Id segmentId;
+        public Id parentId;
+        public Id rootSegmentId;
         public Set<Id> acceptIds = new Set<Id>();
         public Boolean meetsCriteria(CampaignList.Member m) {
             return acceptIds.contains(m.getId());
@@ -49,16 +51,28 @@ public class CampaignList_TEST {
         public Id getId() {
             return segmentId;
         }
+        public void setId(Id segmentId) {
+            this.segmentId = segmentId;
+        }
         public Id getParentId() {
             return null;
         }
+        public void setParentId(Id parentId) {
+            this.parentId = parentId;
+        }
         public Id getRootSegmentId() {
             return null;
+        }
+        public void setRootSegmentId(Id rootSegmentId) {
+            this.rootSegmentId = rootSegmentId;
         }
         public List<CampaignList.Segment> getChildren() {
             return null;
         }
         public Iterator<CampaignList.Segment> iterator() {
+            return null;
+        }
+        public Segment__c getSObject() {
             return null;
         }
         public void addChild(CampaignList.Segment child) {}
@@ -86,12 +100,16 @@ public class CampaignList_TEST {
     public class SegmentMapperStub implements CampaignList.SegmentMapper {
         public Id sourceId;
         public String sourceName;
+        public CampaignList.Segment rootSegment;
         public String getSourceNameById(Id sourceId) {
             this.sourceId = sourceId;
             return sourceName;
         }
         public CampaignList.Segment getSegmentTreeByRootId(Id rootSegmentId) {
             return null;
+        }
+        public void upsertSegmentTreeByRootSegment(CampaignList.Segment rootSegment) {
+            this.rootSegment = rootSegment;
         }
     }
 

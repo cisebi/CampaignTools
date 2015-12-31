@@ -59,6 +59,10 @@ public abstract class CampaignList {
         Id getId();
         Id getParentId();
         Id getRootSegmentId();
+        void setId(Id segmentId);
+        void setParentId(Id parentId);
+        void setRootSegmentId(Id rootSegmentId);
+        Segment__c getSObject();
         void addChild(CampaignList.Segment child);
         List<Segment> getChildren();
         Boolean meetsCriteria(Member member);
@@ -67,6 +71,7 @@ public abstract class CampaignList {
     public interface SegmentMapper {
         String getSourceNameById(Id sourceId);
         Segment getSegmentTreeByRootId(Id rootSegmentId);
+        void upsertSegmentTreeByRootSegment(CampaignList.Segment rootSegment);
     }
 
     public abstract class CustomException extends System.Exception {}
@@ -86,6 +91,13 @@ public abstract class CampaignList {
         RUNNING,
         SUCCESS,
         FAILURE
+    }
+
+    public enum SegmentType {
+        AND_SEGMENT,
+        OR_SEGMENT,
+        CAMPAIGN_SOURCE_SEGMENT,
+        REPORT_SOURCE_SEGMENT
     }
 
     private static Service service_x = new CampaignListService();
