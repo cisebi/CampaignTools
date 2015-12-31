@@ -1225,49 +1225,6 @@ private class CampaignListSegment_TEST2 {
         return getTestMembersWithSources(A, B, C, D, null);
     }
 
-    private static CampaignListSegment createOrSegment() {
-        return createSegment('OR', false);
-    }
-
-    private static CampaignListSegment createAndSegment() {
-        return createSegment('AND', false);
-    }
-
-    private static CampaignListSegment createSourceSegment(Id sourceId) {
-        return createSegment('SOURCE', false, sourceId);
-    }
-
-    private static CampaignListSegment createExcludedSourceSegment(Id sourceId) {
-        return createSegment('SOURCE', true, sourceId);
-    }
-
-    private static CampaignListSegment createSegment(String operator, Boolean isExclusion) {
-        return createSegment(operator, isExclusion, null);
-    }
-
-    private static CampaignListSegment createSegment(String operator, Boolean isExclusion, Id sourceId) {
-        if ('OR' == operator) {
-            return new CampaignListSegment.OrSegment(null, null, null);
-        } else if ('AND' == operator) {
-            return new CampaignListSegment.AndSegment(null, null, null);
-        } else if ('SOURCE' == operator) {
-            return new CampaignListSegment.CampaignSourceSegment(null, null, null, sourceId, isExclusion);
-        }
-        return null;
-    }
-
-    private static Map<String, CampaignList.Member> getTestMembersWithSources(Id A, Id B) {
-        return getTestMembersWithSources(A, B, null, null, null);
-    }
-
-    private static Map<String, CampaignList.Member> getTestMembersWithSources(Id A, Id B, Id C) {
-        return getTestMembersWithSources(A, B, C, null, null);
-    }
-
-    private static Map<String, CampaignList.Member> getTestMembersWithSources(Id A, Id B, Id C, Id D) {
-        return getTestMembersWithSources(A, B, C, D, null);
-    }
-
     private static Map<String, CampaignList.Member> getTestMembersWithSources(Id A, Id B, Id C, Id D, Id E) {
         Map<String, CampaignList.Member> members = new Map<String, CampaignList.Member>();
 
