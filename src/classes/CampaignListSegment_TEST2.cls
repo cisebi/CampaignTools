@@ -35,19 +35,10 @@ private class CampaignListSegment_TEST2 {
          * (SOURCE A)
          */
 
-        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
-        CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceASegmentId,
-            null,
-            null,
-            sourceAId,
-            false
-        );
-
-        CampaignListSegment rootSegment = sourceASegment;
+        CampaignListSegment rootSegment = createSourceSegment(A);
 
         /*
          * Test members:
@@ -60,13 +51,7 @@ private class CampaignListSegment_TEST2 {
          * (), (B)
          */
 
-        Map<String, CampaignListMember> members = getTestMembersWithSources(
-            sourceAId,
-            sourceBId,
-            null,
-            null,
-            null
-        );
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
 
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
@@ -80,19 +65,10 @@ private class CampaignListSegment_TEST2 {
          * (NOT (SOURCE A))
          */
 
-        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
-        CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceASegmentId,
-            null,
-            null,
-            sourceAId,
-            true
-        );
-
-        CampaignListSegment rootSegment = sourceASegment;
+        CampaignListSegment rootSegment = createExcludedSourceSegment(A);
 
         /*
          * Test members:
@@ -105,13 +81,7 @@ private class CampaignListSegment_TEST2 {
          * (A), (A, B)
          */
 
-        Map<String, CampaignListMember> members = getTestMembersWithSources(
-            sourceAId,
-            sourceBId,
-            null,
-            null,
-            null
-        );
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
 
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
@@ -128,38 +98,13 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id andSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id C = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
-        CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
-            andSegmentId,
-            null,
-            null
-        );
-
-        CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceASegmentId,
-            null,
-            andSegmentId,
-            sourceAId,
-            false
-        );
-
-        CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceBSegmentId,
-            null,
-            andSegmentId,
-            sourceBId,
-            false
-        );
-
-        CampaignListSegment rootSegment = andSegment;
-        rootSegment.addChild(sourceASegment);
-        rootSegment.addChild(sourceBSegment);
+        CampaignListSegment rootSegment = createAndSegment();
+        rootSegment.addChild(createSourceSegment(A));
+        rootSegment.addChild(createSourceSegment(B));
 
         /*
          * Test members:
@@ -172,13 +117,7 @@ private class CampaignListSegment_TEST2 {
          * (), (A), (B), (C), (A, C), (B, C)
          */
 
-        Map<String, CampaignListMember> members = getTestMembersWithSources(
-            sourceAId,
-            sourceBId,
-            sourceCId,
-            null,
-            null
-        );
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B, C);
 
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B, C)')));
@@ -200,38 +139,13 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id orSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id C = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
-        CampaignListSegment orSegment = new CampaignListSegment.OrSegment(
-            orSegmentId,
-            null,
-            null
-        );
-
-        CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceASegmentId,
-            null,
-            orSegmentId,
-            sourceAId,
-            false
-        );
-
-        CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceBSegmentId,
-            null,
-            orSegmentId,
-            sourceBId,
-            false
-        );
-
-        CampaignListSegment rootSegment = orSegment;
-        rootSegment.addChild(sourceASegment);
-        rootSegment.addChild(sourceBSegment);
+        CampaignListSegment rootSegment = createOrSegment();
+        rootSegment.addChild(createSourceSegment(A));
+        rootSegment.addChild(createSourceSegment(B));
 
         /*
          * Test members:
@@ -244,13 +158,7 @@ private class CampaignListSegment_TEST2 {
          * (), (C)
          */
 
-        Map<String, CampaignListMember> members = getTestMembersWithSources(
-            sourceAId,
-            sourceBId,
-            sourceCId,
-            null,
-            null
-        );
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B, C);
 
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
@@ -271,38 +179,13 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id andSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id C = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
-        CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
-            andSegmentId,
-            null,
-            null
-        );
-
-        CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceASegmentId,
-            null,
-            andSegmentId,
-            sourceAId,
-            true
-        );
-
-        CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceBSegmentId,
-            null,
-            andSegmentId,
-            sourceBId,
-            false
-        );
-
-        CampaignListSegment rootSegment = andSegment;
-        rootSegment.addChild(sourceASegment);
-        rootSegment.addChild(sourceBSegment);
+        CampaignListSegment rootSegment = createAndSegment();
+        rootSegment.addChild(createExcludedSourceSegment(A));
+        rootSegment.addChild(createSourceSegment(B));
 
         /*
          * Test members:
@@ -315,13 +198,7 @@ private class CampaignListSegment_TEST2 {
          * (), (A), (C), (A, B), (A, C), (A, B, C)
          */
 
-        Map<String, CampaignListMember> members = getTestMembersWithSources(
-            sourceAId,
-            sourceBId,
-            sourceCId,
-            null,
-            null
-        );
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B, C);
 
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B, C)')));
@@ -342,38 +219,13 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id orSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id C = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
-        CampaignListSegment orSegment = new CampaignListSegment.OrSegment(
-            orSegmentId,
-            null,
-            null
-        );
-
-        CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceASegmentId,
-            null,
-            orSegmentId,
-            sourceAId,
-            true
-        );
-
-        CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceBSegmentId,
-            null,
-            orSegmentId,
-            sourceBId,
-            false
-        );
-
-        CampaignListSegment rootSegment = orSegment;
-        rootSegment.addChild(sourceASegment);
-        rootSegment.addChild(sourceBSegment);
+        CampaignListSegment rootSegment = createOrSegment();
+        rootSegment.addChild(createExcludedSourceSegment(A));
+        rootSegment.addChild(createSourceSegment(B));
 
         /*
          * Test members:
@@ -386,13 +238,7 @@ private class CampaignListSegment_TEST2 {
          * (A), (A, C)
          */
 
-        Map<String, CampaignListMember> members = getTestMembersWithSources(
-            sourceAId,
-            sourceBId,
-            sourceCId,
-            null,
-            null
-        );
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B, C);
 
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
@@ -419,76 +265,21 @@ private class CampaignListSegment_TEST2 {
          * )
          */
 
-        Id andSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id orSegment1Id = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id orSegment2Id = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceASegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceAId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceBSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceBId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceCSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceCId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceDSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
-        Id sourceDId = CampaignList_TEST.getNextId(Campaign.sObjectType);
-        Id sourceEId = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id C = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id D = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id E = CampaignList_TEST.getNextId(Campaign.sObjectType);
 
-        CampaignListSegment andSegment = new CampaignListSegment.AndSegment(
-            andSegmentId,
-            null,
-            null
-        );
-
-        CampaignListSegment orSegment1 = new CampaignListSegment.OrSegment(
-            orSegment1Id,
-            null,
-            andSegmentId
-        );
-
-        CampaignListSegment orSegment2 = new CampaignListSegment.OrSegment(
-            orSegment2Id,
-            null,
-            andSegmentId
-        );
-
-        CampaignListSegment sourceASegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceASegmentId,
-            null,
-            orSegment1Id,
-            sourceAId,
-            false
-        );
-
-        CampaignListSegment sourceBSegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceBSegmentId,
-            null,
-            orSegment1Id,
-            sourceBId,
-            true
-        );
-
-        CampaignListSegment sourceCSegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceCSegmentId,
-            null,
-            orSegment2Id,
-            sourceCId,
-            false
-        );
-
-        CampaignListSegment sourceDSegment = new CampaignListSegment.CampaignSourceSegment(
-            sourceDSegmentId,
-            null,
-            orSegment2Id,
-            sourceDId,
-            false
-        );
-
-        CampaignListSegment rootSegment = andSegment;
+        CampaignListSegment rootSegment = createAndSegment();
+        CampaignListSegment orSegment1 = createOrSegment();
+        orSegment1.addChild(createSourceSegment(A));
+        orSegment1.addChild(createExcludedSourceSegment(B));
+        CampaignListSegment orSegment2 = createOrSegment();
+        orSegment2.addChild(createSourceSegment(C));
+        orSegment2.addChild(createSourceSegment(D));
         rootSegment.addChild(orSegment1);
-        orSegment1.addChild(sourceASegment);
-        orSegment1.addChild(sourceBSegment);
         rootSegment.addChild(orSegment2);
-        orSegment2.addChild(sourceCSegment);
-        orSegment2.addChild(sourceDSegment);
 
         /*
          * Test members:
@@ -510,13 +301,7 @@ private class CampaignListSegment_TEST2 {
          * (B, D, E), (B, C, D, E)
          */
 
-        Map<String, CampaignListMember> members = getTestMembersWithSources(
-            sourceAId,
-            sourceBId,
-            sourceCId,
-            sourceDId,
-            sourceEId
-        );
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B, C, D, E);
 
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(C)')));
         System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, C)')));
@@ -553,8 +338,51 @@ private class CampaignListSegment_TEST2 {
         System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, C, D, E)')));
     }
 
-    private static Map<String, CampaignListMember> getTestMembersWithSources(Id A, Id B, Id C, Id D, Id E) {
-        Map<String, CampaignListMember> members = new Map<String, CampaignListMember>();
+    private static CampaignListSegment createOrSegment() {
+        return createSegment('OR', false);
+    }
+
+    private static CampaignListSegment createAndSegment() {
+        return createSegment('AND', false);
+    }
+
+    private static CampaignListSegment createSourceSegment(Id sourceId) {
+        return createSegment('SOURCE', false, sourceId);
+    }
+
+    private static CampaignListSegment createExcludedSourceSegment(Id sourceId) {
+        return createSegment('SOURCE', true, sourceId);
+    }
+
+    private static CampaignListSegment createSegment(String operator, Boolean isExclusion) {
+        return createSegment(operator, isExclusion, null);
+    }
+
+    private static CampaignListSegment createSegment(String operator, Boolean isExclusion, Id sourceId) {
+        if ('OR' == operator) {
+            return new CampaignListSegment.OrSegment(null, null, null);
+        } else if ('AND' == operator) {
+            return new CampaignListSegment.AndSegment(null, null, null);
+        } else if ('SOURCE' == operator) {
+            return new CampaignListSegment.CampaignSourceSegment(null, null, null, sourceId, isExclusion);
+        }
+        return null;
+    }
+
+    private static Map<String, CampaignList.Member> getTestMembersWithSources(Id A, Id B) {
+        return getTestMembersWithSources(A, B, null, null, null);
+    }
+
+    private static Map<String, CampaignList.Member> getTestMembersWithSources(Id A, Id B, Id C) {
+        return getTestMembersWithSources(A, B, C, null, null);
+    }
+
+    private static Map<String, CampaignList.Member> getTestMembersWithSources(Id A, Id B, Id C, Id D) {
+        return getTestMembersWithSources(A, B, C, D, null);
+    }
+
+    private static Map<String, CampaignList.Member> getTestMembersWithSources(Id A, Id B, Id C, Id D, Id E) {
+        Map<String, CampaignList.Member> members = new Map<String, CampaignList.Member>();
 
         members.put('()', getTestMemberWithSources(null, null, null, null, null));
 
@@ -602,7 +430,7 @@ private class CampaignListSegment_TEST2 {
         return members;
     }
 
-    private static CampaignListMember getTestMemberWithSources(Id A, Id B, Id C, Id D, Id E) {
+    private static CampaignList.Member getTestMemberWithSources(Id A, Id B, Id C, Id D, Id E) {
         CampaignListMember member = new CampaignListMember(null, null);
         if (null != A) {
             member.addSource(A, 'A');
