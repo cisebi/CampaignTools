@@ -49,6 +49,7 @@ public with sharing class CampaignListBuilder_CTRL {
         CampaignList.SegmentMapper mapper = new CampaignListSegmentMapper();
         CampaignList.Segment segmentTree = mapper.deserializeSegmentFromJSON(csegRoot);
         Id rootSegmentId = mapper.upsertSegmentTreeByRootSegment(segmentTree);
+        update new Campaign(Id = campaignId, Campaign_List__c = rootSegmentId);
         return true;
     }
 
