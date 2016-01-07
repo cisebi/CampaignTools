@@ -70,11 +70,6 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
         this.isExclusion = isExclusion;
     }
 
-    public Segment__c getSObject() {
-        // @todo
-        return new Segment__c();
-    }
-
     /**
      * @description Return a Segment__c sObject that represents this CampaignListSegment
      *
