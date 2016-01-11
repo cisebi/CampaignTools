@@ -206,6 +206,7 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
                 if (null == childMeetsCriteria) continue;
                 meetsCriteria &= childMeetsCriteria;
                 numberOfValidChildren++;
+                if (!meetsCriteria) break;
             }
 
             if (numberOfValidChildren < 1) {
@@ -273,6 +274,7 @@ public abstract class CampaignListSegment implements CampaignList.Segment {
                 if (null == childMeetsCriteria) continue;
                 meetsCriteria |= childMeetsCriteria;
                 numberOfValidChildren++;
+                if (meetsCriteria) break;
             }
 
             if (numberOfValidChildren < 1) {
