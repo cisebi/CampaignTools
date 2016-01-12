@@ -138,20 +138,19 @@ public class CampaignListSegmentMapper implements CampaignList.SegmentMapper {
         Id segmentId = segment.Id;
         Id rootSegmentId = segment.Root_Segment__c;
         Id parentId = segment.Parent_Segment__c;
+        Boolean isExclusion = segment.Exclude_Source__c;
 
         if ('OR' == segment.Operation__c) {
-            return new CampaignListSegment.OrSegment(segmentId, rootSegmentId, parentId);
+            return new CampaignListSegment.OrSegment(segmentId, rootSegmentId, parentId, isExclusion);
         } else if ('AND' == segment.Operation__c) {
-            return new CampaignListSegment.AndSegment(segmentId, rootSegmentId, parentId);
+            return new CampaignListSegment.AndSegment(segmentId, rootSegmentId, parentId, isExclusion);
         } else if ('SOURCE' == segment.Operation__c) {
             Id sourceId = (Id) segment.Source_ID__c;
-            Boolean isExcluded = segment.Exclude_Source__c;
-
             if (Campaign.sObjectType == sourceId.getSObjectType()) {
-                return new CampaignListSegment.CampaignSourceSegment(segmentId, rootSegmentId, parentId, sourceId, isExcluded);
+                return new CampaignListSegment.CampaignSourceSegment(segmentId, rootSegmentId, parentId, isExclusion, sourceId);
             } else if (Report.sObjectType == sourceId.getSObjectType()) {
                 String columnName = segment.Report_Column_Name__c;
-                return new CampaignListSegment.ReportSourceSegment(segmentId, rootSegmentId, parentId, sourceId, isExcluded, columnName);
+                return new CampaignListSegment.ReportSourceSegment(segmentId, rootSegmentId, parentId, isExclusion, sourceId, columnName);
             }
         }
         throw new CampaignList.InvalidSegmentSObjectException('Invalid Segment__c object');

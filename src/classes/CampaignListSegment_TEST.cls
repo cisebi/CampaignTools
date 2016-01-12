@@ -37,12 +37,14 @@ private class CampaignListSegment_TEST {
         CampaignListSegment.AndSegment segment = new CampaignListSegment.AndSegment(
             segmentId,
             rootSegmentId,
-            parentId
+            parentId,
+            false
         );
 
         System.assertEquals(segmentId, segment.getId());
         System.assertEquals(rootSegmentId, segment.getRootSegmentId());
         System.assertEquals(parentId, segment.getParentId());
+        System.assertEquals(false, segment.isExclusion());
     }
 
     private static testMethod void testOrSegment() {
@@ -53,12 +55,14 @@ private class CampaignListSegment_TEST {
         CampaignListSegment.OrSegment segment = new CampaignListSegment.OrSegment(
             segmentId,
             rootSegmentId,
-            parentId
+            parentId,
+            false
         );
 
         System.assertEquals(segmentId, segment.getId());
         System.assertEquals(rootSegmentId, segment.getRootSegmentId());
         System.assertEquals(parentId, segment.getParentId());
+        System.assertEquals(false, segment.isExclusion());
     }
 
     private static testMethod void testCampaignSourceSegment() {
@@ -71,8 +75,8 @@ private class CampaignListSegment_TEST {
             segmentId,
             rootSegmentId,
             parentId,
-            sourceId,
-            false
+            false,
+            sourceId
         );
 
         System.assertEquals(segmentId, segment.getId());
@@ -104,8 +108,8 @@ private class CampaignListSegment_TEST {
             segmentId,
             rootSegmentId,
             parentId,
-            sourceId,
             false,
+            sourceId,
             'test_column_name'
         );
 
