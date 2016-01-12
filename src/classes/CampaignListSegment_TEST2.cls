@@ -338,12 +338,856 @@ private class CampaignListSegment_TEST2 {
         System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B, C, D, E)')));
     }
 
+    private static testMethod void testNegatedOrWithNegatedEmptyAndAndExcludedSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (NOT
+         *     (OR
+         *         (NOT AND)
+         *         (NOT SOURCE A)
+         *     )
+         * )
+         *
+         * Equivalent to:
+         * (AND
+         *     (AND)
+         *     (SOURCE A)
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createNegatedOrSegment();
+        rootSegment.addChild(createNegatedAndSegment());
+        rootSegment.addChild(createExcludedSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createAndSegment();
+        rootSegment2.addChild(createAndSegment());
+        rootSegment2.addChild(createSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (A), (A, B)
+         *
+         * Expected to not meet criteria:
+         * (), (B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testNegatedOrWithNegatedEmptyAndAndSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (NOT
+         *     (OR
+         *         (NOT (AND))
+         *         (SOURCE A)
+         *     )
+         * )
+         *
+         * Equivalent to:
+         * (AND
+         *     (AND)
+         *     (NOT (SOURCE A))
+         * )
+         */
+
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createNegatedOrSegment();
+        rootSegment.addChild(createNegatedAndSegment());
+        rootSegment.addChild(createSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createAndSegment();
+        rootSegment2.addChild(createAndSegment());
+        rootSegment2.addChild(createExcludedSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (), (B)
+         *
+         * Expected to not meet criteria:
+         * (A), (A, B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testNegatedOrWithNegatedEmptyOrAndExcludedSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (NOT
+         *     (OR
+         *         (NOT (OR))
+         *         (NOT (SOURCE A))
+         *     )
+         * )
+         *
+         * Equivalent to:
+         * (AND
+         *     (OR)
+         *     (SOURCE A)
+         * )
+         */
+
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createNegatedOrSegment();
+        rootSegment.addChild(createNegatedOrSegment());
+        rootSegment.addChild(createExcludedSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createAndSegment();
+        rootSegment2.addChild(createOrSegment());
+        rootSegment2.addChild(createSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (A), (A, B)
+         *
+         * Expected to not meet criteria:
+         * (), (B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testNegatedOrWithNegatedEmptyOrAndSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (NOT
+         *     (OR
+         *         (NOT (OR))
+         *         (SOURCE A)
+         *     )
+         * )
+         *
+         * Equivalent to:
+         * (AND
+         *     (OR)
+         *     (NOT (SOURCE A))
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createNegatedOrSegment();
+        rootSegment.addChild(createNegatedOrSegment());
+        rootSegment.addChild(createSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createAndSegment();
+        rootSegment2.addChild(createOrSegment());
+        rootSegment2.addChild(createExcludedSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (), (B)
+         *
+         * Expected to not meet criteria:
+         * (A), (A, B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+
+    private static testMethod void testNegatedOrWithEmptyAndAndExcludedSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (NOT
+         *     (OR
+         *         (AND)
+         *         (NOT (SOURCE A))
+         *     )
+         * )
+         *
+         * Equivalent to:
+         * (AND
+         *     (NOT (AND))
+         *     (SOURCE A)
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createNegatedOrSegment();
+        rootSegment.addChild(createAndSegment());
+        rootSegment.addChild(createExcludedSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createAndSegment();
+        rootSegment2.addChild(createNegatedAndSegment());
+        rootSegment2.addChild(createSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (A), (A, B)
+         *
+         * Expected to not meet criteria:
+         * (), (B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+
+    private static testMethod void testNegatedOrWithEmptyAndAndSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (NOT
+         *     (OR
+         *         (AND)
+         *         (SOURCE A)
+         *     )
+         * )
+         *
+         * Equivalent to:
+         * (AND
+         *     (NOT (AND))
+         *     (NOT (SOURCE A))
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createNegatedOrSegment();
+        rootSegment.addChild(createAndSegment());
+        rootSegment.addChild(createSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createAndSegment();
+        rootSegment2.addChild(createNegatedAndSegment());
+        rootSegment2.addChild(createExcludedSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (), (B)
+         *
+         * Expected to not meet criteria:
+         * (A), (A, B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testNegatedOrWithEmptyOrAndExcludedSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (NOT
+         *     (OR
+         *         (OR)
+         *         (NOT (SOURCE A))
+         *     )
+         * )
+         *
+         * Equivalent to:
+         * (AND
+         *     (NOT (OR))
+         *     (SOURCE A)
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createNegatedOrSegment();
+        rootSegment.addChild(createOrSegment());
+        rootSegment.addChild(createExcludedSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createAndSegment();
+        rootSegment2.addChild(createNegatedOrSegment());
+        rootSegment2.addChild(createSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (A), (A, B)
+         *
+         * Expected to not meet criteria:
+         * (), (B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testNegatedOrWithEmptyOrAndSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (NOT
+         *     (OR
+         *         (OR)
+         *         (SOURCE A)
+         *     )
+         * )
+         *
+         * Equivalent to:
+         * (AND
+         *     (NOT (OR))
+         *     (NOT (SOURCE A))
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createNegatedOrSegment();
+        rootSegment.addChild(createOrSegment());
+        rootSegment.addChild(createSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createAndSegment();
+        rootSegment2.addChild(createNegatedOrSegment());
+        rootSegment2.addChild(createExcludedSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (), (B)
+         *
+         * Expected to not meet criteria:
+         * (A), (A, B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testOrWithNegatedEmptyAndAndExcludedSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (OR
+         *     (NOT (AND))
+         *     (NOT (SOURCE A))
+         * )
+         *
+         * Equivalent to:
+         * (NOT
+         *     (AND
+         *         (AND)
+         *         (SOURCE A)
+         *     )
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createOrSegment();
+        rootSegment.addChild(createNegatedAndSegment());
+        rootSegment.addChild(createExcludedSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createNegatedAndSegment();
+        rootSegment2.addChild(createAndSegment());
+        rootSegment2.addChild(createSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (), (B)
+         *
+         * Expected to not meet criteria:
+         * (A), (A, B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testOrWithNegatedEmptyAndAndSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (OR
+         *     (NOT (AND))
+         *     (SOURCE A)
+         * )
+         *
+         * Equivalent to:
+         * (NOT
+         *     (AND
+         *         (AND)
+         *         (NOT (SOURCE A))
+         *     )
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignListSegment rootSegment = createOrSegment();
+        rootSegment.addChild(createNegatedAndSegment());
+        rootSegment.addChild(createSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createNegatedAndSegment();
+        rootSegment2.addChild(createAndSegment());
+        rootSegment2.addChild(createExcludedSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (A), (A, B)
+         *
+         * Expected to not meet criteria:
+         * (), (B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testOrWithNegatedEmptyOrAndExcludedSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (OR
+         *     (NOT (OR))
+         *     (NOT (SOURCE A))
+         * )
+         *
+         * Equivalent to:
+         * (NOT
+         *     (AND
+         *         (OR)
+         *         (SOURCE A)
+         *     )
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignList.Segment rootSegment = createOrSegment();
+        rootSegment.addChild(createNegatedOrSegment());
+        rootSegment.addChild(createExcludedSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createNegatedAndSegment();
+        rootSegment2.addChild(createOrSegment());
+        rootSegment2.addChild(createSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (), (B)
+         *
+         * Expected to not meet criteria:
+         * (A), (A, B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testOrWithNegatedEmptyOrAndSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (OR
+         *     (NOT (OR))
+         *     (SOURCE A)
+         * )
+         *
+         * Equivalent to:
+         * (NOT
+         *     (AND
+         *         (OR)
+         *         (NOT (SOURCE A))
+         *     )
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignList.Segment rootSegment = createOrSegment();
+        rootSegment.addChild(createNegatedOrSegment());
+        rootSegment.addChild(createSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createNegatedAndSegment();
+        rootSegment2.addChild(createOrSegment());
+        rootSegment2.addChild(createExcludedSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (A), (A, B)
+         *
+         * Expected to not meet criteria:
+         * (), (B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testOrWithEmptyAndAndExcludedSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (OR
+         *     (AND)
+         *     (NOT (SOURCE A))
+         * )
+         *
+         * Equivalent to:
+         * (NOT
+         *     (AND
+         *         (NOT (AND))
+         *         (SOURCE A)
+         *     )
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignList.Segment rootSegment = createOrSegment();
+        rootSegment.addChild(createAndSegment());
+        rootSegment.addChild(createExcludedSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createNegatedAndSegment();
+        rootSegment2.addChild(createNegatedAndSegment());
+        rootSegment2.addChild(createSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (), (B)
+         *
+         * Expected to not meet criteria:
+         * (A), (A, B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testOrWithEmptyAndAndSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (OR
+         *     (AND)
+         *     (SOURCE A)
+         * )
+         *
+         * Equivalent to:
+         * (NOT
+         *     (AND
+         *         (NOT (AND))
+         *         (NOT (SOURCE A))
+         *     )
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignList.Segment rootSegment = createOrSegment();
+        rootSegment.addChild(createAndSegment());
+        rootSegment.addChild(createSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createNegatedAndSegment();
+        rootSegment2.addChild(createNegatedAndSegment());
+        rootSegment2.addChild(createExcludedSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (A), (A, B)
+         *
+         * Expected to not meet criteria:
+         * (), (B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
+    private static testMethod void testOrWithEmptyOrAndExcludedSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (OR
+         *     (OR)
+         *     (NOT (SOURCE A))
+         * )
+         *
+         * (NOT
+         *     (AND
+         *         (NOT (OR))
+         *         (SOURCE A)
+         *     )
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignList.Segment rootSegment = createOrSegment();
+        rootSegment.addChild(createOrSegment());
+        rootSegment.addChild(createExcludedSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createNegatedAndSegment();
+        rootSegment2.addChild(createNegatedOrSegment());
+        rootSegment2.addChild(createSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (), (B)
+         *
+         * Expected to not meet criteria:
+         * (A), (A, B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('()')));
+
+    }
+
+    private static testMethod void testOrWithEmptyOrAndSource() {
+        /*
+         * Criteria tree as s-expression:
+         * (OR
+         *     (OR)
+         *     (SOURCE A)
+         * )
+         *
+         * Equivalent to:
+         * (NOT
+         *     (AND
+         *         (NOT (OR))
+         *         (NOT (SOURCE A))
+         *     )
+         * )
+         */
+
+        Id A = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id B = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        CampaignList.Segment rootSegment = createOrSegment();
+        rootSegment.addChild(createOrSegment());
+        rootSegment.addChild(createSourceSegment(A));
+
+        CampaignListSegment rootSegment2 = createNegatedAndSegment();
+        rootSegment2.addChild(createNegatedOrSegment());
+        rootSegment2.addChild(createExcludedSourceSegment(A));
+
+        /*
+         * Test members:
+         * (), (A), (B), (A, B)
+         *
+         * Expected to meet criteria:
+         * (A), (A, B)
+         *
+         * Expected to not meet criteria:
+         * (), (B)
+         */
+
+        Map<String, CampaignList.Member> members = getTestMembersWithSources(A, B);
+
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment.meetsCriteria(members.get('()')));
+
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('(B)')));
+        System.assertEquals(true, rootSegment2.meetsCriteria(members.get('(A, B)')));
+        System.assertEquals(false, rootSegment2.meetsCriteria(members.get('()')));
+    }
+
     private static CampaignListSegment createOrSegment() {
         return createSegment('OR', false);
     }
 
+    private static CampaignListSegment createNegatedOrSegment() {
+        return createSegment('OR', true);
+    }
+
     private static CampaignListSegment createAndSegment() {
         return createSegment('AND', false);
+    }
+
+    private static CampaignListSegment createNegatedAndSegment() {
+        return createSegment('AND', true);
     }
 
     private static CampaignListSegment createSourceSegment(Id sourceId) {
@@ -360,11 +1204,11 @@ private class CampaignListSegment_TEST2 {
 
     private static CampaignListSegment createSegment(String operator, Boolean isExclusion, Id sourceId) {
         if ('OR' == operator) {
-            return new CampaignListSegment.OrSegment(null, null, null);
+            return new CampaignListSegment.OrSegment(null, null, null, isExclusion);
         } else if ('AND' == operator) {
-            return new CampaignListSegment.AndSegment(null, null, null);
+            return new CampaignListSegment.AndSegment(null, null, null, isExclusion);
         } else if ('SOURCE' == operator) {
-            return new CampaignListSegment.CampaignSourceSegment(null, null, null, sourceId, isExclusion);
+            return new CampaignListSegment.CampaignSourceSegment(null, null, null, isExclusion, sourceId);
         }
         return null;
     }
