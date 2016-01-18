@@ -1,19 +1,11 @@
 <aura:component controller="CampaignListBuilder_CTRL" >
     <aura:attribute name="campaignId" type="String" />
     <aura:attribute name="campaign" type="Campaign"/>
-    <aura:attribute name="csegRoot" type="CSegment"/>
-    <aura:attribute name="csegRootOriginal" type="CSegment"/>
-    <aura:attribute name="csegExcludes" type="CSegment"/>
+    <aura:attribute name="csegRoot" type="Object"/>
+    <aura:attribute name="csegRootOriginal" type="Object"/>
+    <aura:attribute name="csegExcludes" type="Object"/>
     <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
     <aura:handler event="c:addCSegmentEvent" action="{!c.handleAddCSegmentEvent}"/>
-
-
-    <!-- <ltng:require styles="/resource/bssf1" /> -->
-
-    <!-- gets an error when loading here, but ok from the vfpage!!!!
-    <ltng:require scripts="/resource/LightningDesignSystem/assets/styles/salesforce-lightning-design-system.css" />
-    -->
-
 
     <!-- only needed by autocomplete component, but lightning bug fails to load it there -->
     <ltng:require scripts="/resource/jquery,/resource/jqueryui/jqueryui/jquery-ui.js,"

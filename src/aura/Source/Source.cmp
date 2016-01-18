@@ -1,20 +1,20 @@
 <aura:component >
-    <aura:attribute name="source" type="CSegment"/>
+    <aura:attribute name="source" type="Object"/>
     <aura:registerEvent name="deleteCSegmentEvent" type="c:deleteCSegmentEvent"/>
 
     <div class="filter slds-form--inline">
         <div class="slds-form-element">
             <ui:inputSelect class="slds-select" aura:id="sourceType" change="{!c.handleSourceType}">
                 <ui:inputSelectOption text="Select Source Type"/>
-                <ui:inputSelectOption text="Campaign" label="Campaign" value="{!v.source.Segment.Source_Type__c == 'Campaign'}" />
-                <ui:inputSelectOption text="Report" label="Report" value="{!v.source.Segment.Source_Type__c == 'Report'}" />
+                <ui:inputSelectOption text="CAMPAIGN_SOURCE_SEGMENT" label="Campaign" value="{!v.source.segmentType == 'CAMPAIGN_SOURCE_SEGMENT'}" />
+                <ui:inputSelectOption text="REPORT_SOURCE_SEGMENT" label="Report" value="{!v.source.segmentType == 'REPORT_SOURCE_SEGMENT'}" />
             </ui:inputSelect>
         </div>
         <div class="slds-form-element" style="width:60%">
-            <aura:if isTrue="{!v.source.Segment.Source_Type__c == 'Report'}">
+            <aura:if isTrue="{!v.source.segmentType == 'REPORT_SOURCE_SEGMENT'}">
                 <c:autocomplete sObjectType="Report" autocompleteEvent="{!c.handleAutocomplete}" placeholder="find..." value="{!v.source.sourceName}" fields="" />
             </aura:if>
-            <aura:if isTrue="{!v.source.Segment.Source_Type__c == 'Campaign'}">
+            <aura:if isTrue="{!v.source.segmentType == 'CAMPAIGN_SOURCE_SEGMENT'}">
                 <c:autocomplete sObjectType="Campaign" autocompleteEvent="{!c.handleAutocomplete}" placeholder="find..." value="{!v.source.sourceName}" fields="" />
             </aura:if>
         </div>
