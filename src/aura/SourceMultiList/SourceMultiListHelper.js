@@ -1,22 +1,22 @@
 ({
     insertParentInTree : function(cseg, csegNewParent) {
         // replace cseg from its parent's children with csegNewParent
-        var csegOldParent = cseg.parentCSegment;
-        var i = csegOldParent.listChildCSegments.indexOf(cseg);
-        csegOldParent.listChildCSegments[i] = csegNewParent;
+        var csegOldParent = cseg.parent;
+        var i = csegOldParent.children.indexOf(cseg);
+        csegOldParent.children[i] = csegNewParent;
 
         // make sure the new parent has its correct parent
-        csegNewParent.parentCSegment = csegOldParent;
+        csegNewParent.parent = csegOldParent;
 
         // add cseg to new parent's children
-        csegNewParent.listChildCSegments.push(cseg);
+        csegNewParent.children.push(cseg);
 
         // set new Parent for cseg
-        cseg.parentCSegment = csegNewParent;
+        cseg.parent = csegNewParent;
     },
 
     insertChildInTree : function (cseg, csegNewChild) {
-        csegNewChild.parentCSegment = cseg;
-        cseg.listChildCSegments.push(csegNewChild);
+        csegNewChild.parent = cseg;
+        cseg.children.push(csegNewChild);
     }
 })

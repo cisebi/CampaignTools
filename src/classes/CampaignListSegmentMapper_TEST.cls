@@ -29,20 +29,11 @@
 */
 @isTest
 private class CampaignListSegmentMapper_TEST {
-    private static testMethod void testGetSourceNameByCampaignId() {
+    @isTest(SeeAllData=True)
+    private static void testGetSourceNamesByIds() {
         Campaign testCampaign = new Campaign(Name='Test Campaign');
         insert testCampaign;
 
-        CampaignListSegmentMapper segmentMapper = new CampaignListSegmentMapper();
-
-        System.assertEquals(
-            'Campaign: Test Campaign',
-            segmentMapper.getSourceNameById(testCampaign.Id)
-        );
-    }
-
-    @isTest(SeeAllData=True)
-    private static void testGetSourceNameByReportId() {
         Report testReport = [
             SELECT Name
             FROM Report
@@ -50,12 +41,19 @@ private class CampaignListSegmentMapper_TEST {
             LIMIT 1
         ];
 
+        List<Id> sourceIds = new List<Id>{
+            testCampaign.Id,
+            testReport.Id
+        };
+
         CampaignListSegmentMapper segmentMapper = new CampaignListSegmentMapper();
 
-        System.assertEquals(
-            'Report: NPSP Test Contact Report',
-            segmentMapper.getSourceNameById(testReport.Id)
-        );
+        Map<Id, String> sourceNames = segmentMapper.getSourceNamesByIds(sourceIds);
+
+        System.assert(sourceNames.containsKey(testCampaign.Id));
+        System.assertEquals('Test Campaign', sourceNames.get(testCampaign.Id));
+        System.assert(sourceNames.containsKey(testReport.Id));
+        System.assertEquals('NPSP Test Contact Report', sourceNames.get(testReport.Id));
     }
 
     private static testMethod void testGetByRootSegmentId() {
@@ -219,5 +217,407 @@ private class CampaignListSegmentMapper_TEST {
         }
 
         System.assert(invalidSegmentExceptionThrown);
+    }
+
+    private static testMethod void testUpsertSegmentTreeByRootSegmentForNewSegments() {
+        Id campaignId1 = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id campaignId2 = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id reportId = CampaignList_TEST.getNextId(Report.sObjectType);
+        CampaignList.Segment rootSegment = new CampaignListSegment.AndSegment(null, null, null, false);
+        CampaignList.Segment orSegment = new CampaignListSegment.OrSegment(null, null, null, false);
+        CampaignList.Segment campaignSourceSegment1 = new CampaignListSegment.CampaignSourceSegment(null, null, null, false, campaignId1);
+        CampaignList.Segment campaignSourceSegment2 = new CampaignListSegment.CampaignSourceSegment(null, null, null, true, campaignId2);
+        CampaignList.Segment reportSourceSegment = new CampaignListSegment.ReportSourceSegment(null, null, null, false, reportId, 'TEST_COLUMN_NAME');
+
+        orSegment.addChild(campaignSourceSegment2);
+        orSegment.addChild(reportSourceSegment);
+        rootSegment.addChild(campaignSourceSegment1);
+        rootSegment.addChild(orSegment);
+
+        CampaignListSegmentMapper mapper = new CampaignListSegmentMapper();
+
+        Test.startTest();
+
+        Id rootSegmentId = mapper.upsertSegmentTreeByRootSegment(rootSegment);
+
+        Test.stopTest();
+
+        Integer createdSegmentCount = [
+            SELECT COUNT()
+            FROM Segment__c
+            WHERE Root_Segment__c = :rootSegmentId
+            OR Id = :rootSegmentId
+        ];
+
+        System.assertEquals(5, createdSegmentCount);
+
+        Segment__c actualRootSegment = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Id = :rootSegmentId
+        ];
+
+        System.assertEquals(null, actualRootSegment.Parent_Segment__c);
+        System.assertEquals('AND', actualRootSegment.Operation__c);
+        System.assertEquals(null, actualRootSegment.Source_ID__c);
+        System.assertEquals(false, actualRootSegment.Exclude_Source__c);
+        System.assertEquals(null, actualRootSegment.Report_Column_Name__c);
+        System.assertEquals(null, actualRootSegment.Root_Segment__c);
+
+        Segment__c actualOrSegment = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Parent_Segment__c = :rootSegmentId
+            AND Operation__c = 'OR'
+        ];
+
+        System.assertEquals(rootSegmentId, actualOrSegment.Parent_Segment__c);
+        System.assertEquals('OR', actualOrSegment.Operation__c);
+        System.assertEquals(null, actualOrSegment.Source_ID__c);
+        System.assertEquals(false, actualOrSegment.Exclude_Source__c);
+        System.assertEquals(null, actualOrSegment.Report_Column_Name__c);
+        System.assertEquals(rootSegmentId, actualOrSegment.Root_Segment__c);
+
+        Segment__c actualCampaignSourceSegment1 = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Source_ID__c = :campaignId1
+        ];
+
+        System.assertEquals(rootSegmentId, actualCampaignSourceSegment1.Parent_Segment__c);
+        System.assertEquals('SOURCE', actualCampaignSourceSegment1.Operation__c);
+        System.assertEquals(campaignId1, actualCampaignSourceSegment1.Source_ID__c);
+        System.assertEquals(false, actualCampaignSourceSegment1.Exclude_Source__c);
+        System.assertEquals(null, actualCampaignSourceSegment1.Report_Column_Name__c);
+        System.assertEquals(rootSegmentId, actualCampaignSourceSegment1.Root_Segment__c);
+
+        Segment__c actualCampaignSourceSegment2 = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Source_ID__c = :campaignId2
+        ];
+
+        System.assertEquals(actualOrSegment.Id, actualCampaignSourceSegment2.Parent_Segment__c);
+        System.assertEquals('SOURCE', actualCampaignSourceSegment2.Operation__c);
+        System.assertEquals(campaignId2, actualCampaignSourceSegment2.Source_ID__c);
+        System.assertEquals(true, actualCampaignSourceSegment2.Exclude_Source__c);
+        System.assertEquals(null, actualCampaignSourceSegment2.Report_Column_Name__c);
+        System.assertEquals(rootSegmentId, actualCampaignSourceSegment2.Root_Segment__c);
+
+        Segment__c actualReportSourceSegment = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Source_ID__c = :reportId
+        ];
+
+        System.assertEquals(actualOrSegment.Id, actualReportSourceSegment.Parent_Segment__c);
+        System.assertEquals('SOURCE', actualReportSourceSegment.Operation__c);
+        System.assertEquals(reportId, actualReportSourceSegment.Source_ID__c);
+        System.assertEquals(false, actualReportSourceSegment.Exclude_Source__c);
+        System.assertEquals('TEST_COLUMN_NAME', actualReportSourceSegment.Report_Column_Name__c);
+        System.assertEquals(rootSegmentId, actualReportSourceSegment.Root_Segment__c);
+    }
+
+    public static testMethod void testUpsertSegmentTreeByRootSegmentForExistingSegments() {
+        Id campaignId1 = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id campaignId2 = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id reportId = CampaignList_TEST.getNextId(Report.sObjectType);
+
+        Segment__c existingRootSegment = new Segment__c(
+            Operation__c = 'AND',
+            Exclude_Source__c = false
+        );
+
+        insert existingRootSegment;
+
+        Segment__c existingOrSegment = new Segment__c(
+            Parent_Segment__c = existingRootSegment.Id,
+            Root_Segment__c = existingRootSegment.Id,
+            Operation__c = 'OR',
+            Exclude_Source__c = false
+        );
+
+        insert existingOrSegment;
+
+        Segment__c existingCampaignSourceSegment1 = new Segment__c(
+            Parent_Segment__c = existingRootSegment.Id,
+            Root_Segment__c = existingRootSegment.Id,
+            Operation__c = 'SOURCE',
+            Exclude_Source__c = false,
+            Source_ID__c = campaignId1
+        );
+
+        insert existingCampaignSourceSegment1;
+
+        Segment__c existingCampaignSourceSegment2 = new Segment__c(
+            Parent_Segment__c = existingOrSegment.Id,
+            Root_Segment__c = existingRootSegment.Id,
+            Operation__c = 'SOURCE',
+            Exclude_Source__c = true,
+            Source_ID__c = campaignId2
+        );
+
+        insert existingCampaignSourceSegment2;
+
+        Segment__c existingReportSourceSegment = new Segment__c(
+            Parent_Segment__c = existingOrSegment.Id,
+            Root_Segment__c = existingRootSegment.Id,
+            Operation__c = 'SOURCE',
+            Exclude_Source__c = false,
+            Source_ID__c = reportId,
+            Report_Column_Name__c = 'TEST_COLUMN_NAME'
+        );
+
+        insert existingReportSourceSegment;
+
+        /*
+         * We're going to re-use some of the above segments, but not all of them, and also create some new segments
+         */
+
+        CampaignList.Segment rootSegment = new CampaignListSegment.AndSegment(
+            existingRootSegment.Id,
+            null,
+            null,
+            false
+        );
+
+        CampaignList.Segment orSegment = new CampaignListSegment.OrSegment(
+            existingOrSegment.Id,
+            existingRootSegment.Id,
+            existingRootSegment.Id,
+            false
+        );
+
+        CampaignList.Segment campaignSourceSegment2 = new CampaignListSegment.CampaignSourceSegment(
+            existingCampaignSourceSegment2.Id,
+            existingRootSegment.Id,
+            existingOrSegment.Id,
+            false, // note this is being changed
+            campaignId2
+        );
+
+        CampaignList.Segment reportSourceSegment = new CampaignListSegment.ReportSourceSegment(
+            null, // this is a completely new segment
+            existingRootSegment.Id,
+            existingOrSegment.Id,
+            false,
+            reportId,
+            'TEST_COLUMN_NAME_2'
+        );
+
+        orSegment.addChild(campaignSourceSegment2);
+        orSegment.addChild(reportSourceSegment);
+        rootSegment.addChild(orSegment);
+
+        CampaignListSegmentMapper mapper = new CampaignListSegmentMapper();
+
+        Test.startTest();
+
+        Id rootSegmentId = mapper.upsertSegmentTreeByRootSegment(rootSegment);
+
+        Test.stopTest();
+
+        System.assertEquals(rootSegmentId, existingRootSegment.Id);
+
+        Integer createdSegmentCount = [
+            SELECT COUNT()
+            FROM Segment__c
+            WHERE Root_Segment__c = :rootSegmentId
+            OR Id = :rootSegmentId
+        ];
+
+        System.assertEquals(4, createdSegmentCount);
+
+        Segment__c actualRootSegment = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Id = :rootSegmentId
+        ];
+
+        System.assertEquals(null, actualRootSegment.Parent_Segment__c);
+        System.assertEquals('AND', actualRootSegment.Operation__c);
+        System.assertEquals(null, actualRootSegment.Source_ID__c);
+        System.assertEquals(false, actualRootSegment.Exclude_Source__c);
+        System.assertEquals(null, actualRootSegment.Report_Column_Name__c);
+        System.assertEquals(null, actualRootSegment.Root_Segment__c);
+
+        Segment__c actualOrSegment = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Id = :existingOrSegment.Id
+        ];
+
+        System.assertEquals(rootSegmentId, actualOrSegment.Parent_Segment__c);
+        System.assertEquals('OR', actualOrSegment.Operation__c);
+        System.assertEquals(null, actualOrSegment.Source_ID__c);
+        System.assertEquals(false, actualOrSegment.Exclude_Source__c);
+        System.assertEquals(null, actualOrSegment.Report_Column_Name__c);
+        System.assertEquals(rootSegmentId, actualOrSegment.Root_Segment__c);
+
+        Segment__c actualCampaignSourceSegment2 = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Id = :existingCampaignSourceSegment2.Id
+        ];
+
+        System.assertEquals(actualOrSegment.Id, actualCampaignSourceSegment2.Parent_Segment__c);
+        System.assertEquals('SOURCE', actualCampaignSourceSegment2.Operation__c);
+        System.assertEquals(campaignId2, actualCampaignSourceSegment2.Source_ID__c);
+        System.assertEquals(false, actualCampaignSourceSegment2.Exclude_Source__c);
+        System.assertEquals(null, actualCampaignSourceSegment2.Report_Column_Name__c);
+        System.assertEquals(rootSegmentId, actualCampaignSourceSegment2.Root_Segment__c);
+
+        Segment__c actualReportSourceSegment = [
+            SELECT
+                Parent_Segment__c,
+                Operation__c,
+                Source_ID__c,
+                Exclude_Source__c,
+                Report_Column_Name__c,
+                Root_Segment__c
+            FROM Segment__c
+            WHERE Source_ID__c = :reportId
+        ];
+
+        System.assertNotEquals(existingReportSourceSegment.Id, actualReportSourceSegment.Id);
+        System.assertEquals(actualOrSegment.Id, actualReportSourceSegment.Parent_Segment__c);
+        System.assertEquals('SOURCE', actualReportSourceSegment.Operation__c);
+        System.assertEquals(reportId, actualReportSourceSegment.Source_ID__c);
+        System.assertEquals(false, actualReportSourceSegment.Exclude_Source__c);
+        System.assertEquals('TEST_COLUMN_NAME_2', actualReportSourceSegment.Report_Column_Name__c);
+        System.assertEquals(rootSegmentId, actualReportSourceSegment.Root_Segment__c);
+    }
+
+    public static testMethod void testDeserializeSegmentFromJSON() {
+        Id rootSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id orSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id reportSourceSegmentId = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id campaignSourceSegmentId1 = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id campaignSourceSegmentId2 = CampaignList_TEST.getNextId(Segment__c.sObjectType);
+        Id reportId = CampaignList_TEST.getNextId(Report.sObjectType);
+        Id campaignId1 = CampaignList_TEST.getNextId(Campaign.sObjectType);
+        Id campaignId2 = CampaignList_TEST.getNextId(Campaign.sObjectType);
+
+        String serialized = '';
+        serialized += '{';
+        serialized += '    "segmentType": "AND_SEGMENT",';
+        serialized += '    "segmentId": "' + rootSegmentId + '",';
+        serialized += '    "isExclusion": false,';
+        serialized += '    "children": [';
+        serialized += '        {';
+        serialized += '            "segmentType": "OR_SEGMENT",';
+        serialized += '            "segmentId": "' + orSegmentId + '",';
+        serialized += '            "isExclusion": false,';
+        serialized += '            "children": [';
+        serialized += '                {';
+        serialized += '                    "segmentType": "CAMPAIGN_SOURCE_SEGMENT",';
+        serialized += '                    "segmentId": "' + campaignSourceSegmentId2 + '",';
+        serialized += '                    "isExclusion": true,';
+        serialized += '                    "sourceId": "' + campaignId2 + '",';
+        serialized += '                    "sourceName": "Campaign 2"';
+        serialized += '                },';
+        serialized += '                {';
+        serialized += '                    "segmentType": "REPORT_SOURCE_SEGMENT",';
+        serialized += '                    "segmentId": "' + reportSourceSegmentId + '",';
+        serialized += '                    "isExclusion": false,';
+        serialized += '                    "sourceId": "' + reportId + '",';
+        serialized += '                    "sourceName": "Report",';
+        serialized += '                    "columnName": "TEST_COLUMN_NAME"';
+        serialized += '                }';
+        serialized += '            ]';
+        serialized += '        },';
+        serialized += '        {';
+        serialized += '            "segmentType": "CAMPAIGN_SOURCE_SEGMENT",';
+        serialized += '            "segmentId": "' + campaignSourceSegmentId1 + '",';
+        serialized += '            "isExclusion": false,';
+        serialized += '            "sourceId": "' + campaignId1 + '",';
+        serialized += '            "sourceName": "Campaign 1"';
+        serialized += '        }';
+        serialized += '    ]';
+        serialized += '}';
+
+        CampaignListSegmentMapper mapper = new CampaignListSegmentMapper();
+
+        CampaignListSegment.AndSegment rootSegment = (CampaignListSegment.AndSegment) mapper.deserializeSegmentFromJSON(serialized);
+
+        System.assertEquals(rootSegmentId, rootSegment.getId());
+        System.assertEquals(false, rootSegment.isExclusion());
+        System.assertEquals(2, rootSegment.getChildren().size());
+
+        CampaignListSegment.OrSegment orSegment = (CampaignListSegment.OrSegment) rootSegment.getChildren().get(0);
+
+        System.assertEquals(orSegmentId, orSegment.getId());
+        System.assertEquals(false, orSegment.isExclusion());
+        System.assertEquals(2, orSegment.getChildren().size());
+
+        CampaignListSegment.CampaignSourceSegment campaignSourceSegment2 = (CampaignListSegment.CampaignSourceSegment) orSegment.getChildren().get(0);
+
+        System.assertEquals(campaignSourceSegmentId2, campaignSourceSegment2.getId());
+        System.assertEquals(true, campaignSourceSegment2.isExclusion());
+        System.assertEquals(campaignId2, campaignSourceSegment2.getSourceId());
+        System.assertEquals('Campaign 2', campaignSourceSegment2.getSourceName());
+
+        CampaignListSegment.ReportSourceSegment reportSourceSegment = (CampaignListSegment.ReportSourceSegment) orSegment.getChildren().get(1);
+
+        System.assertEquals(reportSourceSegmentId, reportSourceSegment.getId());
+        System.assertEquals(false, reportSourceSegment.isExclusion());
+        System.assertEquals(reportId, reportSourceSegment.getSourceId());
+        System.assertEquals('Report', reportSourceSegment.getSourceName());
+        System.assertEquals('TEST_COLUMN_NAME', reportSourceSegment.getColumnName());
+
+        CampaignListSegment.CampaignSourceSegment campaignSourceSegment1 = (CampaignListSegment.CampaignSourceSegment) rootSegment.getChildren().get(1);
+
+        System.assertEquals(campaignSourceSegmentId1, campaignSourceSegment1.getId());
+        System.assertEquals(false, campaignSourceSegment1.isExclusion());
+        System.assertEquals(campaignId1, campaignSourceSegment1.getSourceId());
+        System.assertEquals('Campaign 1', campaignSourceSegment1.getSourceName());
     }
 }
