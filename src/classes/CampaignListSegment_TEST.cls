@@ -79,23 +79,19 @@ private class CampaignListSegment_TEST {
             sourceId
         );
 
+        segment.setSourceName('Test Campaign');
+
         System.assertEquals(segmentId, segment.getId());
         System.assertEquals(rootSegmentId, segment.getRootSegmentId());
         System.assertEquals(parentId, segment.getParentId());
         System.assertEquals(sourceId, segment.getSourceId());
         System.assertEquals(false, segment.isExclusion());
-
-        CampaignList_TEST.SegmentMapperStub mapperStub = new CampaignList_TEST.SegmentMapperStub();
-        mapperStub.sourceName = 'Test Campaign';
-        CampaignList.setSegmentMapper(mapperStub);
-
         System.assertEquals('Test Campaign', segment.getSourceName());
-        System.assertEquals(sourceId, mapperStub.sourceId);
 
         CampaignListFromCampaignBatch batch = (CampaignListFromCampaignBatch) segment.getBatchProcessor();
         System.assertEquals(rootSegmentId, batch.rootSegmentId);
         System.assertEquals(sourceId, batch.campaignId);
-        System.assertEquals('Test Campaign', batch.campaignName);
+        System.assertEquals('Campaign: Test Campaign', batch.campaignName);
     }
 
     private static testMethod void testReportSourceSegment() {
@@ -113,24 +109,20 @@ private class CampaignListSegment_TEST {
             'test_column_name'
         );
 
+        segment.setSourceName('Test Report');
+
         System.assertEquals(segmentId, segment.getId());
         System.assertEquals(rootSegmentId, segment.getRootSegmentId());
         System.assertEquals(parentId, segment.getParentId());
         System.assertEquals(sourceId, segment.getSourceId());
         System.assertEquals(false, segment.isExclusion());
         System.assertEquals('test_column_name', segment.getColumnName());
-
-        CampaignList_TEST.SegmentMapperStub mapperStub = new CampaignList_TEST.SegmentMapperStub();
-        mapperStub.sourceName = 'Test Report';
-        CampaignList.setSegmentMapper(mapperStub);
-
         System.assertEquals('Test Report', segment.getSourceName());
-        System.assertEquals(sourceId, mapperStub.sourceId);
 
         CampaignListFromReportBatch batch = (CampaignListFromReportBatch) segment.getBatchProcessor();
         System.assertEquals(rootSegmentId, batch.rootSegmentId);
         System.assertEquals(sourceId, batch.reportId);
-        System.assertEquals('Test Report', batch.reportName);
+        System.assertEquals('Report: Test Report', batch.reportName);
         System.assertEquals('test_column_name', batch.idColumnName);
     }
 }

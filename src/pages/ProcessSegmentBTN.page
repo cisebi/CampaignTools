@@ -1,3 +1,4 @@
 <apex:page standardController="Campaign" extensions="ProcessSegmentBTN_CTRL" action="{!refreshCampaignList}" >
+    <apex:outputText value="{!Campaign.Campaign_List__c}" rendered="false"/>
     <apex:PageMessages />
 </apex:page>
