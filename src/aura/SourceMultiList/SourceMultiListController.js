@@ -6,24 +6,21 @@
 
         // our current segment may be a group or a source.
         // so if we are not a group, we have to add one.
-        if (group.Segment.Operation__c == 'SOURCE') {
-            var segNew = {Operation__c:'AND'};
+        if (group.segmentType != 'AND_SEGMENT' && group.segmentType != 'OR_SEGMENT') {
             var csegNew = {
-                Segment: segNew,
-                listChildCSegments: [],
-                rootCSegment: group.rootCSegment,
-                parentCSegment: group.parentCSegment
+                segmentType: 'AND_SEGMENT',
+                children: [],
+                root: group.root,
+                parent: group.parent
             };
             helper.insertParentInTree(group, csegNew);
             group = csegNew;
         }
 
-        var segNew = {Operation__c:'SOURCE'};
         var csegNew = {
-            Segment: segNew,
-            listChildCSegments: [],
-            rootCSegment: group.rootCSegment,
-            parentCSegment: group.parentCSegment
+            children: [],
+            root: group.root,
+            parent: group.parent
         };
         helper.insertChildInTree(group, csegNew);
 
@@ -50,20 +47,19 @@
             // deleting ourself?
             if (cseg == group) {
                 // turn a single segment into an empty group
-                if (cseg.Segment.Operation__c == 'SOURCE') {
-                    cseg.Segment.Operation__c = 'AND';
-                    cseg.Segment.Source_ID__c = null;
-                    cseg.Segment.Source_Type__c = null;
-                    cseg.listChildCSegments = [];
+                if (cseg.segmentType != 'AND_SEGMENT' && cseg.segmentType != 'OR_SEGMENT') {
+                    cseg.segmentType = 'AND_SEGMENT';
+                    cseg.sourceId = null;
+                    cseg.children = [];
                 }
 
             }
-            else if (group.listChildCSegments != null) {
-                var i = group.listChildCSegments.indexOf(cseg);
+            else if (group.children != null) {
+                var i = group.children.indexOf(cseg);
                 if (i >= 0) {
-                    group.listChildCSegments.splice(i, 1);
+                    group.children.splice(i, 1);
                     // if deleted our last child, delete ourself
-                    if (group.listChildCSegments.length == 0) {
+                    if (group.children.length == 0) {
                         var event = $A.get("e.c:deleteCSegmentEvent");
                         event.setParams({ "cseg" : group });
                         event.fire();
