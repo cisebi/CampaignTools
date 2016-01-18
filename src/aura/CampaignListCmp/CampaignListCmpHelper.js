@@ -2,7 +2,6 @@
     // called at init to load information from the campaign, including
     // it's segment tree (if one exists)
     loadCampaignInfo: function(component) {
-
         // parse out url parameter of campaignId
         //var cmpId = this.getParam('CampaignId');
         var cmpId = component.get('v.campaignId');
@@ -15,7 +14,6 @@
             var state = response.getState();
             if (component.isValid() && state === "SUCCESS") {
                 var campaign = response.getReturnValue();
-                console.log(campaign);
                 component.set("v.campaign", campaign);
                 if (campaign.Campaign_List__c != null)
                     self.loadCSegmentTree(component);
@@ -31,42 +29,28 @@
 
     // create a new CSegmentTree for a campaign
     newCSegmentTree: function(component) {
-        // we need to create new nodes for csegRoot, csegRootOriginal, and csegExcludes
-        var segRootOriginal = {
-            Operation__c : 'AND'
-        };
         var csegRootOriginal = {
-            Segment : segRootOriginal,
-            listChildCSegments : []
-        };
-        var segRoot = {
-            Operation__c : 'SOURCE'
-        };
-        var csegRoot = {
-            Segment : segRoot,
-            parentCSegment : csegRootOriginal,
-            rootCSegment : csegRootOriginal,
-            listChildCSegments : []
-        };
-        var segExcludes = {
-            Operation__c : 'AND',
-            Exclude_Source__c : true
-        };
-        var csegExcludes = {
-            Segment : segExcludes,
-            parentCSegment : csegRootOriginal,
-            rootCSegment : csegRootOriginal,
-            listChildCSegments : []
+            segmentType: 'AND_SEGMENT',
+            isExclusion: false,
+            children: [
+                {
+                    isExclusion: false,
+                    children: []
+                },
+                {
+                    segmentType: 'AND_SEGMENT',
+                    isExclusion: true,
+                    children: []
+                }
+            ]
         };
 
-        // hook up children
-        csegRootOriginal.listChildCSegments.push(csegRoot);
-        csegRootOriginal.listChildCSegments.push(csegExcludes);
+        this.setParentAndRootValues(csegRootOriginal, null, csegRootOriginal);
 
         // save our csegments with the component
-        component.set("v.csegRoot", csegRoot);
         component.set("v.csegRootOriginal", csegRootOriginal);
-        component.set("v.csegExcludes", csegExcludes);
+        component.set("v.csegRoot", csegRootOriginal.children[0]);
+        component.set("v.csegExcludes", csegRootOriginal.children[1]);
     },
 
     // load a CSegmentTree from the server
@@ -77,32 +61,30 @@
             return;
 
         // query for the segment tree
-        var action = component.get("c.getCSegmentTree");
-        action.setParams({ segmentId : cmp.Campaign_List__c });
+        var action = component.get("c.getSerializedSegmentTree");
+        action.setParams({ rootSegmentId : cmp.Campaign_List__c });
         var self = this;
         action.setCallback(this, function(response) {
             var state = response.getState();
             if (component.isValid() && state === "SUCCESS") {
-                var csegRoot = response.getReturnValue();
-                console.log(csegRoot);
+                var csegRoot = JSON.parse(response.getReturnValue());
                 var csegRootOriginal = csegRoot;
 
                 // our parent and root references will not get serialized from Apex to Javascript,
                 // so let's fix them up ourselves.
                 self.setParentAndRootValues(csegRoot, null, csegRoot);
-                console.log(csegRoot);
 
                 var csegExcludes = null;
                 // find the final excludes node
-                if (csegRoot.Segment.Operation__c == 'AND' &&
-                    csegRoot.listChildCSegments != null &&
-                    csegRoot.listChildCSegments.length == 2) {
-                    var cseg1 = csegRoot.listChildCSegments[0];
-                    var cseg2 = csegRoot.listChildCSegments[1];
-                    if (cseg1.Segment.Exclude_Source__c == true) {
+                if (csegRoot.segmentType == 'AND_SEGMENT' &&
+                    csegRoot.children != null &&
+                    csegRoot.children.length == 2) {
+                    var cseg1 = csegRoot.children[0];
+                    var cseg2 = csegRoot.children[1];
+                    if (cseg1.isExclusion) {
                         csegExcludes = cseg1;
                         csegRoot = cseg2;
-                    } else if (cseg2.Segment.Exclude_Source__c == true) {
+                    } else if (cseg2.isExclusion) {
                         csegExcludes = cseg2;
                         csegRoot = cseg1;
                     }
@@ -134,21 +116,20 @@
 
     // set the Parent and Root CSegment values for each node in the tree
     setParentAndRootValues: function(csegRoot, csegParent, csegChild) {
-        csegChild.rootCSegment = csegRoot;
-        csegChild.parentCSegment = csegParent;
-        for (var i = 0; i < csegChild.listChildCSegments.length; i++) {
-            var cseg = csegChild.listChildCSegments[i];
+        csegChild.root = csegRoot;
+        csegChild.parent = csegParent;
+        for (var i = 0; i < csegChild.children.length; i++) {
+            var cseg = csegChild.children[i];
             this.setParentAndRootValues(csegRoot, csegChild, cseg);
         }
     },
 
     // clear the Parent and Root CSegment values for each node in the tree
     clearParentAndRootValues: function(cseg) {
-        cseg.rootCSegment = null;
-        cseg.parentCSegment = null;
-        cseg.Segment.Segments__r = null;
-        for (var i = 0; i < cseg.listChildCSegments.length; i++) {
-            var csegChild = cseg.listChildCSegments[i];
+        cseg.root = null;
+        cseg.parent = null;
+        for (var i = 0; i < cseg.children.length; i++) {
+            var csegChild = cseg.children[i];
             this.clearParentAndRootValues(csegChild);
         }
     },
@@ -169,9 +150,7 @@
         // JSON cannot handle.
         // unfortunately, we couldn't get aura to marshall our csegRoot,
         // so now we are converting it to JSON and passing that instead.
-        console.log(csegRoot);
         this.clearParentAndRootValues(csegRoot);
-        console.log(csegRoot);
         strJson = JSON.stringify(csegRoot);
 
         // save the segment tree
@@ -220,23 +199,23 @@
 
     insertParentInTree : function(cseg, csegNewParent) {
         // replace cseg from its parent's children with csegNewParent
-        var csegOldParent = cseg.parentCSegment;
-        var i = csegOldParent.listChildCSegments.indexOf(cseg);
-        csegOldParent.listChildCSegments[i] = csegNewParent;
+        var csegOldParent = cseg.parent;
+        var i = csegOldParent.children.indexOf(cseg);
+        csegOldParent.children[i] = csegNewParent;
 
         // make sure the new parent has its correct parent
-        csegNewParent.parentCSegment = csegOldParent;
+        csegNewParent.parent = csegOldParent;
 
         // add cseg to new parent's children
-        csegNewParent.listChildCSegments.push(cseg);
+        csegNewParent.children.push(cseg);
 
         // set new Parent for cseg
-        cseg.parentCSegment = csegNewParent;
+        cseg.parent = csegNewParent;
     },
 
     insertChildInTree : function (cseg, csegNewChild) {
-        csegNewChild.parentCSegment = cseg;
-        cseg.listChildCSegments.push(csegNewChild);
+        csegNewChild.parent = cseg;
+        cseg.children.push(csegNewChild);
     },
 
     addGroup: function(component, event) {
@@ -248,13 +227,12 @@
 
         // if current segment is a source, we want
         // to create an AND group for it, before we create the other new group
-        if (cseg.Segment.Operation__c == 'SOURCE') {
-            var segNew = {Operation__c:'AND'};
+        if (cseg.segmentType != 'AND_SOURCE' && cseg.segmentType != 'OR_SEGMENT') {
             var csegNew = {
-                Segment: segNew,
-                listChildCSegments: [],
-                rootCSegment: cseg.rootCSegment,
-                parentCSegment: cseg.paretCSegment
+                segmentType: 'AND_SEGMENT',
+                children: [],
+                root: cseg.root,
+                parent: cseg.parent
             };
             this.insertParentInTree(cseg, csegNew);
             // if the group was the root, update the app's root
@@ -268,13 +246,12 @@
         }
 
         // if the current segment isn't an OR, then we have to add a level
-        if (cseg.Segment.Operation__c != 'OR') {
-            var segNew = {Operation__c:'OR'};
+        if (cseg.segmentType != 'OR_SEGMENT') {
             var csegNew = {
-                Segment: segNew,
-                listChildCSegments: [],
-                rootCSegment: cseg.rootCSegment,
-                parentCSegment: cseg.parentCSegment
+                segmentType: 'OR_SEGMENT',
+                children: [],
+                root: cseg.root,
+                parent: cseg.parent
             };
             this.insertParentInTree(cseg, csegNew);
 
@@ -290,21 +267,18 @@
         }
 
         // now create the new child
-        var segNew = {Operation__c:'AND'};
         var csegNewGroup = {
-            Segment: segNew,
-            listChildCSegments: [],
-            rootCSegment: cseg.rootCSegment,
-            parentCSegment: cseg
+            segmentType: 'AND_SEGMENT',
+            children: [],
+            root: cseg.root,
+            parent: cseg
         };
         this.insertChildInTree(cseg, csegNewGroup);
         // now create the new child's src
-        var segNew = {Operation__c:'SOURCE'};
         var csegNew = {
-            Segment: segNew,
-            listChildCSegments: [],
-            rootCSegment: csegNewGroup.rootCSegment,
-            parentCSegment: csegNewGroup
+            children: [],
+            root: csegNewGroup.root,
+            parent: csegNewGroup
         };
         this.insertChildInTree(csegNewGroup, csegNew);
 

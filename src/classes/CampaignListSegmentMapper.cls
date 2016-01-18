@@ -35,33 +35,36 @@
  */
 public class CampaignListSegmentMapper implements CampaignList.SegmentMapper {
     /**
-     * @description A map of source ids to source names used for caching source
-     * name lookups
-     */
-    private static Map<Id, String> sourceNames = new Map<Id, String>();
-
-    /**
-     * @description Given the id of a source, i.e. a Report or Campaign, look
-     * up the name of that source.  This might execute a SOQL query.
+     * @description Given a list of report or campaign ids, return a map of names for those ids
      *
-     * @param sourceId The id of the source (i.e. a Report id or a Campaign id
-     * @return String (the name of the source)
+     * @param sourceIds a list of report or campaign ids
+     * @return Map<Id, String>
      */
-    public String getSourceNameById(Id sourceId) {
-        if (!sourceNames.containsKey(sourceId)) {
-            String name;
-            try {
-                if (Report.sObjectType == sourceId.getSObjectType()) {
-                    name = 'Report: ' + [SELECT Name FROM Report WHERE Id = :sourceId].Name;
-                } else if (Campaign.sObjectType == sourceId.getSObjectType()) {
-                    name = 'Campaign: ' + [SELECT Name FROM Campaign WHERE Id = :sourceId].Name;
-                }
-            } catch (System.QueryException e) {
-                name = '';
-            }
-            sourceNames.put(sourceId, name);
+    @TestVisible
+    private Map<Id, String> getSourceNamesByIds(List<Id> sourceIds) {
+        Map<Id, String> names = new Map<Id, String>();
+
+        List<Report> reportNames = [
+            SELECT Name
+            FROM Report
+            WHERE Id IN :sourceIds
+        ];
+
+        List<Campaign> campaignNames = [
+            SELECT Name
+            FROM Campaign
+            WHERE Id IN :sourceIds
+        ];
+
+        for (Report r : reportNames) {
+            names.put(r.Id, r.Name);
         }
-        return sourceNames.get(sourceId);
+
+        for (Campaign c : campaignNames) {
+            names.put(c.Id, c.Name);
+        }
+
+        return names;
     }
 
     /**
@@ -96,7 +99,52 @@ public class CampaignListSegmentMapper implements CampaignList.SegmentMapper {
             }
         }
 
+        setSourceNamesBySegmentTree(rootSegment);
+
         return rootSegment;
+    }
+
+    /**
+     * @description Pluck out the id of the associated source for each source segment in the segment tree
+     *
+     * @param rootSegment The root segment of the segment tree
+     * @return List<Id>
+     */
+    private List<Id> getSourceIdsFromSegmentTree(CampaignList.Segment rootSegment) {
+        Iterator<CampaignList.Segment> it = rootSegment.iterator();
+
+        Set<Id> sourceIds = new Set<Id>();
+
+        while(it.hasNext()) {
+            CampaignList.Segment next = it.next();
+            if (next instanceof CampaignListSegment.SourceSegment) {
+                CampaignListSegment.SourceSegment sourceSegment = (CampaignListSegment.SourceSegment) next;
+                sourceIds.add(sourceSegment.getSourceId());
+            }
+        }
+
+        return new List<Id>(sourceIds);
+    }
+
+    /**
+     * @description Populate the given segment tree's source nodes with the name of the source they are associated with
+     *
+     * @param rootSegment The root segment of the segment tree
+     * @return void
+     */
+    private void setSourceNamesBySegmentTree(CampaignList.Segment rootSegment) {
+        List<Id> sourceIds = getSourceIdsFromSegmentTree(rootSegment);
+        Map<Id, String> sourceNamesById = getSourceNamesByIds(sourceIds);
+
+        Iterator<CampaignList.Segment> it = rootSegment.iterator();
+
+        while (it.hasNext()) {
+            CampaignList.Segment next = it.next();
+            if (next instanceof CampaignListSegment.SourceSegment) {
+                CampaignListSegment.SourceSegment sourceSegment = (CampaignListSegment.SourceSegment) next;
+                sourceSegment.setSourceName(sourceNamesById.get(sourceSegment.getSourceId()));
+            }
+        }
     }
 
     /**
@@ -154,5 +202,226 @@ public class CampaignListSegmentMapper implements CampaignList.SegmentMapper {
             }
         }
         throw new CampaignList.InvalidSegmentSObjectException('Invalid Segment__c object');
+    }
+
+    /**
+     * @description Given a segment tree (by root segment), persist that tree
+     * to the database by updating existing segments, inserting new ones, and
+     * removing segments that are no longer a part of that segment tree.
+     *
+     * @param rootSegment The root segment of the updated segment tree
+     * @return Id (The id of the root segment)
+     */
+    public Id upsertSegmentTreeByRootSegment(CampaignList.Segment rootSegment) {
+        /*
+        This method saves a segment tree to the database in three stages:
+
+        First, the segments are saved without any information that relates them
+        to each other.
+
+        Second, those saved records are updated with lookups to their parent
+        and root segments, using the ids that have been generated in the first
+        step.
+
+        Finally, any segments in the database that no longer belong to the
+        segment tree are deleted.
+
+        When saving a segment tree where every segment in the tree has
+        previously existed in the database, and therefore has an id, then the
+        two step update process is not necessary.  However, we have no guarantee
+        that every segment in the segment tree has an id.  Some, or all, of the
+        segments in the tree may have been created anew, and after inserting
+        these new segments, the second step is necessary to update the lookups
+        of segments that are children of these new nodes.
+
+        This process will save a segment tree of thousands of segments and
+        arbitrary structure, with all previously existing segments, all new
+        segments, or a mix of both, in exactly 3 DML statements.
+        */
+
+        List<CampaignList.Segment> segments = new List<CampaignList.Segment>();
+        List<Segment__c> segmentSObjects = new List<Segment__c>();
+
+        /*
+        To prepare to upsert the segment records without any lookups populated,
+        we iterate over the segment tree.  For each segment model object, we
+        clear that segment's relationship data, add that model object to a list
+        for referencing later, and add a Segment__c sObject for each segment
+        model object to a list for upserting.
+
+        Clearing the lookup ids from each segment does not cause the actual
+        relationship between segments in the tree to be lost, because each
+        segment still holds a reference to its children.
+        */
+        Iterator<CampaignList.Segment> segmentIterator = rootSegment.iterator();
+
+        while(segmentIterator.hasNext()) {
+            CampaignList.Segment next = segmentIterator.next();
+            next.setParentId(null);
+            next.setRootSegmentId(null);
+            segments.add(next);
+            segmentSObjects.add(next.getSObject());
+        }
+
+        upsert segmentSObjects;
+
+        /*
+        Now that all of the segments in the segment tree have been saved to the
+        database, they all have ids (where they may not have before).  For each
+        saved Segment__c sObject, we update the id of the corresponding
+        CampaignList.Segment model object.
+
+        Note that setting the id of a segment object will cause the parentId of
+        all of it's children to be updated as well.  This uses the structure of
+        the segment tree, specifically that each segment holds references to its
+        children, to repopulate the relationship data back into each segment.
+        */
+        for (Integer i = 0; i < segmentSObjects.size(); i++) {
+            segments.get(i).setId(segmentSObjects.get(i).Id);
+        }
+
+        /*
+        Setting the root segment id is a special case, since we only need to set
+        it for the root segment model object, and it will be propagated to all
+        other segments in the tree recursively.
+        */
+        Id rootSegmentId = segmentSObjects.get(0).Id;
+
+        rootSegment.setRootSegmentId(rootSegmentId);
+
+        /*
+        Now that we've updated our in-memory segment tree with all lookup
+        information, we prepare to update the database records with this
+        relationship data.  We re-use the segmentSObject list here.
+        */
+        segmentSObjects.clear();
+
+        /*
+        Iterate over the segment tree and for each CampaignList.Segment model,
+        add a corresponding Segment__c sObject to a list for updating.  Then,
+        update those records in the database.
+        */
+        segmentIterator = rootSegment.iterator();
+
+        while(segmentIterator.hasNext()) {
+            segmentSObjects.add(segmentIterator.next().getSObject());
+        }
+
+        upsert segmentSObjects;
+
+        /*
+        Now that we've saved our segment tree to the database and updated all of
+        the saved Segment__c sObjects with appropriate lookups to their parent
+        segments, and their root segment, we need to handle the case where
+        existing Segment__c sObjects may no longer belong to the segment tree
+        (as represented in our in-memory segment tree).
+
+        Since we know that the relationship data for all of the segments in our
+        tree have been saved to the database, and that the segments in our
+        in-memory tree are the only ones we want to remain in the database, we
+        can use these facts to delete redundant segments.
+
+        The Segment__c sObjects we want to delete are ones that used to be part
+        of the segment tree (i.e., they referenced our current root segment as
+        their root segment) but are not one of the segments in our in-memory
+        tree.
+
+        We select those Segment__c sObjects and then delete them.
+        */
+        List<Segment__c> redundantSegments = [
+            SELECT Id
+            FROM Segment__c
+            WHERE Root_Segment__c = :rootSegmentId
+            AND Id NOT IN :segmentSObjects
+        ];
+
+        delete redundantSegments;
+
+        /*
+        Finally, we return the id of the root segment of the segment tree to the
+        caller.
+        */
+        return rootSegmentId;
+    }
+
+    /**
+     * @description Given a JSON serialized version of a segment tree, this
+     * method will deserialize it and return a constructed segment tree of
+     * CampaignList.Segment objects.  This method returns the root segment of
+     * that tree.
+     *
+     * @param serialized A JSON serialized version of a segment tree
+     * @return CampaignList.Segment
+     */
+    public CampaignList.Segment deserializeSegmentFromJSON(String serialized) {
+        SegmentData data = (SegmentData) JSON.deserialize(serialized, SegmentData.class);
+        return data.getConcreteInstance();
+    }
+
+    /**
+     * @author Salesforce.org
+     * @group CampaignTools
+     * @description This class maps to the JSON serialized structure of a
+     * CampaignList.Segment, and is expected to be used during deserialization
+     * of that JSON structure.  This class is not intended to be used for any
+     * other purpose.  In addition to having properties defined necessary for
+     * deserializing JSON objects, it also provides a method that will
+     * recursively convert these deserialized objects to real
+     * CampaignList.Segment objects.  Expected usage is to use the
+     * JSON.deserialize() method to deserialize a JSON segment tree, and then
+     * call the getConcreteInstance() of the first deserialized segment
+     */
+    private class SegmentData {
+        public CampaignList.SegmentType segmentType;
+        public Id segmentId;
+        public Id rootSegmentId;
+        public Id parentId;
+        public Id sourceId;
+        public Boolean isExclusion;
+        public String columnName;
+        public String sourceName;
+        public List<SegmentData> children;
+
+        /**
+         * @description This method converts this SegmentData object into the
+         * appropriate CampaignListSegment object.  If any children segments
+         * exist, those are recursively converted and added as children to the
+         * constructed CampaignListSegment object.
+         *
+         * @return CampaignList.Segment
+         */
+
+        public CampaignList.Segment getConcreteInstance() {
+            /*
+            The data in this class came from a JSON serialized version of a
+            segment.  The JSON serialized data will contain a property that
+            determines what type of CampaignListSegment that object corresponds
+            to.  We use this property to construct the appropriate
+            CampaignListSegment object.  If this segment contains any children,
+            those children are recursively converted into appropriate
+            CampaignListSegment objects and added to the converted
+            CampaignListSegment as children.
+            */
+            CampaignList.Segment segment;
+            if (CampaignList.SegmentType.AND_SEGMENT == segmentType) {
+                segment = new CampaignListSegment.AndSegment(segmentId, rootSegmentId, parentId, isExclusion);
+            } else if (CampaignList.SegmentType.OR_SEGMENT == segmentType) {
+                segment = new CampaignListSegment.OrSegment(segmentId, rootSegmentId, parentId, isExclusion);
+            } else if (CampaignList.SegmentType.CAMPAIGN_SOURCE_SEGMENT == segmentType) {
+                segment = new CampaignListSegment.CampaignSourceSegment(segmentId, rootSegmentId, parentId, isExclusion, sourceId);
+                ((CampaignListSegment.SourceSegment) segment).setSourceName(sourceName);
+            } else if (CampaignList.SegmentType.REPORT_SOURCE_SEGMENT == segmentType) {
+                segment = new CampaignListSegment.ReportSourceSegment(segmentId, rootSegmentId, parentId, isExclusion, sourceId, columnName);
+                ((CampaignListSegment.SourceSegment) segment).setSourceName(sourceName);
+            }
+
+            if (null != children) {
+                for (SegmentData child : children) {
+                    segment.addChild(child.getConcreteInstance());
+                }
+            }
+
+            return segment;
+        }
     }
 }
