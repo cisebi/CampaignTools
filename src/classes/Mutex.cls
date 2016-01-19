@@ -109,9 +109,6 @@ public with sharing class Mutex implements MutexInterface {
             }
         );
 
-        System.debug(queryFormat);
-        System.debug(query);
-
         return query;
     }
 
