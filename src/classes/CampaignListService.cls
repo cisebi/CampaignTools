@@ -96,7 +96,6 @@ public class CampaignListService implements CampaignList.Service {
             batchSequence.run();
 
         } catch (Exception e) {
-            System.debug(e.getStackTraceString());
             throw new CampaignListUpdateAlreadyRunningException(
                 String.format(
                     Label.CampaignToolsCantUpdateException,

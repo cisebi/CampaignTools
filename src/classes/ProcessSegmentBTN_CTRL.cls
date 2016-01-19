@@ -71,7 +71,10 @@ public with sharing class ProcessSegmentBTN_CTRL {
         } catch (CampaignListService.CampaignListUpdateAlreadyRunningException e) {
             ApexPages.addMessage(new ApexPages.Message(
                 ApexPages.Severity.ERROR,
-                'Unable to refresh campaign because another campaign list update is already in progress.'
+                String.format(
+                    Label.CampaignToolsAlreadyRunningException,
+                    new List<String>{campaign.Name}
+                )
             ));
             return null;
         }
