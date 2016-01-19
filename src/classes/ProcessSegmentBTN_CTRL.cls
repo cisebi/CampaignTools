@@ -62,10 +62,23 @@ public with sharing class ProcessSegmentBTN_CTRL {
         }
         
         CampaignList.Service service = CampaignList.getService();
-        service.updateCampaignFromCampaignList(campaign.Id, campaign.Campaign_List__c);
         
-        // return back to the campaign.
-        return pgRet;
+        try {
+            service.updateCampaignFromCampaignList(campaign.Id, campaign.Campaign_List__c);
+
+            // return back to the campaign.
+            return pgRet;
+        } catch (CampaignListService.CampaignListUpdateAlreadyRunningException e) {
+            ApexPages.addMessage(new ApexPages.Message(
+                ApexPages.Severity.ERROR,
+                String.format(
+                    Label.CampaignToolsAlreadyRunningException,
+                    new List<String>{campaign.Name}
+                )
+            ));
+            return null;
+        }
+
     }
 
 }

@@ -79,9 +79,31 @@ public class CampaignListService implements CampaignList.Service {
         batchSequence.add(new CampaignListToCampaignBatch(campaignId, segmentTree), 10000);
         batchSequence.add(new DeleteCampaignListMembersBatch(rootSegmentId), 5000);
 
-        CampaignList.getService().updateCampaignStatus(campaignId, CampaignList.UpdateStatus.RUNNING);
+        try {
+            Mutex.MutexInterface m = CampaignList.getMutexFactory().create(campaignId, Campaign.Campaign_List_Mutex__c);
+            Boolean lockAcquired = m.acquireLock();
 
-        batchSequence.run();
+            if (!lockAcquired) {
+                throw new CampaignListUpdateAlreadyRunningException(
+                    String.format(
+                        Label.CampaignToolsAlreadyRunningException,
+                        new List<String>{campaignId}
+                    )
+                );
+            }
+
+            CampaignList.getService().updateCampaignStatus(campaignId, CampaignList.UpdateStatus.RUNNING);
+            batchSequence.run();
+
+        } catch (Exception e) {
+            throw new CampaignListUpdateAlreadyRunningException(
+                String.format(
+                    Label.CampaignToolsCantUpdateException,
+                    new List<String>{campaignId}
+                ),
+                e
+            );
+        }
     }
 
     /**
@@ -98,6 +120,13 @@ public class CampaignListService implements CampaignList.Service {
             Campaign_List_Update_Status__c = status.name()
         );
 
+        if (CampaignList.UpdateStatus.SUCCESS == status) {
+            c.Campaign_List_Last_Updated__c = DateTime.now();
+        }
+
         update c;
     }
+
+    public virtual class CustomException extends Exception {}
+    public class CampaignListUpdateAlreadyRunningException extends CustomException {}
 }
