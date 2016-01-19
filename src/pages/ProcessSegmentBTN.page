@@ -1,4 +1,6 @@
 <apex:page standardController="Campaign" extensions="ProcessSegmentBTN_CTRL" action="{!refreshCampaignList}" >
+    <apex:outputText value="{!Campaign.Name}" rendered="false"/>
     <apex:outputText value="{!Campaign.Campaign_List__c}" rendered="false"/>
     <apex:PageMessages />
+    <apex:outputLink value="{!URLFOR($Action.Campaign.View, Campaign.Id)}">{!$Label.ReturnToCampaign}</apex:outputLink>
 </apex:page>
