@@ -102,10 +102,34 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
     */
     public override void finish(Database.BatchableContext bc) {
         super.finish(bc);
-        CampaignList.getService().updateCampaignStatus(
-            campaignId,
-            CampaignList.UpdateStatus.SUCCESS
-        );
+        try {
+            CampaignList.getService().updateCampaignStatus(
+                campaignId,
+                CampaignList.UpdateStatus.SUCCESS
+            );
+
+            Mutex.MutexInterface m = CampaignList.getMutexFactory().create(campaignId, Campaign.Campaign_List_Mutex__c);
+            Boolean lockReleased = m.releaseLock();
+
+            if (!lockReleased) {
+                throw new CouldNotReleaseLockException(
+                    String.format(
+                        Label.CampaignToolsReleaseLockException,
+                        new List<String>{campaignId}
+                    )
+                );
+            }
+
+        } catch (Exception e) {
+            throw new CouldNotUpdateCampaignException(
+                String.format(
+                    Label.CampaignToolsCantFinishUpdateException,
+                    new List<String>{campaignId}
+                ),
+                e
+            );
+        }
+
     }
 
     /**
@@ -118,4 +142,8 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
     public override Id executeBatch() {
         return Database.executeBatch(this, getScope());
     }
+
+    public virtual class CustomException extends Exception {}
+    public class CouldNotReleaseLockException extends CustomException {}
+    public class CouldNotUpdateCampaignException extends CustomException {}
 }
