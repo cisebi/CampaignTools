@@ -7,6 +7,7 @@
         <members>BatchableSequence_TEST</members>
         <members>CampaignList</members>
         <members>CampaignListBuilder_CTRL</members>
+        <members>CampaignListBuilder_TEST</members>
         <members>CampaignListFromCampaignBatch</members>
         <members>CampaignListFromCampaignBatch_TEST</members>
         <members>CampaignListFromReportBatch</members>

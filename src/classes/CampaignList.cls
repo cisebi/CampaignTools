@@ -40,6 +40,10 @@ public abstract class CampaignList {
         void updateCampaignStatus(Id campaignId, UpdateStatus status);
     }
 
+    public interface ReportService {
+        Map<String, String> getIdColumns(Id reportId);
+    }
+
     public interface Member {
         Id getId();
         Id getRelatedId();
@@ -101,6 +105,7 @@ public abstract class CampaignList {
     }
 
     private static Service service_x = new CampaignListService();
+    private static ReportService reportService_x = (ReportService) Type.forName('ReportService').newInstance();
     private static MemberMapper memberMapper_x = new CampaignListMemberMapper();
     private static SegmentMapper segmentMapper_x = new CampaignListSegmentMapper();
 
@@ -110,6 +115,14 @@ public abstract class CampaignList {
 
     public static Service getService() {
         return service_x;
+    }
+
+    public static void setReportService(ReportService rs) {
+        reportService_x = rs;
+    }
+
+    public static ReportService getReportService() {
+        return reportService_x;
     }
 
     public static void setMemberMapper(MemberMapper mm) {
