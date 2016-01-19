@@ -33,7 +33,33 @@
  * @description A service class that provides methods for interacting with
  * reports via the Analytics API.
  */
-public class ReportService {
+public class ReportService implements CampaignList.ReportService {
+    /**
+     * @description Retrieve the labels and ids of columns of type ID_TYPE from
+     * the given report.  Returns a Map<String, String> where the column id is
+     * the key and the label is the value.
+     *
+     * @param reportId The id of the report to find columns
+     * @return Map<String, String>
+     */
+    public Map<String, String> getIdColumns(Id reportId) {
+        Reports.ReportExtendedMetadata metadata = Reports.ReportManager.describeReport(reportId).getReportExtendedMetadata();
+        Map<String, Reports.DetailColumn> reportColumns = metadata.getDetailColumnInfo();
+
+        Map<String, String> idColumns = new Map<String, String>();
+
+        for (Reports.DetailColumn column : reportColumns.values()) {
+            if (Reports.ColumnDataType.ID_DATA == column.getDataType()) {
+                idColumns.put(
+                    column.getName(),
+                    column.getLabel()
+                );
+            }
+        }
+
+        return idColumns;
+    }
+
     /**
      * @description Runs a report and returns the results.  The given
      * indexColumn is the name of a column that can be used for sorting the
