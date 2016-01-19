@@ -31,7 +31,7 @@
 * @author Salesforce.org
 * @date 2015
 *
-* @group Segments
+* @group CampaignTools
 *
 * @description Apex controller for the Lightning CampaignListBuilder app.
 *
@@ -59,4 +59,16 @@ public with sharing class CampaignListBuilder_CTRL {
             return null;
         return [select Id, Name, Campaign_List__c from Campaign where Id = :campaignId];
     }
+
+    @AuraEnabled
+    public static Map<String, String> getReportIdColumns(Id reportId) {
+        try {
+            CampaignList.ReportService service = CampaignList.getReportService();
+            return service.getIdColumns(reportId);
+        } catch (Exception e) {
+            throw new NoColumnsException();
+        }
+    }
+
+    public class NoColumnsException extends Exception {}
 }
