@@ -84,12 +84,18 @@
         <name>CustomField</name>
     </types>
     <types>
-        <members>logicAND</members>
-        <members>logicOR</members>
+        <members>CampaignToolsAlreadyRunningException</members>
+        <members>CampaignToolsCantFinishUpdateException</members>
+        <members>CampaignToolsCantUpdateException</members>
+        <members>CampaignToolsReleaseLockException</members>
+        <members>MutexFieldInvalidDateTimeException</members>
+        <members>MutexFieldInvalidUpdateableException</members>
+        <members>ReturnToCampaign</members>
         <name>CustomLabel</name>
     </types>
     <types>
-        <name>CustomLabel</name>
+        <members>CustomLabels</members>
+        <name>CustomLabels</name>
     </types>
     <types>
         <members>Campaign</members>
@@ -119,5 +125,5 @@
         <members>Campaign.Refresh_Campaign_List</members>
         <name>WebLink</name>
     </types>
-    <version>34.0</version>
+    <version>35.0</version>
 </Package>

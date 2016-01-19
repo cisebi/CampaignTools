@@ -113,13 +113,19 @@ public class CampaignListToCampaignBatch extends BatchableSequence.Batch impleme
 
             if (!lockReleased) {
                 throw new CouldNotReleaseLockException(
-                    'Could not release lock on campaign ' + campaignId
+                    String.format(
+                        Label.CampaignToolsReleaseLockException,
+                        new List<String>{campaignId}
+                    )
                 );
             }
 
         } catch (Exception e) {
             throw new CouldNotUpdateCampaignException(
-                'Could not finish updating campaign ' + campaignId,
+                String.format(
+                    Label.CampaignToolsCantFinishUpdateException,
+                    new List<String>{campaignId}
+                ),
                 e
             );
         }

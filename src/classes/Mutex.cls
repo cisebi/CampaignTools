@@ -52,9 +52,10 @@ public with sharing class Mutex implements MutexInterface {
     public Mutex(Id recordId, Schema.SObjectField mutexField) {
 
         Schema.DescribeFieldResult fieldDescribe = mutexField.getDescribe();
+        Schema.DescribeSObjectResult objectDescribe = recordId.getSObjectType().getDescribe();
 
         Set<Schema.SObjectField> objectFields = new Set<Schema.SObjectField>(
-            recordId.getSobjectType().getDescribe().fields.getMap().values()
+            objectDescribe.fields.getMap().values()
         );
 
         Boolean mutexFieldIsDateTime = (Schema.DisplayType.DATETIME == fieldDescribe.getType());
@@ -62,13 +63,22 @@ public with sharing class Mutex implements MutexInterface {
 
         if (!mutexFieldExists || !mutexFieldIsDateTime) {
             throw new InvalidMutexFieldException(
-                'Mutex expects a valid DateTime field on the given lock record'
+                String.format(
+                    Label.MutexFieldInvalidDateTimeException,
+                    new List<String>{
+                        fieldDescribe.getLabel(),
+                        objectDescribe.getLabel()
+                    }
+                )
             );
         }
 
         if (!fieldDescribe.isUpdateable()) {
             throw new InvalidMutexFieldException(
-                'User does not have permission to update mutex field'
+                String.format(
+                    Label.MutexFieldInvalidUpdateableException,
+                    new List<String>{fieldDescribe.getLabel()}
+                )
             );
         }
 

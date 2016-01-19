@@ -85,7 +85,10 @@ public class CampaignListService implements CampaignList.Service {
 
             if (!lockAcquired) {
                 throw new CampaignListUpdateAlreadyRunningException(
-                    'Could not update campaign ' + campaignId + ' because this campaign is locked by another campaign list update.'
+                    String.format(
+                        Label.CampaignToolsAlreadyRunningException,
+                        new List<String>{campaignId}
+                    )
                 );
             }
 
@@ -95,7 +98,10 @@ public class CampaignListService implements CampaignList.Service {
         } catch (Exception e) {
             System.debug(e.getStackTraceString());
             throw new CampaignListUpdateAlreadyRunningException(
-                'Could not update campaign ' + campaignId + '.',
+                String.format(
+                    Label.CampaignToolsCantUpdateException,
+                    new List<String>{campaignId}
+                ),
                 e
             );
         }
