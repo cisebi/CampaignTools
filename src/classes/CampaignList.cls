@@ -108,6 +108,7 @@ public abstract class CampaignList {
     private static ReportService reportService_x = (ReportService) Type.forName('ReportService').newInstance();
     private static MemberMapper memberMapper_x = new CampaignListMemberMapper();
     private static SegmentMapper segmentMapper_x = new CampaignListSegmentMapper();
+    private static Mutex.Factory mutexFactory_x = new Mutex.DefaultFactory();
 
     public static void setService(Service s) {
         service_x = s;
@@ -139,5 +140,13 @@ public abstract class CampaignList {
 
     public static SegmentMapper getSegmentMapper() {
         return segmentMapper_x;
+    }
+
+    public static void setMutexFactory(Mutex.Factory mutexFactory) {
+        mutexFactory_x = mutexFactory;
+    }
+
+    public static Mutex.Factory getMutexFactory() {
+        return mutexFactory_x;
     }
 }
