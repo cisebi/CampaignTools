@@ -1,13 +1,13 @@
 @isTest
 private class Mutex_TEST {
     private static testMethod void testConstructorValidField() {
-        Campaign c = new Campaign(Name = 'My Test Campaign');
+        Contact c = new Contact(LastName = 'Test Contact');
         insert c;
 
         Boolean exceptionThrown = false;
 
         try {
-            Mutex campaignMutex = new Mutex(c.Id, Campaign.Campaign_List_Mutex__c);
+            Mutex m = new Mutex(c.Id, Contact.EmailBouncedDate);
         } catch (Exception e) {
             exceptionThrown = true;
         }
@@ -16,13 +16,13 @@ private class Mutex_TEST {
     }
 
     private static testMethod void testConstructorNonModifiableField() {
-        Campaign c = new Campaign(Name = 'My Test Campaign');
+        Contact c = new Contact(LastName = 'Test Contact');
         insert c;
 
         Boolean exceptionThrown = false;
 
         try {
-            Mutex campaignMutex = new Mutex(c.Id, Campaign.SystemModstamp);
+            Mutex m = new Mutex(c.Id, Contact.SystemModstamp);
         } catch (Exception e) {
             exceptionThrown = true;
         }
@@ -31,13 +31,13 @@ private class Mutex_TEST {
     }
 
     private static testMethod void testConstructorNotDateTimeField() {
-        Campaign c = new Campaign(Name = 'My Test Campaign');
+        Contact c = new Contact(LastName = 'Test Contact');
         insert c;
 
         Boolean exceptionThrown = false;
 
         try {
-            Mutex campaignMutex = new Mutex(c.Id, Campaign.Name);
+            Mutex m = new Mutex(c.Id, Contact.Name);
         } catch (Exception e) {
             exceptionThrown = true;
         }
@@ -46,13 +46,13 @@ private class Mutex_TEST {
     }
 
     private static testMethod void testConstructorFieldDoesNotBelongToRecord() {
-        Campaign c = new Campaign(Name = 'My Test Campaign');
+        Contact c = new Contact(LastName = 'Test Contact');
         insert c;
 
         Boolean exceptionThrown = false;
 
         try {
-            Mutex campaignMutex = new Mutex(c.Id, Contact.LastName);
+            Mutex m = new Mutex(c.Id, Opportunity.Amount);
         } catch (Exception e) {
             exceptionThrown = true;
         }
@@ -61,24 +61,24 @@ private class Mutex_TEST {
     }
 
     public static testMethod void testGetLockRecordReturnsNullWhenNoRecordFound() {
-        Id recordId = Campaign.sObjectType.getDescribe().getKeyPrefix() + '000000000000';
+        Id recordId = Contact.sObjectType.getDescribe().getKeyPrefix() + '000000000000';
 
-        Mutex m = new Mutex(recordId, Campaign.Campaign_List_Mutex__c);
+        Mutex m = new Mutex(recordId, Contact.EmailBouncedDate);
 
         System.assertEquals(null, m.getLockRecord(false));
     }
 
     public static testMethod void testGetLockRecordReturnsCorrectRecord() {
-        Schema.SObjectField mutexField = Campaign.Campaign_List_Mutex__c;
+        Schema.SObjectField mutexField = Contact.EmailBouncedDate;
 
-        Campaign c = new Campaign(Name = 'My Test Campaign');
+        Contact c = new Contact(LastName = 'Test Contact');
         insert c;
 
         Mutex m = new Mutex(c.Id, mutexField);
 
         sObject so = m.getLockRecord(false);
 
-        System.assert(so instanceof Campaign);
+        System.assert(so instanceof Contact);
         System.assertEquals(c.Id, so.Id);
 
         Boolean mutexFieldWasQueried = true;
@@ -93,20 +93,20 @@ private class Mutex_TEST {
     }
 
     public static testMethod void testAcquireLockFailsIfMissingLockRecord() {
-        Id recordId = Campaign.sObjectType.getDescribe().getKeyPrefix() + '000000000000';
+        Id recordId = Contact.sObjectType.getDescribe().getKeyPrefix() + '000000000000';
 
-        Mutex m = new Mutex(recordId, Campaign.Campaign_List_Mutex__c);
+        Mutex m = new Mutex(recordId, Contact.EmailBouncedDate);
 
         System.assertEquals(false, m.acquireLock(null, null));
     }
 
     public static testMethod void testAcquireLockFailsIfRecordAlreadyLocked() {
-        Schema.SObjectField mutexField = Campaign.Campaign_List_Mutex__c;
+        Schema.SObjectField mutexField = Contact.EmailBouncedDate;
         DateTime lockTime = DateTime.now();
 
-        Campaign c = new Campaign(
-            Name = 'My Test Campaign',
-            Campaign_List_Mutex__c = lockTime
+        Contact c = new Contact(
+            LastName = 'Test Contact',
+            EmailBouncedDate = lockTime
         );
         insert c;
 
@@ -118,9 +118,9 @@ private class Mutex_TEST {
     }
 
     public static testMethod void testAcquireLockUpdatesLockField() {
-        Schema.SObjectField mutexField = Campaign.Campaign_List_Mutex__c;
+        Schema.SObjectField mutexField = Contact.EmailBouncedDate;
 
-        Campaign c = new Campaign(Name = 'My Test Campaign');
+        Contact c = new Contact(LastName = 'Test Contact');
         insert c;
 
         DateTime lockTime = DateTime.now();
@@ -130,8 +130,8 @@ private class Mutex_TEST {
         Boolean lockAcquired = m.acquireLock(c, lockTime);
 
         c = [
-            SELECT Campaign_List_Mutex__c
-            FROM Campaign
+            SELECT EmailBouncedDate
+            FROM Contact
             WHERE Id = :c.Id
         ];
 
@@ -140,24 +140,21 @@ private class Mutex_TEST {
     }
 
     public static testMethod void testReleaseLockReturnsNullIfNoRecord() {
-        Id recordId = Campaign.sObjectType.getDescribe().getKeyPrefix() + '000000000000';
+        Id recordId = Contact.sObjectType.getDescribe().getKeyPrefix() + '000000000000';
 
-        Mutex m = new Mutex(recordId, Campaign.Campaign_List_Mutex__c);
+        Mutex m = new Mutex(recordId, Contact.EmailBouncedDate);
 
         System.assertEquals(false, m.releaseLock(null));
     }
 
     public static testMethod void testReleaseLockClearsLockField() {
+        Schema.SObjectField mutexField = Contact.EmailBouncedDate;
 
-    }
-
-    public static testMethod void testGetLockTimeReturnsNullIfMissingLockRecord() {
-        Schema.SObjectField mutexField = Campaign.Campaign_List_Mutex__c;
         DateTime lockTime = DateTime.now();
 
-        Campaign c = new Campaign(
-            Name = 'My Test Campaign',
-            Campaign_List_Mutex__c = lockTime
+        Contact c = new Contact(
+            LastName = 'Test Contact',
+            EmailBouncedDate = lockTime
         );
         insert c;
 
@@ -166,8 +163,32 @@ private class Mutex_TEST {
         Boolean lockReleased = m.releaseLock(c);
 
         c = [
-            SELECT Campaign_List_Mutex__c
-            FROM Campaign
+            SELECT EmailBouncedDate
+            FROM Contact
+            WHERE Id = :c.Id
+        ];
+
+        System.assert(lockReleased);
+        System.assertEquals(null, c.get(mutexField));
+    }
+
+    public static testMethod void testGetLockTimeReturnsNullIfMissingLockRecord() {
+        Schema.SObjectField mutexField = Contact.EmailBouncedDate;
+        DateTime lockTime = DateTime.now();
+
+        Contact c = new Contact(
+            LastName = 'Test Contact',
+            EmailBouncedDate = lockTime
+        );
+        insert c;
+
+        Mutex m = new Mutex(c.Id, mutexField);
+
+        Boolean lockReleased = m.releaseLock(c);
+
+        c = [
+            SELECT EmailBouncedDate
+            FROM Contact
             WHERE Id = :c.Id
         ];
 
@@ -176,11 +197,11 @@ private class Mutex_TEST {
     }
 
     public static testMethod void testGetLockTimeReturnsLockTime() {
-        Id recordId = Campaign.sObjectType.getDescribe().getKeyPrefix() + '000000000000';
+        Id recordId = Contact.sObjectType.getDescribe().getKeyPrefix() + '000000000000';
         DateTime lockTime = DateTime.now();
-        Campaign c = new Campaign(Campaign_List_Mutex__c = lockTime);
+        Contact c = new Contact(EmailBouncedDate = lockTime);
 
-        Mutex m = new Mutex(recordId, Campaign.Campaign_List_Mutex__c);
+        Mutex m = new Mutex(recordId, Contact.EmailBouncedDate);
 
         System.assertEquals(lockTime, m.getLockTime(c));
     }
