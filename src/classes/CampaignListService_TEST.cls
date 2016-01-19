@@ -63,6 +63,13 @@ private class CampaignListService_TEST {
         CampaignList_TEST.ServiceStub serviceStub = new CampaignList_TEST.ServiceStub();
         CampaignList.setService(serviceStub);
 
+        CampaignList_TEST.MutexStub mutexStub = new CampaignList_TEST.MutexStub();
+        mutexStub.acquireLock = true;
+
+        CampaignList_TEST.MutexStubFactory mutexFactory = new CampaignList_TEST.MutexStubFactory();
+        mutexFactory.m = mutexStub;
+        CampaignList.setMutexFactory(mutexFactory);
+
         CampaignListService service = new CampaignListService();
         service.updateCampaignFromCampaignList(destinationCampaignId, rootSegment.Id, bsStub);
 
@@ -70,6 +77,9 @@ private class CampaignListService_TEST {
         // running update
 
         System.assertEquals(destinationCampaignId, serviceStub.updatedCampaignId);
+        System.assertEquals(destinationCampaignId, mutexFactory.recordId);
+        System.assertEquals(Campaign.Campaign_List_Mutex__c, mutexFactory.mutexField);
+        System.assertEquals(1, mutexStub.acquireLockCalls);
         System.assertEquals(CampaignList.UpdateStatus.RUNNING, serviceStub.updatedStatus);
 
         // assert that the batches in this sequence exist in the expected

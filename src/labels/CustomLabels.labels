@@ -1,19 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
     <labels>
-        <fullName>logicAND</fullName>
-        <categories>logic</categories>
+        <fullName>CampaignToolsAlreadyRunningException</fullName>
+        <categories>CampaignTools,Exceptions</categories>
         <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>logicAND</shortDescription>
-        <value>AND</value>
+        <protected>true</protected>
+        <shortDescription>CampaignToolsAlreadyRunningException</shortDescription>
+        <value>Could not update campaign {0} because this campaign is locked by another campaign list update.</value>
     </labels>
     <labels>
-        <fullName>logicOR</fullName>
-        <categories>logic</categories>
+        <fullName>CampaignToolsCantFinishUpdateException</fullName>
+        <categories>CampaignTools,Exceptions</categories>
         <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>logicOR</shortDescription>
-        <value>OR</value>
+        <protected>true</protected>
+        <shortDescription>CampaignToolsCantFinishUpdateException</shortDescription>
+        <value>Could not finish updating campaign {0}</value>
+    </labels>
+    <labels>
+        <fullName>CampaignToolsCantUpdateException</fullName>
+        <categories>CampaignTools,Exceptions</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CampaignToolsCantUpdateException</shortDescription>
+        <value>Could not update campaign {0}.</value>
+    </labels>
+    <labels>
+        <fullName>CampaignToolsReleaseLockException</fullName>
+        <categories>CampaignTools,Exceptions</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CampaignToolsReleaseLockException</shortDescription>
+        <value>Could not release lock on campaign {0}</value>
+    </labels>
+    <labels>
+        <fullName>MutexFieldInvalidDateTimeException</fullName>
+        <categories>Mutex,Exceptions</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>MutexFieldInvalidDateTimeException</shortDescription>
+        <value>Mutex requires {0} to be a valid DateTime field on the {1} object</value>
+    </labels>
+    <labels>
+        <fullName>MutexFieldInvalidUpdateableException</fullName>
+        <categories>Mutex,Exceptions</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>MutexFieldInvalidUpdateableException</shortDescription>
+        <value>User does not have permission to update the mutex field, {0}</value>
+    </labels>
+    <labels>
+        <fullName>ReturnToCampaign</fullName>
+        <categories>CampaignTools</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>ReturnToCampaign</shortDescription>
+        <value>Return to Campaign</value>
     </labels>
 </CustomLabels>
