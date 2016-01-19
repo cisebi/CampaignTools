@@ -92,6 +92,13 @@ private class CampaignListToCampaignBatch_TEST {
     }
 
     public static testMethod void testExecuteBatch() {
+        CampaignList_TEST.MutexStub mutexStub = new CampaignList_TEST.MutexStub();
+        mutexStub.releaseLock = true;
+
+        CampaignList_TEST.MutexStubFactory mutexFactory = new CampaignList_TEST.MutexStubFactory();
+        mutexFactory.m = mutexStub;
+        CampaignList.setMutexFactory(mutexFactory);
+
         CampaignList_TEST.SegmentStub rootSegment = new CampaignList_TEST.SegmentStub();
         CampaignListToCampaignBatch batch = new CampaignListToCampaignBatch(null, rootSegment);
         batch.setScope(200);
@@ -115,6 +122,13 @@ private class CampaignListToCampaignBatch_TEST {
         CampaignList_TEST.ServiceStub listServiceStub = new CampaignList_TEST.ServiceStub();
 
         CampaignList.setService(listServiceStub);
+
+        CampaignList_TEST.MutexStub mutexStub = new CampaignList_TEST.MutexStub();
+        mutexStub.releaseLock = true;
+
+        CampaignList_TEST.MutexStubFactory mutexFactory = new CampaignList_TEST.MutexStubFactory();
+        mutexFactory.m = mutexStub;
+        CampaignList.setMutexFactory(mutexFactory);
 
         batch.finish(null);
 

@@ -134,6 +134,38 @@ public class CampaignList_TEST {
         }
     }
 
+    public class MutexStubFactory implements Mutex.Factory {
+        public Id recordId;
+        public Schema.SObjectField mutexField;
+        public Mutex.MutexInterface m;
+        public Mutex.MutexInterface create(Id recordId, Schema.SObjectField mutexField) {
+            this.recordId = recordId;
+            this.mutexField = mutexField;
+            return m;
+        }
+    }
+
+    public class MutexStub implements Mutex.MutexInterface {
+        public Integer acquireLockCalls = 0;
+        public Integer releaseLockCalls = 0;
+        public Integer getLockTimeCalls = 0;
+        public Boolean acquireLock;
+        public Boolean releaseLock;
+        public DateTime lockTime;
+        public Boolean acquireLock() {
+            acquireLockCalls++;
+            return acquireLock;
+        }
+        public Boolean releaseLock() {
+            releaseLockCalls++;
+            return releaseLock;
+        }
+        public DateTime getLockTime() {
+            getLockTimeCalls++;
+            return lockTime;
+        }
+    }
+
     public class TestCampaign {
         public Campaign campaign;
         public List<Contact> contacts;
